@@ -33,6 +33,8 @@ function do_settings()
             "-wd4127", -- conditional expression is constant (external)
             "-wd4100", -- unreferenced formal parameter (external)
             "-wd4189", -- local variable is initialized but not referenced (external)
+            "-wd4710", -- function not inlined
+            "-wd4711", -- function inlined
         {force = true})
         add_cxxflags(
             "-wd5204", -- virtual function something something
@@ -123,9 +125,10 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings, 
         support_root,
         deps_root,
         path.join(deps_root, "cjson"),
+        path.join(deps_root, "cglm", "include"),
         path.join(deps_root, "mimalloc", "include"),
         path.join(deps_root, "zstd", "lib"),
-        path.absolute("$(buildir)", "config")
+        path.absolute(path.join("$(buildir)", "config"))
     )
 
     if set_big_settings then
@@ -208,7 +211,7 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings, 
     target("common")
         set_kind("static")
 
-        set_configdir("$(buildir)", "config")
+        set_configdir(path.join("$(buildir)", "config"))
         set_configvar("USE_MIMALLOC", use_mimalloc and 1 or 0)
         add_configfiles(path.join(support_root, "purpl", "config.h.in"))
         

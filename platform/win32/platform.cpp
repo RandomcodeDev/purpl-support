@@ -89,8 +89,10 @@ VOID PlatShutdown(VOID)
     SymCleanup(GetCurrentProcess());
 #endif
 
+#ifdef PURPL_GDK
     LogDebug("Shutting down Xbox Gaming Runtime Services");
     XGameRuntimeUninitialize();
+#endif
 
     LogInfo("Windows deinitialization succeeded");
 }

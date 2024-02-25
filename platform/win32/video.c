@@ -352,7 +352,6 @@ VOID VidDisplayFramebuffer(_Inout_ PVIDEO_FRAMEBUFFER Framebuffer)
 
     if (Framebuffer->Width != (UINT32)WindowWidth || Framebuffer->Height != (UINT32)WindowHeight)
     {
-        PWINDOWS_FRAMEBUFFER_DATA FramebufferData = Framebuffer->Handle;
         DeleteObject(FramebufferData->Bitmap);
 
         Framebuffer->Width = WindowWidth;

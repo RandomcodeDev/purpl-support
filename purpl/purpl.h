@@ -83,6 +83,7 @@
 
 #include "cJSON.h"
 
+#ifdef PURPL_ENGINE
 #ifdef PURPL_DISCORD
 #include "discord_rpc.h"
 #endif
@@ -93,6 +94,11 @@
 #endif
 #include "flecs.h"
 
+#ifdef PURPL_VULKAN
+#include "volk.h"
+#endif
+#endif
+
 #if PURPL_USE_MIMALLOC
 #include "mimalloc.h"
 #endif
@@ -101,10 +107,6 @@
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
 #include "stb/stb_sprintf.h"
-
-#ifdef PURPL_VULKAN
-#include "volk.h"
-#endif
 
 #include "zstd.h"
 
