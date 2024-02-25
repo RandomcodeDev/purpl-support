@@ -1,0 +1,17 @@
+PROJECT_NAME = Purpl Support
+PROJECT_NUMBER = 0.0.0
+PROJECT_BRIEF = This is a set of support libraries for the Purpl game engine, but they can be used for other things.
+OUTPUT_DIRECTORY = docs
+ENABLE_PREPROCESSING = YES
+INPUT = common \
+        platform/win32 \
+        platform/unix \
+        ../platform/switch \
+        purpl \
+        util
+GENERATE_TREEVIEW      = YES # optional. Also works without treeview
+DISABLE_INDEX = NO
+FULL_SIDEBAR = NO
+HTML_EXTRA_STYLESHEET  = deps/doxygen-awesome-css/doxygen-awesome.css
+HTML_COLORSTYLE        = LIGHT # required with Doxygen >= 1.9.5
+
