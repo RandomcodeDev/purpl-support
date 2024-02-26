@@ -7,6 +7,39 @@ if not is_plat("switch") then
     function add_switch_renderapi() end
 end
 
+function fix_target(target)
+    target:add("options", "mimalloc")
+    target:add("options", "verbose")
+
+    if is_plat("gdk", "gdkx") then
+        target:set("prefixname", "")
+        if target:kind() == "binary" then
+            target:set("extension", ".exe")
+        elseif target:kind() == "static" then
+            target:set("extension", ".lib")
+        elseif target:kind() == "shared" then
+            target:set("extension", ".dll")
+        end
+    elseif is_plat("switch") then
+        if target:kind() == "binary" then
+            target:set("prefixname", "")
+            target:set("extension", ".nss")
+        elseif target:kind() == "static" then
+            target:set("prefixname", "lib")
+            target:set("extension", ".a")
+        elseif target:kind() == "shared" then
+            target:set("prefixname", "lib")
+            target:set("extension", ".nrs")
+        end
+    elseif not is_plat("windows") then
+        -- Of course POSIX or GNU or whoever gets to have "libutil.a" be a reserved name
+        -- Other systems don't need this, since they don't pull shit like this
+        if target:kind() == "static" then
+            target:set("suffixname", "-purpl")
+        end
+    end
+end
+
 function do_settings()
     set_warnings("everything")
     
@@ -118,7 +151,7 @@ function support_executable(support_root)
     end
 end
 
-function setup_support(support_root, deps_root, use_mimalloc, set_big_settings, fix_target)    
+function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
     if is_plat("windows") then
         add_defines("PURPL_WIN32")
     elseif is_plat("gdk") then
