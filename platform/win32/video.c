@@ -46,7 +46,8 @@ static BOOLEAN WindowResized;
 static BOOLEAN WindowFocused;
 static BOOLEAN WindowClosed;
 
-static HDC WindowDeviceContext;
+static HDC DeviceContext;
+static HGLRC GlContext;
 
 static LRESULT CALLBACK WindowProcedure(_In_ HWND MessageWindow, _In_ UINT Message, _In_ WPARAM Wparam,
                                         _In_ LPARAM Lparam)
@@ -162,12 +163,111 @@ static VOID InitializeWindow(VOID)
     WindowFocused = TRUE;
     WindowClosed = FALSE;
 
-    WindowDeviceContext = GetWindowDC(Window);
+    DeviceContext = GetWindowDC(Window);
 
     LogDebug("Successfully created window with handle 0x%llX", (UINT64)Window);
 }
 
-VOID VidInitialize(VOID)
+static HMODULE OpenGl32Handle;
+
+static GLADapiproc GetGlSymbol(_In_ PCSTR Name)
+{
+    //LogDebug("Getting OpenGL symbol %s", Name);
+    GLADapiproc Symbol = wglGetProcAddress(Name);
+    if (!Symbol)
+    {
+        Symbol = (GLADapiproc)GetProcAddress(OpenGl32Handle, Name);
+    }
+    return Symbol;
+}
+
+static BOOLEAN EnableOpenGl(VOID)
+{
+    LogDebug("Enabling OpenGL");
+
+    LogDebug("Loading opengl32.dll");
+    OpenGl32Handle = LoadLibraryA("opengl32.dll");
+
+    // https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)
+
+    PIXELFORMATDESCRIPTOR DummyPixelFormat = {.nSize = sizeof(PIXELFORMATDESCRIPTOR),
+                                              .dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+                                              .iPixelType = PFD_TYPE_RGBA,
+                                              .cColorBits = 32,
+                                              .cDepthBits = 24,
+                                              .cStencilBits = 8,
+                                              0};
+
+    LogDebug("Creating dummy context");
+
+    INT32 ChosenFormat = ChoosePixelFormat(DeviceContext, &DummyPixelFormat);
+    SetPixelFormat(DeviceContext, ChosenFormat, &DummyPixelFormat);
+
+    HGLRC DummyContext = wglCreateContext(DeviceContext);
+    wglMakeCurrent(DeviceContext, DummyContext);
+
+    gladLoadWGL(DeviceContext, GetGlSymbol);
+
+    CONST INT32 FormatAttributes[] = {
+        WGL_DRAW_TO_WINDOW_ARB,
+        GL_TRUE,
+        WGL_SUPPORT_OPENGL_ARB,
+        GL_TRUE,
+        WGL_DOUBLE_BUFFER_ARB,
+        GL_TRUE,
+        WGL_PIXEL_TYPE_ARB,
+        WGL_TYPE_RGBA_ARB,
+        WGL_COLOR_BITS_ARB,
+        32,
+        WGL_DEPTH_BITS_ARB,
+        24,
+        WGL_STENCIL_BITS_ARB,
+        8,
+        0 // Terminator
+    };
+
+    INT32 GoodFormat = 0;
+    UINT32 FormatCount;
+
+    wglChoosePixelFormatARB(DeviceContext, FormatAttributes, NULL, 1, &GoodFormat, &FormatCount);
+
+    wglDeleteContext(DummyContext);
+
+    LogDebug("Creating real v3.3 core context");
+
+    DestroyWindow(Window);
+    InitializeWindow();
+
+    CONST INT32 ContextAttributes[] = {
+        WGL_CONTEXT_PROFILE_MASK_ARB,
+        WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+        WGL_CONTEXT_MAJOR_VERSION_ARB,
+        3,
+        WGL_CONTEXT_MINOR_VERSION_ARB,
+        3,
+#ifdef PURPL_DEBUG
+        WGL_CONTEXT_FLAGS_ARB,
+        WGL_CONTEXT_DEBUG_BIT_ARB,
+#endif
+        0 // Terminator 2: Judgement Day
+    };
+
+    SetPixelFormat(DeviceContext, GoodFormat, &DummyPixelFormat);
+    GlContext = wglCreateContextAttribsARB(DeviceContext, NULL, ContextAttributes);
+    wglMakeCurrent(DeviceContext, GlContext);
+
+    gladLoadGL(GetGlSymbol);
+
+    LogDebug("Got %s %s context with GLSL %s on renderer %s", glGetString(GL_VENDOR), glGetString(GL_VERSION),
+             glGetString(GL_SHADING_LANGUAGE_VERSION), glGetString(GL_RENDERER));
+
+    LogDebug("Showing window");
+    ShowWindow(Window, SW_SHOWDEFAULT);
+
+    return TRUE;
+}
+
+BOOLEAN VidInitialize(_In_ BOOLEAN EnableGl)
 {
     LogInfo("Initializing Windows video");
 
@@ -178,8 +278,16 @@ VOID VidInitialize(VOID)
 
     // ImGui_ImplWin32_Init(Window);
 
-    LogDebug("Showing window");
-    ShowWindow(Window, SW_SHOWDEFAULT);
+    if (EnableGl)
+    {
+        return EnableOpenGl();
+    }
+    else
+    {
+        LogDebug("Showing window");
+        ShowWindow(Window, SW_SHOWDEFAULT);
+        return FALSE;
+    }
 }
 
 BOOLEAN VidUpdate(VOID)
@@ -204,7 +312,13 @@ VOID VidShutdown(VOID)
 
     // ImGui_ImplWin32_Shutdown();
 
-    ReleaseDC(Window, WindowDeviceContext);
+    if (GlContext)
+    {
+        LogDebug("Destroying OpenGL context");
+        wglDeleteContext(GlContext);
+    }
+
+    ReleaseDC(Window, DeviceContext);
 
     LogDebug("Destroying window");
     DestroyWindow(Window);
@@ -328,7 +442,7 @@ PVIDEO_FRAMEBUFFER VidCreateFramebuffer(VOID)
     BitmapInfo->bmiHeader.biBitCount = 32;
     BitmapInfo->bmiHeader.biPlanes = 1;
 
-    FramebufferData->DeviceContext = CreateCompatibleDC(WindowDeviceContext);
+    FramebufferData->DeviceContext = CreateCompatibleDC(DeviceContext);
 
     if (!CreateFramebufferBitmap(Framebuffer, FramebufferData))
     {
@@ -346,7 +460,7 @@ VOID VidDisplayFramebuffer(_Inout_ PVIDEO_FRAMEBUFFER Framebuffer)
     }
 
     PWINDOWS_FRAMEBUFFER_DATA FramebufferData = Framebuffer->Handle;
-    StretchDIBits(WindowDeviceContext, ExtraWidth, WindowHeight + ExtraHeight, WindowWidth, -WindowHeight, 0, 0,
+    StretchDIBits(DeviceContext, ExtraWidth, WindowHeight + ExtraHeight, WindowWidth, -WindowHeight, 0, 0,
                   Framebuffer->Width, Framebuffer->Height, Framebuffer->Pixels, &FramebufferData->BitmapInfo,
                   DIB_RGB_COLORS, SRCCOPY);
 

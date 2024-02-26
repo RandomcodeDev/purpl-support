@@ -290,6 +290,9 @@ INT WinMain(_In_ HINSTANCE Instance, _In_opt_ HINSTANCE PreviousInstance, _In_ P
     // Don't care about checking for a console parent process on Xbox, since
     // the console window won't be seen in any circumstance
 #ifndef PURPL_GDKX
+#ifdef PURPL_DEBUG
+    DWORD Error;
+#endif
     HANDLE Snapshot;
     PROCESSENTRY32 ProcessEntry = {0};
     UINT32 EngineProcessId;

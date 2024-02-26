@@ -1,3 +1,8 @@
+#define PURPL_NAME "Purpl"
+#define PURPL_EXECUTABLE_NAME "purpl"
+
+#define PURPL_ORGANIZATION "Randomcode Developers"
+
 #define PURPL_MAKE_VERSION(Major, Minor, Patch, Build) ((Major) << 24 | (Minor) << 16 | (Patch) << 8 | (Build))
 #define PURPL_MAKE_VERSION_STRING_(Major, Minor, Patch, Build) #Major "." #Minor "." #Patch "." #Build
 #define PURPL_MAKE_VERSION_STRING(Major, Minor, Patch, Build) PURPL_MAKE_VERSION_STRING_(Major, Minor, Patch, Build)

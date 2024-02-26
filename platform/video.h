@@ -1,23 +1,19 @@
-/*++
-
-Copyright (c) 2023 Randomcode Developers
-
-Module Name:
-
-    video.h
-
-Abstract:
-
-    This file contains the video abstraction API.
-
---*/
+/// @file video.c
+///
+/// @brief This file contains the video abstraction API.
+///
+/// @copyright (c) 2024 Randomcode Developers
 
 #pragma once
 
 #include "purpl/purpl.h"
 
 /// @brief Initialize platform video
-extern VOID VidInitialize(VOID);
+///
+/// @param[in] EnableGl Whether to try to enable OpenGL
+///
+/// @return Whether OpenGL was initialized
+extern BOOLEAN VidInitialize(_In_ BOOLEAN EnableGl);
 
 /// @brief Update video (and input)
 ///

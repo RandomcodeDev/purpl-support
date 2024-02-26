@@ -149,7 +149,7 @@ function support_executable(support_root)
     end
 end
 
-function setup_support(support_root, deps_root, use_mimalloc, vulkan, set_big_settings)
+function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, set_big_settings, config_h_in_path)
     if is_plat("windows") then
         add_defines("PURPL_WIN32")
     elseif is_plat("gdk") then
@@ -200,6 +200,31 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, set_big_se
             add_defines("VK_USE_PLATFORM_WAYLAND_KHR", "VK_USE_PLATFORM_XCB_KHR")
         elseif is_plat("switch") then
             add_defines("VK_USE_PLATFORM_VI_NN")
+        end
+    end
+
+    if opengl then
+        add_defines("PURPL_OPENGL")
+
+        add_includedirs(
+            path.join(deps_root, "glad", "include")
+        )
+
+        target("glad")
+            set_kind("static")
+            add_headerfiles(path.join(deps_root, "glad", "include", "**", "*.h"))
+            add_files(path.join(deps_root, "glad", "src", "gl.c"))
+            if is_plat("gdk", "windows") then
+                add_files(path.join(deps_root, "glad", "src", "wgl.c"))
+            end
+            set_warnings("none")
+            set_group("External")
+            on_load(fix_target)
+        target_end()
+
+        if is_plat("gdk", "windows") then
+            add_defines("GLAD_PLATFORM_WIN32")
+            add_links("opengl32.lib")
         end
     end
 
@@ -290,12 +315,18 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, set_big_se
 
         set_configdir(path.join("$(buildir)", "config"))
         set_configvar("USE_MIMALLOC", use_mimalloc and 1 or 0)
-        add_configfiles(path.join(support_root, "purpl", "config.h.in"))
+        if config_h_in_path ~= nil then
+            add_configfiles(config_h_in_path)
+            add_headerfiles(config_h_in_path)
+        else
+            add_configfiles(path.join(support_root, "purpl", "config.h.in"))
+            add_headerfiles(path.join(support_root, "purpl", "config.h.in"))
+        end
 
         add_headerfiles(
             path.join(support_root, "common", "*.h"),
-            path.join(support_root, "purpl", "*.h*"),
-            path.join(support_root, "shared.lua")
+            path.join(support_root, "purpl", "*.h"),
+            path.join(support_root, "support.lua")
         )
         add_files(path.join(support_root, "common", "*.c"))
 
@@ -340,6 +371,10 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, set_big_se
 
         if use_mimalloc then
             add_deps("mimalloc")
+        end
+
+        if opengl then
+            add_deps("glad")
         end
 
         set_group("Support")

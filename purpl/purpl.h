@@ -83,6 +83,13 @@
 
 #include "cJSON.h"
 
+#ifdef PURPL_OPENGL
+#include "glad/gl.h"
+#ifdef PURPL_WIN32
+#include "glad/wgl.h"
+#endif
+#endif
+
 #ifdef PURPL_VULKAN
 #include "volk.h"
 #endif
@@ -130,14 +137,6 @@ BEGIN_EXTERN_C
 extern INT PurplMain(_In_ PCHAR *Arguments, _In_ UINT ArgumentCount);
 
 #endif
-
-// Game name
-
-#define PURPL_NAME "Purpl"
-#define PURPL_EXECUTABLE_NAME "purpl"
-
-/// @brief Organization that made the game
-#define PURPL_ORGANIZATION "Randomcode Developers"
 
 // Switch mountpoints
 
