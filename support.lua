@@ -29,6 +29,17 @@ function fix_target(target)
             target:set("prefixname", "lib")
             target:set("extension", ".nrs")
         end
+    elseif is_plat("switchhb") then
+        if target:kind() == "binary" then
+            target:set("prefixname", "")
+            target:set("extension", ".elf")
+        elseif target:kind() == "static" then
+            target:set("prefixname", "lib")
+            target:set("extension", ".a")
+        elseif target:kind() == "shared" then
+            target:set("prefixname", "lib")
+            target:set("extension", ".elf")
+        end
     elseif not is_plat("windows") then
         -- Of course POSIX or GNU or whoever gets to have "libutil.a" be a reserved name
         -- Other systems don't need this, since they don't pull shit like this
@@ -143,13 +154,17 @@ function support_executable(support_root)
     elseif is_plat("linux", "freebsd") then
         add_files("platform/unix/launcher.c")
     elseif is_plat("switch") then
-        add_headerfiles("../platform/switch/switch.lua")
-        add_files("../platform/switch/launcher.cpp")
+        add_files(path.join(support_root, "..", "..", "platform", "switch", "launcher.cpp"))
+        after_build(switch_postbuild)
+    elseif is_plat("switchhb") then
+        add_files(path.join(support_root, "platform", "switchhb", "launcher.c"))
         after_build(switch_postbuild)
     end
 end
 
 function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, set_big_settings, config_h_in_path)
+    includes(path.join(support_root, "platform", "switchhb", "switch.lua"))
+
     if is_plat("windows") then
         add_defines("PURPL_WIN32")
     elseif is_plat("gdk") then
@@ -160,8 +175,11 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
         add_defines("PURPL_LINUX", "PURPL_UNIX")
     elseif is_plat("freebsd") then
         add_defines("CmnFreeBSD", "PURPL_UNIX")
-    elseif is_plat("switch") then
+    elseif is_plat("switch", "switchhb") then
         add_defines("PURPL_SWITCH", "PURPL_UNIX")
+        if is_plat("switchhb") then
+            add_defines("PURPL_CONSOLE_HOMEBREW")
+        end
     end
 
     if is_mode("debug") then
@@ -361,12 +379,21 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
                 add_links("atomic")
             end
         elseif is_plat("switch") then
+            add_headerfiles(path.join(support_root, "..", "..", "platform", "switch", "switch.lua"))
             add_files(
-                path.join(support_root, "..", "platform", "switch", "async.cpp"),
-                path.join(support_root, "..", "platform", "switch", "platform.cpp"),
-                path.join(support_root, "..", "platform", "switch", "video.cpp")
+                path.join(support_root, "..", "..", "platform", "switch", "async.cpp"),
+                path.join(support_root, "..", "..", "platform", "switch", "platform.cpp"),
+                path.join(support_root, "..", "..", "platform", "switch", "video.cpp")
             )
             add_switch_links()
+        elseif is_plat("switchhb") then
+            add_headerfiles(path.join(support_root, "platform", "switchhb", "switch.lua"))
+            add_files(
+                path.join(support_root, "platform", "switchhb", "async.c"),
+                path.join(support_root, "platform", "switchhb", "platform.c"),
+                path.join(support_root, "platform", "switchhb", "video.c")
+            )
+            add_links("drm_nouveau", "nx")
         end
 
         if use_mimalloc then

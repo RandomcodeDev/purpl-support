@@ -47,7 +47,9 @@ static BOOLEAN WindowFocused;
 static BOOLEAN WindowClosed;
 
 static HDC DeviceContext;
+#ifdef PURPL_OPENGL
 static HGLRC GlContext;
+#endif
 
 static LRESULT CALLBACK WindowProcedure(_In_ HWND MessageWindow, _In_ UINT Message, _In_ WPARAM Wparam,
                                         _In_ LPARAM Lparam)
@@ -168,6 +170,7 @@ static VOID InitializeWindow(VOID)
     LogDebug("Successfully created window with handle 0x%llX", (UINT64)Window);
 }
 
+#ifdef PURPL_OPENGL
 static HMODULE OpenGl32Handle;
 
 static GLADapiproc GetGlSymbol(_In_ PCSTR Name)
@@ -266,6 +269,7 @@ static BOOLEAN EnableOpenGl(VOID)
 
     return TRUE;
 }
+#endif
 
 BOOLEAN VidInitialize(_In_ BOOLEAN EnableGl)
 {
@@ -278,16 +282,20 @@ BOOLEAN VidInitialize(_In_ BOOLEAN EnableGl)
 
     // ImGui_ImplWin32_Init(Window);
 
+#ifdef PURPL_OPENGL
     if (EnableGl)
     {
         return EnableOpenGl();
     }
     else
     {
+#endif
         LogDebug("Showing window");
         ShowWindow(Window, SW_SHOWDEFAULT);
         return FALSE;
+#ifdef PURPL_OPENGL
     }
+#endif
 }
 
 BOOLEAN VidUpdate(VOID)
@@ -302,6 +310,10 @@ BOOLEAN VidUpdate(VOID)
         DispatchMessageA(&Message);
     }
 
+#ifdef PURPL_OPENGL
+    wglSwapLayerBuffers(DeviceContext, WGL_SWAP_MAIN_PLANE);
+#endif
+
     // Set in the window procedure
     return !WindowClosed;
 }
@@ -312,11 +324,13 @@ VOID VidShutdown(VOID)
 
     // ImGui_ImplWin32_Shutdown();
 
+#ifdef PURPL_OPENGL
     if (GlContext)
     {
         LogDebug("Destroying OpenGL context");
         wglDeleteContext(GlContext);
     }
+#endif
 
     ReleaseDC(Window, DeviceContext);
 
