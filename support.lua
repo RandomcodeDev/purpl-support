@@ -1,6 +1,6 @@
 use_mimalloc = not is_plat("switch")
 
-if not is_plat("switch")
+if not is_plat("switch") then
     function add_switch_links() end
     function add_switch_vulkan_links() end
     function switch_postbuild(target) end
