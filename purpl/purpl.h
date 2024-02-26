@@ -83,20 +83,8 @@
 
 #include "cJSON.h"
 
-#ifdef PURPL_ENGINE
-#ifdef PURPL_DISCORD
-#include "discord_rpc.h"
-#endif
-
-#if defined(PURPL_DEBUG) || defined(PURPL_RELWITHDEBINFO)
-#define FLECS_HTTP
-#define FLECS_REST
-#endif
-#include "flecs.h"
-
 #ifdef PURPL_VULKAN
 #include "volk.h"
-#endif
 #endif
 
 #if PURPL_USE_MIMALLOC
@@ -109,6 +97,18 @@
 #include "stb/stb_sprintf.h"
 
 #include "zstd.h"
+
+#ifdef PURPL_ENGINE
+#ifdef PURPL_DISCORD
+#include "discord_rpc.h"
+#endif
+
+#if defined(PURPL_DEBUG) || defined(PURPL_RELWITHDEBINFO)
+#define FLECS_HTTP
+#define FLECS_REST
+#endif
+#include "flecs.h"
+#endif
 
 #ifdef __cplusplus
 #ifndef _Noreturn

@@ -1,5 +1,3 @@
-use_mimalloc = not is_plat("switch")
-
 if not is_plat("switch") then
     function add_switch_links() end
     function add_switch_vulkan_links() end
@@ -42,15 +40,14 @@ end
 
 function do_settings()
     set_warnings("everything")
-    
+
     set_languages("gnu11", "cxx23")
     set_exceptions("cxx")
-    
+
     add_defines("_CRT_SECURE_NO_WARNINGS")
     add_defines("_GNU_SOURCE")
-    
-    -- TODO: make this portable to non-MSVC flags (if xmake ever gets a way to detect the toolchain)
-    if is_plat("windows", "gdk", "gdkx") then
+
+    if get_config("toolchain") == "msvc" then
         add_cxflags("-Qspectre", "-EHsc", {force = true})
         -- all of these are either external or inconsequential
         add_cxflags(
@@ -91,15 +88,7 @@ function do_settings()
             "-wd5262", -- implicit fallthrough use [[fallthrough]]
             "-wd4388", -- signed", "unsigned mismatch
         {force = true})
-        add_includedirs(
-            path.join(os.getenv("GRDKLatest"), "GameKit", "Include")
-        )
-        add_linkdirs(
-            path.join(os.getenv("GRDKLatest"), "GameKit", "Lib", "amd64")
-        )
-    end
-
-    if is_plat("linux", "freebsd", "switch") then
+    else -- Probably Clang/GCC
         add_cxflags(
             "-Wno-gnu-line-marker",
             "-Wno-gnu-zero-variadic-macro-arguments",
@@ -132,11 +121,20 @@ function do_settings()
             "-Wno-zero-as-null-pointer-constant",
         {force = true})
     end
+
+    if is_plat("gdk", "gdkx") then
+        add_includedirs(
+            path.join(os.getenv("GRDKLatest"), "GameKit", "Include")
+        )
+        add_linkdirs(
+            path.join(os.getenv("GRDKLatest"), "GameKit", "Lib", "amd64")
+        )
+    end
 end
 
 function support_executable(support_root)
     if is_plat("gdk", "gdkx", "windows") then
-        add_files(path.join(support_root, "platform", "win32", "launcher.cpp"))
+        add_files(path.join(support_root, "platform", "win32", "launcher.c"))
         if is_mode("debug") then
             add_ldflags("-subsystem:console")
         else
@@ -151,7 +149,7 @@ function support_executable(support_root)
     end
 end
 
-function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
+function setup_support(support_root, deps_root, use_mimalloc, vulkan, set_big_settings)
     if is_plat("windows") then
         add_defines("PURPL_WIN32")
     elseif is_plat("gdk") then
@@ -165,7 +163,7 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
     elseif is_plat("switch") then
         add_defines("PURPL_SWITCH", "PURPL_UNIX")
     end
-    
+
     if is_mode("debug") then
         add_defines("PURPL_DEBUG")
         add_defines('PURPL_BUILD_TYPE="Debug"')
@@ -173,11 +171,11 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
         add_defines("PURPL_RELEASE")
         add_defines('PURPL_BUILD_TYPE="Release"')
     end
-    
+
     if is_plat("linux", "freebsd") then
         add_requires("glfw")
     end
-    
+
     add_includedirs(
         support_root,
         deps_root,
@@ -187,6 +185,23 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
         path.join(deps_root, "zstd", "lib"),
         path.absolute(path.join("$(buildir)", "config"))
     )
+
+    if vulkan then
+        add_defines("PURPL_VULKAN")
+
+        add_includedirs(
+            path.join(deps_root, "Vulkan-Headers", "include"),
+            path.join(deps_root, "volk")
+        )
+
+        if is_plat("gdk", "windows") then
+            add_defines("VK_USE_PLATFORM_WIN32_KHR")
+        elseif is_plat("linux", "freebsd") then
+            add_defines("VK_USE_PLATFORM_WAYLAND_KHR", "VK_USE_PLATFORM_XCB_KHR")
+        elseif is_plat("switch") then
+            add_defines("VK_USE_PLATFORM_VI_NN")
+        end
+    end
 
     if set_big_settings then
         do_settings()
@@ -199,6 +214,7 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
         set_warnings("none")
         set_group("External")
         on_load(fix_target)
+    target_end()
 
     if use_mimalloc then
         target("mimalloc")
@@ -240,6 +256,7 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
 
             add_forceincludes("stdio.h")
             on_load(fix_target)
+        target_end()
     end
 
     target("stb")
@@ -248,6 +265,7 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
         set_warnings("none")
         set_group("External")
         on_load(fix_target)
+    target_end()
 
     target("zstd")
         set_kind("static")
@@ -259,11 +277,13 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
         set_warnings("none")
         set_group("External")
         on_load(fix_target)
+    target_end()
 
     option("verbose")
         set_default(false)
         set_description("Enable verbose logging")
         add_defines("PURPL_VERBOSE")
+    target_end()
 
     target("common")
         set_kind("static")
@@ -271,7 +291,7 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
         set_configdir(path.join("$(buildir)", "config"))
         set_configvar("USE_MIMALLOC", use_mimalloc and 1 or 0)
         add_configfiles(path.join(support_root, "purpl", "config.h.in"))
-        
+
         add_headerfiles(
             path.join(support_root, "common", "*.h"),
             path.join(support_root, "purpl", "*.h*"),
@@ -280,9 +300,10 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
         add_files(path.join(support_root, "common", "*.c"))
 
         set_group("Support")
-        
+
         add_deps("platform", "stb")
         on_load(fix_target)
+    target_end()
 
     target("platform")
         set_kind("static")
@@ -324,6 +345,7 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
         set_group("Support")
 
         on_load(fix_target)
+    target_end()
 
     target("util")
         set_kind("static")
@@ -332,4 +354,5 @@ function setup_support(support_root, deps_root, use_mimalloc, set_big_settings)
         add_deps("cjson", "common", "zstd")
         set_group("Support")
         on_load(fix_target)
+    target_end()
 end
