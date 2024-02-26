@@ -1,5 +1,12 @@
 use_mimalloc = not is_plat("switch")
 
+if not is_plat("switch")
+    function add_switch_links() end
+    function add_switch_vulkan_links() end
+    function switch_postbuild(target) end
+    function add_switch_renderapi() end
+end
+
 function do_settings()
     set_warnings("everything")
     
@@ -91,6 +98,23 @@ function do_settings()
             "-Wno-old-style-cast",
             "-Wno-zero-as-null-pointer-constant",
         {force = true})
+    end
+end
+
+function support_executable(support_root)
+    if is_plat("gdk", "gdkx", "windows") then
+        add_files(path.join(support_root, "platform", "win32", "launcher.cpp"))
+        if is_mode("debug") then
+            add_ldflags("-subsystem:console")
+        else
+            add_ldflags("-subsystem:windows")
+        end
+    elseif is_plat("linux", "freebsd") then
+        add_files("platform/unix/launcher.c")
+    elseif is_plat("switch") then
+        add_headerfiles("../platform/switch/switch.lua")
+        add_files("../platform/switch/launcher.cpp")
+        after_build(switch_postbuild)
     end
 end
 
