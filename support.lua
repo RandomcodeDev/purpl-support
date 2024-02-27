@@ -158,8 +158,10 @@ function support_executable(support_root)
         add_files(path.join(support_root, "platform", "win32", "launcher.c"))
         if is_mode("debug") then
             add_ldflags("-subsystem:console")
+            set_runtimes("MTd")
         else
             add_ldflags("-subsystem:windows")
+            set_runtimes("MT")
         end
     elseif is_plat("linux", "freebsd") then
         add_files("platform/unix/launcher.c")
@@ -168,11 +170,11 @@ function support_executable(support_root)
         after_build(switch_postbuild)
     elseif is_plat("switchhb") then
         add_files(path.join(support_root, "platform", "switchhb", "launcher.c"))
-        after_build(switch_postbuild)
+        after_build(switchhb_postbuild)
     end
 end
 
-function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, set_big_settings, config_h_in_path)
+function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, set_big_settings, config_h_in_path, switch_title_id)
     includes(path.join(support_root, "platform", "switchhb", "switch.lua"))
 
     if is_plat("windows") then
@@ -189,7 +191,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
         add_defines("PURPL_SWITCH", "PURPL_UNIX")
         if is_plat("switchhb") then
             add_defines("PURPL_CONSOLE_HOMEBREW")
-            switchhb_add_settings(support_root)
+            switchhb_add_settings(switch_title_id)
         end
     end
 
@@ -256,6 +258,9 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
         if is_plat("gdk", "windows") then
             add_defines("GLAD_PLATFORM_WIN32")
             add_links("opengl32.lib")
+        elseif is_plat("switchhb") then
+            add_defines("EGL_NO_X11")
+            add_links("EGL", "glapi", "drm_nouveau", "nx")
         end
     end
 
@@ -406,7 +411,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
                 path.join(support_root, "platform", "switchhb", "platform.c"),
                 path.join(support_root, "platform", "switchhb", "video.c")
             )
-            add_links("deko3d", "nx")
+            add_links("nx")
         end
 
         if use_mimalloc then

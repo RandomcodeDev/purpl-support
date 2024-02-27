@@ -139,7 +139,7 @@ PCSTR CmnFormatSize(_In_ DOUBLE Size)
     DOUBLE Value;
     UINT8 Prefix;
 
-    CONST PCSTR Units[] = {"B", "kiB", "MiB", "GiB", "TiB", "PiB (damn)", "EiB (are you sure?)",
+    static CONST PCSTR Units[] = {"B", "kiB", "MiB", "GiB", "TiB", "PiB (damn)", "EiB (are you sure?)",
                            // NOTE: these don't all go in increments of 1024, but they're physically
                            // impossible and here as a joke anyway
                            "ZiB (who are you?)", "YiB (what are you doing?)", "RiB (why are you doing this?)",

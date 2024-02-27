@@ -16,29 +16,27 @@ Abstract:
 
 #include "platform/platform.h"
 
-static AccountUid UserId;
+static INT32 NxLinkSocket;
 
 VOID PlatInitialize(VOID)
 {
+    if (R_SUCCEEDED(socketInitializeDefault()))
+    {
+        NxLinkSocket = nxlinkStdio();
+        if (NxLinkSocket < 0)
+        {
+            socketExit();
+        }
+        LogInfo("nxlink socket opened");
+    }
+
     Result NxResult = romfsInit();
     if (R_FAILED(NxResult))
     {
         CmnError("Failed to mount RomFS: %08X", NxResult);
     }
 
-    NxResult = accountInitialize(AccountServiceType_Application);
-    if (R_FAILED(NxResult))
-    {
-        CmnError("Failed to initialize account service: %08X", NxResult);
-    }
-
-    NxResult = accountGetPreselectedUser(&UserId);
-    if (R_FAILED(NxResult))
-    {
-        CmnError("Failed to get user account: %08X", NxResult);
-    }
-
-    NxResult = fsdevMountSaveData(PURPL_SWITCH_USERDATA_NAME, PURPL_SWITCH_TITLEID, UserId);
+    NxResult = fsdevMountSdmc();
 }
 
 VOID PlatShutdown(VOID)
@@ -58,8 +56,14 @@ Return Value:
 
 --*/
 {
-    fsdevCommitDevice(PURPL_SWITCH_USERDATA_NAME);
     fsdevUnmountAll();
+
+    if (NxLinkSocket >= 0)
+    {
+        close(NxLinkSocket);
+        socketExit();
+        NxLinkSocket = -1;
+    }
 }
 
 PCSTR
@@ -186,7 +190,14 @@ Return Value:
 
 PCSTR PlatGetUserDataDirectory(VOID)
 {
-    return PURPL_SWITCH_USERDATA_MOUNTPOINT;
+    static CHAR Buffer[128];
+
+    if (!strlen(Buffer))
+    {
+        strncpy(Buffer, "sdmc:/" PURPL_EXECUTABLE_NAME "/", PURPL_ARRAYSIZE(Buffer));
+    }
+
+    return Buffer;
 }
 
 UINT64 PlatGetMilliseconds(VOID)

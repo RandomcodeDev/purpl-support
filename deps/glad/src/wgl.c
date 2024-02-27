@@ -419,8 +419,6 @@ static void glad_wgl_load_WGL_OML_sync_control(GLADuserptrloadfunc load, void *u
 }
 
 
-static void glad_wgl_resolve_aliases(void) {
-}
 
 static int glad_wgl_has_extension(HDC hdc, const char *ext) {
     const char *terminator;
@@ -567,7 +565,6 @@ int gladLoadWGLUserPtr(HDC hdc, GLADuserptrloadfunc load, void *userptr) {
     glad_wgl_load_WGL_NV_video_output(load, userptr);
     glad_wgl_load_WGL_OML_sync_control(load, userptr);
 
-    glad_wgl_resolve_aliases();
 
     return version;
 }

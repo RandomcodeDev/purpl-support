@@ -14,6 +14,15 @@ Abstract:
 
 #include "common/common.h"
 
+#undef eglGetProcAddress
+extern GLADapiproc eglGetProcAddress(PCSTR Name);
+#undef eglGetDisplay
+extern EGLDisplay* eglGetDisplay(EGLNativeDisplayType Display);
+#undef eglInitialize
+extern EGLBoolean eglInitialize(EGLDisplay dpy, EGLint * major, EGLint * minor);
+#undef eglBindAPI
+extern EGLBoolean eglBindAPI(EGLenum Api);
+
 #include "platform/platform.h"
 #include "platform/video.h"
 
@@ -38,6 +47,8 @@ static VOID InitializeEgl(VOID)
     {
         CmnError("Failed to get default EGL display: %s", eglGetError());
     }
+
+    gladLoadEGL(Display, eglGetProcAddress);
 
     eglInitialize(Display, NULL, NULL);
 
@@ -76,11 +87,11 @@ static VOID InitializeEgl(VOID)
         CmnError("Failed to create window surface: %s", eglGetError());
     }
 
-    static CONST INT32 ContextAttributes[] = {EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR,
-                                              EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
-                                              EGL_CONTEXT_MAJOR_VERSION_KHR,
+    static CONST INT32 ContextAttributes[] = {EGL_CONTEXT_OPENGL_PROFILE_MASK,
+                                              EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
+                                              EGL_CONTEXT_MAJOR_VERSION,
                                               4,
-                                              EGL_CONTEXT_MAJOR_VERSION_KHR,
+                                              EGL_CONTEXT_MAJOR_VERSION,
                                               6,
                                               EGL_NONE};
     GlContext = eglCreateContext(Display, Config, EGL_NO_CONTEXT, ContextAttributes);
@@ -90,6 +101,8 @@ static VOID InitializeEgl(VOID)
     }
 
     eglMakeCurrent(Display, Surface, Surface, GlContext);
+
+    gladLoadGL(eglGetProcAddress);
 }
 #endif
 
