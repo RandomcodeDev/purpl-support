@@ -27,21 +27,6 @@
 #define LOG_USE_COLOR 1
 #define LOG_VERSION "0.1.0"
 
-typedef struct LOG_EVENT
-{
-    va_list ArgList;
-    CONST char *Format;
-    CONST char *File;
-    struct tm *Time;
-    void *Data;
-    int64_t Line;
-    bool HexLine;
-    int Level;
-} LOG_EVENT;
-
-typedef void (*PFN_LOG_LOG)(LOG_EVENT *Event);
-typedef void (*PFN_LOG_LOCK)(bool Lock, void *Data);
-
 typedef enum LOG_LEVEL
 {
     LogLevelTrace,
@@ -51,6 +36,21 @@ typedef enum LOG_LEVEL
     LogLevelError,
     LogLevelFatal
 } LOG_LEVEL;
+
+typedef struct LOG_EVENT
+{
+    va_list ArgList;
+    CONST char *Format;
+    CONST char *File;
+    struct tm *Time;
+    void *Data;
+    int64_t Line;
+    bool HexLine;
+    LOG_LEVEL Level;
+} LOG_EVENT;
+
+typedef void (*PFN_LOG_LOG)(LOG_EVENT *Event);
+typedef void (*PFN_LOG_LOCK)(bool Lock, void *Data);
 
 #define LogTrace(...)                                                          \
     LogMessage(LogLevelTrace, __FILE__, __LINE__, false, __VA_ARGS__)

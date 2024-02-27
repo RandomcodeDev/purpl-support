@@ -60,10 +60,13 @@
 
 #ifdef PURPL_UNIX
 #include <sys/stat.h>
-#include <sys/syscall.h>
 #include <sys/time.h>
 #include <sys/types.h>
+
+#if !defined PURPL_SWITCH && !defined PURPL_CONSOLE_HOMEBREW
+#include <sys/syscall.h>
 #include <sys/utsname.h>
+#endif
 
 #ifndef PURPL_SWITCH
 #include <dlfcn.h>
@@ -78,6 +81,14 @@
 #include "common/wintypes.h"
 #endif
 
+#if defined PURPL_SWITCH && defined PURPL_CONSOLE_HOMEBREW
+#include <pthread.h>
+#include <switch.h>
+
+#define fseeko64 fseeko
+#define stat64 stat
+#endif
+
 #define CGLM_CLIPSPACE_INCLUDE_ALL
 #include "cglm/cglm.h"
 
@@ -87,6 +98,8 @@
 #include "glad/gl.h"
 #ifdef PURPL_WIN32
 #include "glad/wgl.h"
+#else
+#include "glad/egl.h"
 #endif
 #endif
 

@@ -99,7 +99,7 @@ function do_settings()
             "-wd5262", -- implicit fallthrough use [[fallthrough]]
             "-wd4388", -- signed", "unsigned mismatch
         {force = true})
-    else -- Probably Clang/GCC
+    elseif get_config("toolchain") == "clang" then
         add_cxflags(
             "-Wno-gnu-line-marker",
             "-Wno-gnu-zero-variadic-macro-arguments",
@@ -130,6 +130,16 @@ function do_settings()
             "-Wno-c++98-compat-pedantic",
             "-Wno-old-style-cast",
             "-Wno-zero-as-null-pointer-constant",
+        {force = true})
+    elseif get_config("toolchain") == "switchhb" then
+        add_cxflags(
+            "-Wno-unused-value",
+            "-Wno-pointer-to-int-cast",
+            "-Wno-int-to-pointer-cast",
+            "-Wno-frame-address",
+            "-Wno-sign-conversion",
+            "-Wno-multichar",
+            "-Wno-cast-function-type",
         {force = true})
     end
 
@@ -179,6 +189,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
         add_defines("PURPL_SWITCH", "PURPL_UNIX")
         if is_plat("switchhb") then
             add_defines("PURPL_CONSOLE_HOMEBREW")
+            switchhb_add_settings(support_root)
         end
     end
 
@@ -234,6 +245,8 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
             add_files(path.join(deps_root, "glad", "src", "gl.c"))
             if is_plat("gdk", "windows") then
                 add_files(path.join(deps_root, "glad", "src", "wgl.c"))
+            else
+                add_files(path.join(deps_root, "glad", "src", "egl.c"))
             end
             set_warnings("none")
             set_group("External")
@@ -393,7 +406,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
                 path.join(support_root, "platform", "switchhb", "platform.c"),
                 path.join(support_root, "platform", "switchhb", "video.c")
             )
-            add_links("drm_nouveau", "nx")
+            add_links("deko3d", "nx")
         end
 
         if use_mimalloc then

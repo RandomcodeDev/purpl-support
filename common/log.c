@@ -31,7 +31,7 @@ typedef struct LOG_CALLBACK
 {
     PFN_LOG_LOG Log;
     void *Data;
-    int Level;
+    LOG_LEVEL Level;
 } LOG_CALLBACK;
 
 static struct LOG_STATE
@@ -45,11 +45,11 @@ static struct LOG_STATE
 
 static CONST char *LevelStrings[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 
+#ifndef PURPL_SWITCH
 #ifdef LOG_USE_COLOR
 static CONST char *LevelColours[] = {"\x1b[38;5;197m", "\x1b[36m", "\x1b[32m", "\x1b[33m", "\x1b[31m", "\x1b[35m"};
 #endif
 
-#ifndef PURPL_SWITCH
 static void StdoutCallback(LOG_EVENT *Event)
 {
     char Buffer[64] = {0};

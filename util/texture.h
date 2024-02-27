@@ -42,7 +42,7 @@ typedef union DEPTH_PIXEL {
 typedef union RGBA8_PIXEL {
     BYTE Bytes[4];
     UINT32 Value;
-    struct RGBA8_PIXEL_FIELDS
+    struct
     {
         BYTE Blue;
         BYTE Green;
@@ -59,7 +59,7 @@ typedef union RGB8_PIXEL {
 #else
     UINT32 Value;
 #endif
-    struct RGB8_PIXEL_FIELDS
+    struct
     {
         BYTE Blue;
         BYTE Green;
@@ -83,7 +83,8 @@ typedef struct TEXTURE
     // Following fields are in memory only
 
     BOOLEAN DataSeparate;
-    union {
+    union
+    {
         PDEPTH_PIXEL DepthPixels;
         PRGBA8_PIXEL Rgba8Pixels;
         PRGB8_PIXEL Rgb8Pixels;
@@ -97,14 +98,10 @@ typedef struct TEXTURE
 /// @param Texture The texture to check
 ///
 /// @return Whether the texture can be used
-#define ValidateTexture(Texture)                                               \
-    ((Texture) &&                                                              \
-     memcmp((Texture)->MagicBytes, TEXTURE_MAGIC, TEXTURE_MAGIC_LENGTH) ==     \
-         0 &&                                                                  \
-     (Texture)->Version == TEXTURE_FORMAT_VERSION &&                           \
-     (Texture)->Format > TextureFormatUndefined &&                             \
-     (Texture)->Format < TextureFormatCount && (Texture)->Width >= 1 &&        \
-     (Texture)->Height >= 1)
+#define ValidateTexture(Texture)                                                                                       \
+    ((Texture) && memcmp((Texture)->MagicBytes, TEXTURE_MAGIC, TEXTURE_MAGIC_LENGTH) == 0 &&                           \
+     (Texture)->Version == TEXTURE_FORMAT_VERSION && (Texture)->Format > TextureFormatUndefined &&                     \
+     (Texture)->Format < TextureFormatCount && (Texture)->Width >= 1 && (Texture)->Height >= 1)
 
 /// @brief Create a texture
 ///
@@ -115,8 +112,7 @@ typedef struct TEXTURE
 /// EstimateTextureSize bytes)
 ///
 /// @return A texture which can be freed with CmnFree
-extern PTEXTURE CreateTexture(_In_ TEXTURE_FORMAT Format, _In_ UINT32 Width,
-                              _In_ UINT32 Height, _In_ PVOID Data);
+extern PTEXTURE CreateTexture(_In_ TEXTURE_FORMAT Format, _In_ UINT32 Width, _In_ UINT32 Height, _In_ PVOID Data);
 
 /// @brief Load a texture from a file
 ///
@@ -155,8 +151,7 @@ extern SIZE_T GetFormatPitch(_In_ TEXTURE_FORMAT Format);
 /// @param[in] Texture The texture to get the size of
 ///
 /// @return The size of the pixel data
-#define GetTextureSize(Texture)                                                \
-    ((Texture).Width * (Texture).Height * GetFormatPitch((Texture).Format))
+#define GetTextureSize(Texture) ((Texture).Width * (Texture).Height * GetFormatPitch((Texture).Format))
 
 /// @brief Get the size of a texture
 ///
@@ -165,8 +160,7 @@ extern SIZE_T GetFormatPitch(_In_ TEXTURE_FORMAT Format);
 /// @param[in] Height The height
 ///
 /// @return The size the texture's pixel data should be
-extern SIZE_T EstimateTextureSize(_In_ TEXTURE_FORMAT Format, _In_ UINT32 Width,
-                                  _In_ UINT32 Height);
+extern SIZE_T EstimateTextureSize(_In_ TEXTURE_FORMAT Format, _In_ UINT32 Width, _In_ UINT32 Height);
 
 /// @brief Get the address of a pixel by its position
 ///
@@ -175,11 +169,9 @@ extern SIZE_T EstimateTextureSize(_In_ TEXTURE_FORMAT Format, _In_ UINT32 Width,
 /// @param[in] Y The Y position of the pixel
 ///
 /// @return The address of the pixel
-#define GetTexturePixel(Texture, X, Y)                                         \
-    ((PBYTE)(Texture).Pixels + PURPL_CLAMP(Y, 0, (Texture).Height)             \
-         ? (GetFormatPitch((Texture).Format) *                                 \
-            PURPL_CLAMP(Y, 0, (Texture).Height) * (Texture).Width)             \
-     : 0 + PURPL_CLAMP(X, 0, (Texture).Width)                                  \
-         ? (GetFormatPitch((Texture).Format) *                                 \
-            PURPL_CLAMP(X, 0, (Texture).Width))                                \
+#define GetTexturePixel(Texture, X, Y)                                                                                 \
+    ((PBYTE)(Texture).Pixels + PURPL_CLAMP(Y, 0, (Texture).Height)                                                     \
+         ? (GetFormatPitch((Texture).Format) * PURPL_CLAMP(Y, 0, (Texture).Height) * (Texture).Width)                  \
+     : 0 + PURPL_CLAMP(X, 0, (Texture).Width)                                                                          \
+         ? (GetFormatPitch((Texture).Format) * PURPL_CLAMP(X, 0, (Texture).Width))                                     \
          : 0)

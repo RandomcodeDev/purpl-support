@@ -53,7 +53,7 @@ Return Value:
 --*/
 {
     PTEXTURE Texture;
-    SIZE_T Size;
+    UINT64 Size;
 
     if (Format <= TextureFormatUndefined || Format >= TextureFormatCount || Width <= 0 || Height <= 0)
     {
@@ -113,7 +113,7 @@ Return Value:
     PTEXTURE Texture;
     PTEXTURE RealTexture;
     SIZE_T RequiredSize;
-    SIZE_T Size;
+    UINT64 Size;
     PVOID Data;
 
     LogInfo("Loading texture %s", Path);
@@ -228,8 +228,7 @@ Return Value:
     return TRUE;
 }
 
-SIZE_T
-GetFormatComponents(_In_ TEXTURE_FORMAT Format)
+SIZE_T GetFormatComponents(_In_ TEXTURE_FORMAT Format)
 /*++
 
 Routine Description:
@@ -249,8 +248,7 @@ Return Value:
     return FormatComponents[PURPL_CLAMP(Format, TextureFormatUndefined, TextureFormatCount - 1)];
 }
 
-SIZE_T
-GetFormatPitch(_In_ TEXTURE_FORMAT Format)
+SIZE_T GetFormatPitch(_In_ TEXTURE_FORMAT Format)
 /*++
 
 Routine Description:

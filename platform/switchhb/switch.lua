@@ -13,35 +13,37 @@ toolchain("switchhb")
         exe_ext = ".exe"
     end
 
-    set_toolset("cc", "aarch64-unknown-none-elf-gcc" .. exe_ext)
-    set_toolset("cxx", "aarch64-unknown-none-elf-g++" .. exe_ext)
-    set_toolset("ld", "aarch64-unknown-none-elf-gcc" .. exe_ext)
-    set_toolset("ar", "aarch64-unknown-none-elf-ar" .. exe_ext)
-    set_toolset("as", "aarch64-unknown-none-elf-as" .. exe_ext)
+    set_toolset("cc", "aarch64-none-elf-gcc" .. exe_ext)
+    set_toolset("cxx", "aarch64-none-elf-g++" .. exe_ext)
+    set_toolset("ld", "aarch64-none-elf-gcc" .. exe_ext)
+    set_toolset("sh", "aarch64-none-elf-gcc" .. exe_ext)
+    set_toolset("ar", "aarch64-none-elf-ar" .. exe_ext)
+    set_toolset("as", "aarch64-none-elf-gcc" .. exe_ext)
 
     on_load(function (toolchain)
-        toolchain:add("asflags", "-ffunction-sections")
-        toolchain:add("asflags", "-march=armv8-a+crc+crypto")
-        toolchain:add("asflags", "-mtune=cortex-a57")
-        toolchain:add("asflags", "-mtp=soft")
         toolchain:add("cxflags", "-fPIC")
-        toolchain:add("cxflags", "-ffunction-sections")
-        toolchain:add("cxflags", "-march=armv8-a+crc+crypto")
-        toolchain:add("cxflags", "-mtune=cortex-a57")
-        toolchain:add("cxflags", "-mtp=soft")
-        toolchain:add("cxxflags", "-fno-rtti")
-        toolchain:add("cxxflags", "-fno-exceptions")
+        toolchain:add("ldflags", "-mcpu=cortex-a57+fp+simd+crypto+crc")
         toolchain:add("ldflags", "-Wl,-pie")
-        toolchain:add("ldflags", "-T" .. path.join(devkitpro, "libnx", "switch.ld"))
-        toolchain:add("ldflags", "-specs=" .. path.join(devkitpro, "libnx", "switch.specs"))
+        toolchain:add("ldflags", "--specs=" .. path.join(devkitpro, "libnx", "switch.specs"))
+--        toolchain:add("ldflags", "-Wl,--verbose")
 
         toolchain:add("cxflags", "-D__unix__")
         toolchain:add("cxflags", "-D__SWITCH__")
         toolchain:add("cxflags", "-D_POSIX_C_SOURCE")
 
-        toolchain:add("ldflags", "-L" .. path.join(devkitpro, "libnx", "lib"))
+        for _, includedir in ipairs({path.join(devkitpro, "libnx", "include"), path.join(devkitpro, "devkitA64", "aarch64-none-elf", "include")}) do
+            toolchain:add("cxflags", "-I" .. includedir)
+        end
+
+        for _, libdir in ipairs({path.join(devkitpro, "libnx", "lib"), path.join(devkitpro, "devkitA64", "aarch64-none-elf", "lib")}) do
+            toolchain:add("ldflags", "-L" .. libdir)
+        end
     end)
 toolchain_end()
+
+function switchhb_add_settings()
+    add_defines("PURPL_SWITCH_TITLEID=0x" .. title_id)
+end
 
 function switchhb_postbuild(target)
     if target:kind() == "binary" then

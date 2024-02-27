@@ -41,7 +41,7 @@ PMESH
 LoadMesh(_In_ PCSTR Path)
 {
     PMESH Mesh;
-    SIZE_T Size;
+    UINT64 Size;
 
     LogInfo("Loading mesh %s", Path);
 

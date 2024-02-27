@@ -21,7 +21,7 @@ Abstract:
 // to send log output to
 //
 
-#if defined PURPL_WIN32 || defined PURPL_SWITCH
+#if defined PURPL_WIN32 || (defined PURPL_SWITCH && !defined PURPL_CONSOLE_HOMEBREW)
 #define PURPL_HAVE_PLATPRINT 1
 #endif
 
