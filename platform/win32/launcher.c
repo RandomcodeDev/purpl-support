@@ -10,6 +10,7 @@
 #include "common/common.h"
 #include "common/filesystem.h"
 
+#ifndef PURPL_DEBUG
 // hinting the nvidia driver to use the dedicated graphics card in an optimus
 // configuration for more info, see:
 // http://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
@@ -17,6 +18,7 @@ __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 
 // same thing for AMD GPUs using v13.35 or newer drivers
 __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+#endif
 
 // argc and argv are already supplied in debug builds, but otherwise they have
 // to be parsed. These store the arguments either way.

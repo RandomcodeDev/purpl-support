@@ -236,7 +236,7 @@ static BOOLEAN EnableOpenGl(VOID)
 
     wglDeleteContext(DummyContext);
 
-    LogDebug("Creating real v3.3 core context");
+    LogDebug("Creating real context");
 
     DestroyWindow(Window);
     InitializeWindow();
@@ -245,9 +245,9 @@ static BOOLEAN EnableOpenGl(VOID)
         WGL_CONTEXT_PROFILE_MASK_ARB,
         WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
         WGL_CONTEXT_MAJOR_VERSION_ARB,
-        3,
+        4,
         WGL_CONTEXT_MINOR_VERSION_ARB,
-        3,
+        6,
 #ifdef PURPL_DEBUG
         WGL_CONTEXT_FLAGS_ARB,
         WGL_CONTEXT_DEBUG_BIT_ARB,
@@ -311,7 +311,10 @@ BOOLEAN VidUpdate(VOID)
     }
 
 #ifdef PURPL_OPENGL
-    wglSwapLayerBuffers(DeviceContext, WGL_SWAP_MAIN_PLANE);
+    if (GlContext)
+    {
+        wglSwapLayerBuffers(DeviceContext, WGL_SWAP_MAIN_PLANE);
+    }
 #endif
 
     // Set in the window procedure

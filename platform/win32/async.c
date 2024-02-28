@@ -29,8 +29,11 @@ static VOID ThreadEntry(_In_ PVOID Thread)
 VOID InitializeMainThread(_In_ PFN_THREAD_START StartAddress)
 {
     AsCurrentThread = CmnAlloc(1, sizeof(THREAD));
-    strncpy(AsCurrentThread->Name, "main", PURPL_ARRAYSIZE(AsCurrentThread->Name));
-    AsCurrentThread->ThreadStart = StartAddress;
+    if (AsCurrentThread)
+    {
+        strncpy(AsCurrentThread->Name, "main", PURPL_ARRAYSIZE(AsCurrentThread->Name));
+        AsCurrentThread->ThreadStart = StartAddress;
+    }
 }
 
 PTHREAD
@@ -73,8 +76,6 @@ INT AsJoinThread(_In_ PTHREAD Thread)
     if (Thread->Handle)
     {
         WaitForSingleObject(Thread->Handle, INFINITE);
-        // Kill the thread in case it didn't exit
-        TerminateThread(Thread->Handle, Thread->ReturnValue);
     }
 
     ReturnValue = Thread->ReturnValue;

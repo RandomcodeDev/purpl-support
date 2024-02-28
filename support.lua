@@ -158,10 +158,8 @@ function support_executable(support_root)
         add_files(path.join(support_root, "platform", "win32", "launcher.c"))
         if is_mode("debug") then
             add_ldflags("-subsystem:console")
-            set_runtimes("MTd")
         else
             add_ldflags("-subsystem:windows")
-            set_runtimes("MT")
         end
     elseif is_plat("linux", "freebsd") then
         add_files(path.join(support_root, "platform", "unix", "launcher.c"))
