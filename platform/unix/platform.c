@@ -23,12 +23,10 @@ static VOID SignalHandler(_In_ INT Signal, _In_ siginfo_t *SignalInformation, _I
 {
     PCSTR BaseErrorType = "Unknown error";
     PCSTR ErrorType = "unknown error";
-    BOOLEAN Fatal = FALSE;
 
     switch (Signal)
     {
     case SIGILL:
-        Fatal = TRUE;
         BaseErrorType = "Illegal operation";
         switch (SignalInformation->si_code)
         {
@@ -59,7 +57,6 @@ static VOID SignalHandler(_In_ INT Signal, _In_ siginfo_t *SignalInformation, _I
         }
         break;
     case SIGSEGV:
-        Fatal = TRUE;
         BaseErrorType = "Segmentation fault";
         switch (SignalInformation->si_code)
         {
@@ -80,7 +77,6 @@ static VOID SignalHandler(_In_ INT Signal, _In_ siginfo_t *SignalInformation, _I
         }
         break;
     case SIGFPE:
-        Fatal = TRUE;
         BaseErrorType = "Arithmetic error";
         switch (SignalInformation->si_code)
         {
@@ -111,7 +107,6 @@ static VOID SignalHandler(_In_ INT Signal, _In_ siginfo_t *SignalInformation, _I
         }
         break;
     case SIGBUS:
-        Fatal = TRUE;
         BaseErrorType = "Bus error";
         switch (SignalInformation->si_code)
         {
@@ -137,10 +132,10 @@ static VOID SignalHandler(_In_ INT Signal, _In_ siginfo_t *SignalInformation, _I
     case SIGTERM:
         LogInfo("Received quit signal %d, errno %d", Signal, SignalInformation->si_errno);
         WindowClosed = TRUE;
-        break;
+        return;
     default:
         LogInfo("Received signal %d", Signal);
-        break;
+        return;
     }
 
     CmnError("%s at 0x%llX: error %d: %s (si_code %d)", BaseErrorType, (UINT64)SignalInformation->si_addr,

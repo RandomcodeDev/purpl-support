@@ -57,6 +57,7 @@ typedef UINT16* PUINT16;
 typedef UINT32* PUINT32;
 typedef UINT64* PUINT64;
 typedef SIZE_T* PSIZE_T;
+typedef FLOAT* PFLOAT;
 #endif
 
 // Note: WCHAR is not the same between Windows and Linux, to enable

@@ -58,7 +58,7 @@ static VOID GlfwFocusCallback(_In_ GLFWwindow *FocusWindow, _In_ INT Focused)
     }
 }
 
-VOID VidInitialize(VOID)
+BOOLEAN VidInitialize(_In_ BOOLEAN EnableGl)
 {
     PCSTR GlfwError;
 
@@ -71,7 +71,24 @@ VOID VidInitialize(VOID)
 
     glfwSetErrorCallback(GlfwErrorCallback);
 
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#ifdef PURPL_OPENGL
+    if (EnableGl)
+    {
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef PURPL_DEBUG
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, TRUE);
+#endif
+    }
+    else
+    {
+#endif
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#ifdef PURPL_OPENGL
+    }
+#endif
 
     WindowWidth = 1280;
     WindowHeight = 720;
@@ -87,6 +104,16 @@ VOID VidInitialize(VOID)
     glfwSetWindowFocusCallback(Window, GlfwFocusCallback);
 
     //    glfwShowWindow(Window);
+
+#ifdef PURPL_OPENGL
+    if (EnableGl)
+    {
+        glfwMakeContextCurrent(Window);
+        gladLoadGL(glfwGetProcAddress);
+    }
+#endif
+
+    return EnableGl;
 }
 
 BOOLEAN
@@ -119,6 +146,10 @@ Return Value:
             LogDebug("Window closed");
         }
     }
+
+#ifdef PURPL_OPENGL
+    glfwSwapBuffers(Window);
+#endif
 
     glfwGetWindowSize(Window, &WindowWidth, &WindowHeight);
 

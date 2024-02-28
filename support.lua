@@ -164,7 +164,7 @@ function support_executable(support_root)
             set_runtimes("MT")
         end
     elseif is_plat("linux", "freebsd") then
-        add_files("platform/unix/launcher.c")
+        add_files(path.join(support_root, "platform", "unix", "launcher.c"))
     elseif is_plat("switch") then
         add_files(path.join(support_root, "..", "..", "platform", "switch", "launcher.cpp"))
         after_build(switch_postbuild)
