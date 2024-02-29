@@ -83,6 +83,7 @@ function do_settings()
             "-wd4189", -- local variable is initialized but not referenced (external)
             "-wd4710", -- function not inlined
             "-wd4711", -- function inlined
+            "-wd4201", -- nameless struct/union
         {force = true})
         add_cxxflags(
             "-wd5204", -- virtual function something something
