@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "common/alloc.h"
 #include "common/common.h"
 
 /// @brief Data type of a variable
@@ -14,7 +15,7 @@ typedef enum CONFIGVAR_TYPE
     ConfigVarTypeBoolean, // BOOLEAN
     ConfigVarTypeInt,     // INT32
     ConfigVarTypeFloat,   // FLOAT
-    ConfigVarTypeString,  // String, up to 64 characters
+    ConfigVarTypeString,  // String, up to 64 characters including NUL
     ConfigVarTypeCount
 } CONFIGVAR_TYPE, *PCONFIGVAR_TYPE;
 
@@ -34,7 +35,6 @@ typedef union CONFIGVAR_VALUE {
     struct
     {
         CHAR Value[64];
-        UINT64 Length;
     } String;
 } CONFIGVAR_VALUE, *PCONFIGVAR_VALUE;
 
@@ -57,15 +57,25 @@ typedef struct CONFIGVAR
     };
 } CONFIGVAR, *PCONFIGVAR;
 
-/// @brief Initialize a configuration variable
+/// @brief Define a configuration variable
 ///
-/// @param[out] Variable The variable to initialize
 /// @param[in] Name The name of the variable
 /// @param[in] DefaultValue A pointer to the value to set
 /// @param[in] Type The type of the variable, determines the size read from Value
 /// @param[in] Static Whether the variable can be changed after this function is called
 /// @param[in] Side The side of the variable
 /// @param[in] Cheat Whether changing the variable is cheating
-extern VOID CfgInitializeVariable(_Out_ PCONFIGVAR Variable, _In_ PCSTR Name, _In_ CONST PVOID DefaultValue,
-                                  _In_ CONFIGVAR_TYPE Type, _In_ BOOLEAN Static, _In_ CONFIGVAR_SIDE Side,
-                                  _In_ BOOLEAN Cheat);
+extern VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONFIGVAR_TYPE Type,
+                                  _In_ BOOLEAN Static, _In_ CONFIGVAR_SIDE Side, _In_ BOOLEAN Cheat);
+
+/// @brief Get a configuration variable
+///
+/// @param Name The name of the variable
+///
+/// @return If Name exists, the variable it's tied to. Otherwise, NULL.
+extern PCONFIGVAR CfgGetVariable(_In_ PCSTR Name);
+
+#define CONFIGVAR_GET_BOOLEAN(Name) CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Boolean : FALSE
+#define CONFIGVAR_GET_INT(Name) CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Int : 0
+#define CONFIGVAR_GET_FLOAT(Name) CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Float : 0.0
+#define CONFIGVAR_GET_STRING(Name) CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.String.Value : NULL

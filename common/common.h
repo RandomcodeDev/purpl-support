@@ -41,6 +41,14 @@
 /// @brief Make a string, expanding one level of macros
 #define PURPL_STRINGIZE_EXPAND(X) PURPL_STRINGIZE(X)
 
+/// @brief Define a hashmap entry structure for stb
+#define PURPL_MAKE_HASHMAP_ENTRY(Name, Tk, Tv)                                                                         \
+    typedef struct Name                                                                                                \
+    {                                                                                                                  \
+        Tk key;                                                                                                       \
+        Tv value;                                                                                                     \
+    } Name, *P##Name;
+
 /// @brief Round a size to an aligment
 ///
 /// @param[in] Alignment The alignment

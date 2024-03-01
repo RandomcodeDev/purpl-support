@@ -21,19 +21,20 @@ static PCSTR GetSideString(_In_ CONFIGVAR_SIDE Side)
     return "unknown side";
 }
 
-VOID CfgInitializeVariable(_Out_ PCONFIGVAR Variable, _In_ PCSTR Name, _In_ CONST PVOID DefaultValue,
-                           _In_ CONFIGVAR_TYPE Type, _In_ BOOLEAN Static, _In_ CONFIGVAR_SIDE Side, _In_ BOOLEAN Cheat)
+PURPL_MAKE_HASHMAP_ENTRY(CONFIGVAR_MAP, PCHAR, PCONFIGVAR);
+
+PCONFIGVAR_MAP CfgVariables;
+
+VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONFIGVAR_TYPE Type,
+                           _In_ BOOLEAN Static, _In_ CONFIGVAR_SIDE Side, _In_ BOOLEAN Cheat)
 {
-    if (!Variable || !Name || Type >= ConfigVarTypeCount)
+    if (!Name || Type >= ConfigVarTypeCount)
     {
-        if (Variable)
-        {
-            memset(Variable, 0, sizeof(CONFIGVAR));
-        }
         return;
     }
 
-    memset(Variable, 0, sizeof(CONFIGVAR));
+    PCONFIGVAR Variable = CmnAlloc(1, sizeof(CONFIGVAR));
+    PURPL_ASSERT(Variable != NULL);
 
     Variable->Side = Side & 0b11;
     PSTR SideString = CmnFormatTempString("%s", GetSideString(Variable->Side));
@@ -73,6 +74,18 @@ VOID CfgInitializeVariable(_Out_ PCONFIGVAR Variable, _In_ PCSTR Name, _In_ CONS
         break;
     }
 
-    // TODO: support users changing the current value
     memcpy(&Variable->Current, &Variable->Default, sizeof(CONFIGVAR_VALUE));
+
+    stbds_shput(CfgVariables, Name, Variable);
+}
+
+PCONFIGVAR CfgGetVariable(_In_ PCSTR Name)
+{
+    PCONFIGVAR Variable = stbds_shget(CfgVariables, Name);
+    if (!Variable)
+    {
+        LogWarning("Unknown variable %s, check the spelling.", Name);
+    }
+
+    return Variable;
 }
