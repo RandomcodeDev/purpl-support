@@ -53,12 +53,12 @@ VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONF
                 Variable->Name, Variable->Default.Boolean ? "true" : "false");
         break;
     case ConfigVarTypeInteger:
-        Variable->Default.Int = *(PINT32)DefaultValue;
+        Variable->Default.Int = *(PINT64)DefaultValue;
         LogInfo("%s%s%s variable %s initialized with integer value %d", SideString, StaticString, CheatString,
                 Variable->Name, Variable->Default.Int);
         break;
     case ConfigVarTypeFloat:
-        Variable->Default.Float = *(PFLOAT)DefaultValue;
+        Variable->Default.Float = *(DOUBLE *)DefaultValue;
         LogInfo("%s%s%s variable %s initialized with float value %f", SideString, StaticString, CheatString,
                 Variable->Name, Variable->Default.Float);
         break;
@@ -101,10 +101,10 @@ VOID CfgSetVariable(_In_ PCSTR Name, _In_ PVOID Value)
         Variable->Current.Boolean = *(PBOOLEAN)Value;
         break;
     case ConfigVarTypeInteger:
-        Variable->Current.Int = *(PINT32)Value;
+        Variable->Current.Int = *(PINT64)Value;
         break;
     case ConfigVarTypeFloat:
-        Variable->Current.Float = *(PFLOAT)Value;
+        Variable->Current.Float = *(DOUBLE *)Value;
         break;
     case ConfigVarTypeString:
         strncpy(Variable->Current.String, Value, PURPL_ARRAYSIZE(Variable->Default.String));

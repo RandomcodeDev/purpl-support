@@ -38,20 +38,20 @@
 #endif
 
 #define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include <windows.h>
 
 #ifdef __cplusplus
 #include <comdef.h>
 #endif
-#include <ShlObj.h>
+#include <shlobj.h>
 #include <shellapi.h>
-#include <Uxtheme.h>
+#include <uxtheme.h>
 #include <windowsx.h>
 
 #ifndef PURPL_GDKX
-#include <DbgHelp.h>
-#include <Psapi.h>
-#include <TlHelp32.h>
+#include <dbghelp.h>
+#include <psapi.h>
+#include <tlhelp32.h>
 #endif
 
 #define strcasecmp _stricmp

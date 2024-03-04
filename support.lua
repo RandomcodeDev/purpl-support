@@ -132,7 +132,7 @@ function do_settings()
             "-Wno-old-style-cast",
             "-Wno-zero-as-null-pointer-constant",
         {force = true})
-    elseif get_config("toolchain") == "switchhb" then
+    elseif get_config("toolchain") == "switchhb" or get_config("toolchain") == "mingw" then
         add_cxflags(
             "-Wno-unused-value",
             "-Wno-pointer-to-int-cast",
@@ -142,6 +142,9 @@ function do_settings()
             "-Wno-multichar",
             "-Wno-cast-function-type",
         {force = true})
+        if is_plat("windows") then
+            add_defines("_POSIX_C_SOURCE")
+        end
     end
 
     if is_plat("gdk", "gdkx") then
@@ -155,16 +158,18 @@ function do_settings()
 end
 
 function gdk_postbuild(target)
-    
+
 end
 
 function support_executable(support_root)
     if is_plat("gdk", "gdkx", "windows") then
         add_files(path.join(support_root, "platform", "win32", "launcher.c"))
-        if is_mode("debug") then
-            add_ldflags("-subsystem:console")
-        else
-            add_ldflags("-subsystem:windows")
+        if get_config("toolchain") == "msvc" then
+            if is_mode("debug") then
+                add_ldflags("-subsystem:console", {force = true})
+            else
+                add_ldflags("-subsystem:windows", {force = true})
+            end
         end
         if not is_plat("windows") then
             after_build(gdk_postbuild)

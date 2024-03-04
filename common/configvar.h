@@ -30,7 +30,7 @@ typedef enum CONFIGVAR_SIDE
 /// @brief The value of a configuration variable
 typedef union CONFIGVAR_VALUE {
     BOOLEAN Boolean;
-    UINT64 Int;
+    INT64 Int;
     DOUBLE Float;
     CHAR String[64];
 } CONFIGVAR_VALUE, *PCONFIGVAR_VALUE;
@@ -72,12 +72,12 @@ extern VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _I
     }
 #define CONFIGVAR_DEFINE_INT(Name, DefaultValue, Static, Side, Cheat)                                                  \
     {                                                                                                                  \
-        INT DefaultValue_ = (INT)(DefaultValue);                                                                       \
+        INT64 DefaultValue_ = (INT64)(DefaultValue);                                                                       \
         CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeInteger, (Static), (Side), (Cheat));                    \
     }
 #define CONFIGVAR_DEFINE_FLOAT(Name, DefaultValue, Static, Side, Cheat)                                                \
     {                                                                                                                  \
-        FLOAT DefaultValue_ = (FLOAT)(DefaultValue);                                                                   \
+        DOUBLE DefaultValue_ = (DOUBLE)(DefaultValue);                                                                   \
         CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeFloat, (Static), (Side), (Cheat));                      \
     }
 #define CONFIGVAR_DEFINE_STRING(Name, DefaultValue, Static, Side, Cheat)                                               \
@@ -109,12 +109,12 @@ extern VOID CfgSetVariable(_In_ PCSTR Name, _In_ PVOID Value);
     }
 #define CONFIGVAR_SET_INT(Name, Value)                                                                                 \
     {                                                                                                                  \
-        INT Value_ = (INT)(Value);                                                                                     \
+        INT64 Value_ = (INT64)(Value);                                                                                     \
         CfgSetVariable((Name), &Value_);                                                                               \
     }
 #define CONFIGVAR_SET_FLOAT(Name, Value)                                                                               \
     {                                                                                                                  \
-        FLOAT Value_ = (FLOAT)(Value);                                                                                 \
+        DOUBLE Value_ = (DOUBLE)(Value);                                                                                 \
         CfgSetVariable((Name), &Value_);                                                                               \
     }
 #define CONFIGVAR_SET_STRING(Name, Value)                                                                              \

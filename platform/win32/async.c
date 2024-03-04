@@ -36,8 +36,7 @@ VOID InitializeMainThread(_In_ PFN_THREAD_START StartAddress)
     }
 }
 
-PTHREAD
-AsCreateThread(_In_opt_ PCSTR Name, _In_ SIZE_T StackSize, _In_ PFN_THREAD_START ThreadStart, _In_opt_ PVOID UserData)
+PTHREAD AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize, _In_ PFN_THREAD_START ThreadStart, _In_opt_ PVOID UserData)
 {
     PTHREAD Thread;
     DWORD Error;

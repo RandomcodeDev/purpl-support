@@ -58,6 +58,8 @@ typedef UINT32* PUINT32;
 typedef UINT64* PUINT64;
 typedef SIZE_T* PSIZE_T;
 typedef FLOAT* PFLOAT;
+typedef DOUBLE* PDOUBLE;
+typedef BOOLEAN* PBOOLEAN;
 #endif
 
 // Note: WCHAR is not the same between Windows and Linux, to enable

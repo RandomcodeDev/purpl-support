@@ -286,7 +286,7 @@ extern DWORD InitialConsoleErrorMode;
 /// @param Show              Window show state.
 ///
 /// @return An appropriate status code.
-INT WinMain(_In_ HINSTANCE Instance, _In_opt_ HINSTANCE PreviousInstance, _In_ PCHAR CommandLine, _In_ INT Show)
+INT WINAPI WinMain(_In_ HINSTANCE Instance, _In_opt_ HINSTANCE PreviousInstance, _In_ LPSTR CommandLine, _In_ INT Show)
 {
     INT Result;
     // Don't care about checking for a console parent process on Xbox, since
