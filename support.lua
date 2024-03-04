@@ -154,6 +154,10 @@ function do_settings()
     end
 end
 
+function gdk_postbuild(target)
+    
+end
+
 function support_executable(support_root)
     if is_plat("gdk", "gdkx", "windows") then
         add_files(path.join(support_root, "platform", "win32", "launcher.c"))
@@ -161,6 +165,9 @@ function support_executable(support_root)
             add_ldflags("-subsystem:console")
         else
             add_ldflags("-subsystem:windows")
+        end
+        if not is_plat("windows") then
+            after_build(gdk_postbuild)
         end
     elseif is_plat("linux", "freebsd") then
         add_files(path.join(support_root, "platform", "unix", "launcher.c"))
