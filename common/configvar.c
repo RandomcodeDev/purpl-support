@@ -22,13 +22,12 @@ static PCSTR GetSideString(_In_ CONFIGVAR_SIDE Side)
 }
 
 PURPL_MAKE_HASHMAP_ENTRY(CONFIGVAR_MAP, PCHAR, PCONFIGVAR);
-
 PCONFIGVAR_MAP CfgVariables;
 
 VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONFIGVAR_TYPE Type,
                            _In_ BOOLEAN Static, _In_ CONFIGVAR_SIDE Side, _In_ BOOLEAN Cheat)
 {
-    if (!Name || Type >= ConfigVarTypeCount)
+    if (!Name || Type >= ConfigVarTypeCount || stbds_shget(CfgVariables, Name))
     {
         return;
     }
@@ -53,7 +52,7 @@ VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONF
         LogInfo("%s%s%s variable %s initialized with boolean value %s", SideString, StaticString, CheatString,
                 Variable->Name, Variable->Default.Boolean ? "true" : "false");
         break;
-    case ConfigVarTypeInt:
+    case ConfigVarTypeInteger:
         Variable->Default.Int = *(PINT32)DefaultValue;
         LogInfo("%s%s%s variable %s initialized with integer value %d", SideString, StaticString, CheatString,
                 Variable->Name, Variable->Default.Int);
@@ -64,11 +63,9 @@ VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONF
                 Variable->Name, Variable->Default.Float);
         break;
     case ConfigVarTypeString:
-        Variable->Default.String.Length =
-            PURPL_MIN(strlen(DefaultValue), PURPL_ARRAYSIZE(Variable->Default.String.Value));
-        strncpy(Variable->Default.String.Value, DefaultValue, Variable->Default.String.Length);
-        LogInfo("%s%s%s variable %s initialized with string value %.*s", SideString, StaticString, CheatString,
-                Variable->Name, Variable->Default.String.Length, Variable->Default.String.Value);
+        strncpy(Variable->Default.String, DefaultValue, PURPL_ARRAYSIZE(Variable->Default.String));
+        LogInfo("%s%s%s variable %s initialized with string value %s", SideString, StaticString, CheatString,
+                Variable->Name, Variable->Default.String);
         break;
     default:
         break;
@@ -88,4 +85,31 @@ PCONFIGVAR CfgGetVariable(_In_ PCSTR Name)
     }
 
     return Variable;
+}
+
+VOID CfgSetVariable(_In_ PCSTR Name, _In_ PVOID Value)
+{
+    PCONFIGVAR Variable = CfgGetVariable(Name);
+    if (!Variable)
+    {
+        return;
+    }
+
+    switch (Variable->Type)
+    {
+    case ConfigVarTypeBoolean:
+        Variable->Current.Boolean = *(PBOOLEAN)Value;
+        break;
+    case ConfigVarTypeInteger:
+        Variable->Current.Int = *(PINT32)Value;
+        break;
+    case ConfigVarTypeFloat:
+        Variable->Current.Float = *(PFLOAT)Value;
+        break;
+    case ConfigVarTypeString:
+        strncpy(Variable->Current.String, Value, PURPL_ARRAYSIZE(Variable->Default.String));
+        break;
+    default:
+        break;
+    }
 }

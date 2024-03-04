@@ -13,7 +13,7 @@
 typedef enum CONFIGVAR_TYPE
 {
     ConfigVarTypeBoolean, // BOOLEAN
-    ConfigVarTypeInt,     // INT32
+    ConfigVarTypeInteger, // INT32
     ConfigVarTypeFloat,   // FLOAT
     ConfigVarTypeString,  // String, up to 64 characters including NUL
     ConfigVarTypeCount
@@ -32,13 +32,10 @@ typedef union CONFIGVAR_VALUE {
     BOOLEAN Boolean;
     UINT64 Int;
     DOUBLE Float;
-    struct
-    {
-        CHAR Value[64];
-    } String;
+    CHAR String[64];
 } CONFIGVAR_VALUE, *PCONFIGVAR_VALUE;
 
-/// @brief A configuration variable
+/// @brief A configuration variable. Do not modify the fields directly.
 typedef struct CONFIGVAR
 {
     CHAR Name[32];
@@ -66,16 +63,61 @@ typedef struct CONFIGVAR
 /// @param[in] Side The side of the variable
 /// @param[in] Cheat Whether changing the variable is cheating
 extern VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONFIGVAR_TYPE Type,
-                                  _In_ BOOLEAN Static, _In_ CONFIGVAR_SIDE Side, _In_ BOOLEAN Cheat);
+                              _In_ BOOLEAN Static, _In_ CONFIGVAR_SIDE Side, _In_ BOOLEAN Cheat);
+
+#define CONFIGVAR_DEFINE_BOOLEAN(Name, DefaultValue, Static, Side, Cheat)                                              \
+    {                                                                                                                  \
+        BOOLEAN DefaultValue_ = (BOOLEAN)(DefaultValue);                                                               \
+        CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeBoolean, (Static), (Side), (Cheat));                    \
+    }
+#define CONFIGVAR_DEFINE_INT(Name, DefaultValue, Static, Side, Cheat)                                                  \
+    {                                                                                                                  \
+        INT DefaultValue_ = (INT)(DefaultValue);                                                                       \
+        CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeInteger, (Static), (Side), (Cheat));                    \
+    }
+#define CONFIGVAR_DEFINE_FLOAT(Name, DefaultValue, Static, Side, Cheat)                                                \
+    {                                                                                                                  \
+        FLOAT DefaultValue_ = (FLOAT)(DefaultValue);                                                                   \
+        CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeFloat, (Static), (Side), (Cheat));                      \
+    }
+#define CONFIGVAR_DEFINE_STRING(Name, DefaultValue, Static, Side, Cheat)                                               \
+    {                                                                                                                  \
+        CfgDefineVariable((Name), (DefaultValue), ConfigVarTypeString, (Static), (Side), (Cheat));                     \
+    }
 
 /// @brief Get a configuration variable
 ///
-/// @param Name The name of the variable
+/// @param[in] Name The name of the variable
 ///
 /// @return If Name exists, the variable it's tied to. Otherwise, NULL.
 extern PCONFIGVAR CfgGetVariable(_In_ PCSTR Name);
 
-#define CONFIGVAR_GET_BOOLEAN(Name) CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Boolean : FALSE
-#define CONFIGVAR_GET_INT(Name) CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Int : 0
-#define CONFIGVAR_GET_FLOAT(Name) CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Float : 0.0
-#define CONFIGVAR_GET_STRING(Name) CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.String.Value : NULL
+#define CONFIGVAR_GET_BOOLEAN(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Boolean : FALSE)
+#define CONFIGVAR_GET_INT(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Int : 0)
+#define CONFIGVAR_GET_FLOAT(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Float : 0.0)
+#define CONFIGVAR_GET_STRING(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.String.Value : NULL)
+
+/// @brief Set a configuration variable
+///
+/// @param[in] Name The name of the variable
+/// @param[in] Value The value of the variable
+extern VOID CfgSetVariable(_In_ PCSTR Name, _In_ PVOID Value);
+#define CONFIGVAR_SET_BOOLEAN(Name, Value)                                                                             \
+    {                                                                                                                  \
+        BOOLEAN Value_ = (BOOLEAN)(Value);                                                                             \
+        CfgSetVariable((Name), &Value_);                                                                               \
+    }
+#define CONFIGVAR_SET_INT(Name, Value)                                                                                 \
+    {                                                                                                                  \
+        INT Value_ = (INT)(Value);                                                                                     \
+        CfgSetVariable((Name), &Value_);                                                                               \
+    }
+#define CONFIGVAR_SET_FLOAT(Name, Value)                                                                               \
+    {                                                                                                                  \
+        FLOAT Value_ = (FLOAT)(Value);                                                                                 \
+        CfgSetVariable((Name), &Value_);                                                                               \
+    }
+#define CONFIGVAR_SET_STRING(Name, Value)                                                                              \
+    {                                                                                                                  \
+        CfgSetVariable((Name), (Value));                                                                               \
+    }

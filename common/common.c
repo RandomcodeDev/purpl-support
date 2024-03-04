@@ -9,9 +9,9 @@
 #include "filesystem.h"
 
 // TODO: implement mutexes
-//static VOID LogLock(BOOLEAN Lock, PVOID Mutex)
+// static VOID LogLock(BOOLEAN Lock, PVOID Mutex)
 //{
-    // Lock ? AsLockMutex(Mutex, TRUE) : AsUnlockMutex(Mutex);
+// Lock ? AsLockMutex(Mutex, TRUE) : AsUnlockMutex(Mutex);
 //}
 
 VOID CmnInitialize(_In_opt_ PCHAR *Arguments, _In_opt_ UINT ArgumentCount)
@@ -65,8 +65,16 @@ static VOID MiMallocStatPrint(PCSTR Message, PVOID Argument)
 }
 #endif
 
+PURPL_MAKE_HASHMAP_ENTRY(CONFIGVAR_MAP, PCHAR, struct CONFIGVAR *);
+extern PCONFIGVAR_MAP CfgVariables;
+
 VOID CmnShutdown(VOID)
 {
+    if (CfgVariables)
+    {
+        stbds_shfree(CfgVariables);
+    }
+
     PlatShutdown();
 
 #if PURPL_USE_MIMALLOC
@@ -140,10 +148,10 @@ PCSTR CmnFormatSize(_In_ DOUBLE Size)
     UINT8 Prefix;
 
     static CONST PCSTR Units[] = {"B", "kiB", "MiB", "GiB", "TiB", "PiB (damn)", "EiB (are you sure?)",
-                           // NOTE: these don't all go in increments of 1024, but they're physically
-                           // impossible and here as a joke anyway
-                           "ZiB (who are you?)", "YiB (what are you doing?)", "RiB (why are you doing this?)",
-                           "QiB (HOW ARE YOU DOING THIS?)", "?B (what did you do?)"};
+                                  // NOTE: these don't all go in increments of 1024, but they're physically
+                                  // impossible and here as a joke anyway
+                                  "ZiB (who are you?)", "YiB (what are you doing?)", "RiB (why are you doing this?)",
+                                  "QiB (HOW ARE YOU DOING THIS?)", "?B (what did you do?)"};
 
     Value = Size;
     Prefix = 0;
