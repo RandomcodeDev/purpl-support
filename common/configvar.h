@@ -92,6 +92,9 @@ extern VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _I
 /// @return If Name exists, the variable it's tied to. Otherwise, NULL.
 extern PCONFIGVAR CfgGetVariable(_In_ PCSTR Name);
 
+#define CONFIGVAR_HAS_CHANGED(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Changed : FALSE)
+#define CONFIGVAR_CLEAR_CHANGED(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Changed = FALSE : 0)
+
 #define CONFIGVAR_GET_BOOLEAN(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Boolean : FALSE)
 #define CONFIGVAR_GET_INT(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Int : 0)
 #define CONFIGVAR_GET_FLOAT(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Float : 0.0)

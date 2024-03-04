@@ -95,6 +95,7 @@ VOID CfgSetVariable(_In_ PCSTR Name, _In_ PVOID Value)
         return;
     }
 
+    Variable->Changed = TRUE;
     switch (Variable->Type)
     {
     case ConfigVarTypeBoolean:
