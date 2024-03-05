@@ -118,6 +118,7 @@ function do_settings()
             "-Wno-nullability-extension",
             "-Wno-format-nonliteral",
             "-Wno-sign-conversion",
+            "-Wno-reserved-identifier",
         {force = true})
         if is_arch("arm64") then
             add_cxflags(
