@@ -65,14 +65,22 @@ static VOID MiMallocStatPrint(PCSTR Message, PVOID Argument)
 }
 #endif
 
+// Have to actually know the size for hashmaps
 PURPL_MAKE_HASHMAP_ENTRY(CONFIGVAR_MAP, PCHAR, struct CONFIGVAR *);
 extern PCONFIGVAR_MAP CfgVariables;
+
+extern struct FILESYSTEM_SOURCE *FsSources;
 
 VOID CmnShutdown(VOID)
 {
     if (CfgVariables)
     {
         stbds_shfree(CfgVariables);
+    }
+
+    if (FsSources)
+    {
+        stbds_arrfree(FsSources);
     }
 
     PlatShutdown();
