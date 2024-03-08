@@ -116,6 +116,8 @@
 #include "stb/stb_image_write.h"
 #include "stb/stb_sprintf.h"
 
+#include "xxhash.h"
+
 #include "zstd.h"
 
 #ifdef PURPL_ENGINE

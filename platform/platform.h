@@ -43,7 +43,7 @@ extern PCSTR PlatCaptureStackBackTrace(_In_ UINT32 FramesToSkip, _In_ UINT32 Max
 /// @brief Displays an error (and potentially gives the option to trigger a breakpoint), and exits the process
 ///
 /// @param[in] Message The error message.
-_Noreturn extern VOID PlatError(_In_ PCSTR Message);
+_Noreturn extern VOID PlatError(_In_z_ PCSTR Message);
 
 /// @brief Retrieves a string with information about the system version.
 ///
@@ -70,13 +70,13 @@ extern UINT64 PlatGetMilliseconds(VOID);
 /// @param[in] Path The path of the directory to create.
 ///
 /// @return Whether the directory could be created.
-extern BOOLEAN PlatCreateDirectory(_In_ PCSTR Path);
+extern BOOLEAN PlatCreateDirectory(_In_z_ PCSTR Path);
 
 #ifdef PURPL_HAVE_PLATPRINT
 /// @brief Output text in a platform specific way like OutputDebugString
 ///
 /// @param[in] Text The text to output
-extern VOID PlatPrint(_In_ PCSTR Text);
+extern VOID PlatPrint(_In_z_ PCSTR Text);
 #endif
 
 /// @brief Fix a path if necessary
@@ -84,11 +84,11 @@ extern VOID PlatPrint(_In_ PCSTR Text);
 /// @param[in] Path The path to fix
 ///
 /// @return The fixed path in a new buffer
-extern PCHAR PlatFixPath(_In_ PCSTR Path);
+extern PCHAR PlatFixPath(_In_z_ PCSTR Path);
 
 /// @brief Get a file's size (this exists because it's probably more performant than using fopen/fseek/ftell)
 ///
 /// @param[in] Path The path to the file to get the size of
 ///
 /// @return The size of the file (returns zero if it doesn't exist)
-extern UINT64 PlatGetFileSize(_In_ PCSTR Path);
+extern UINT64 PlatGetFileSize(_In_z_ PCSTR Path);

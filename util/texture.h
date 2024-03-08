@@ -119,7 +119,7 @@ extern PTEXTURE CreateTexture(_In_ TEXTURE_FORMAT Format, _In_ UINT32 Width, _In
 /// @param Path The path to the texture file
 ///
 /// @return The loaded texture, which can be freed with CmnFree
-extern PTEXTURE LoadTexture(_In_ PCSTR Path);
+extern PTEXTURE LoadTexture(_In_z_ PCSTR Path);
 
 /// @brief Write a texture to a file
 ///
@@ -127,7 +127,7 @@ extern PTEXTURE LoadTexture(_In_ PCSTR Path);
 /// @param Texture The texture to write
 ///
 /// @return Whether the texture could be written
-extern BOOLEAN WriteTexture(_In_ PCSTR Path, _In_ PTEXTURE Texture);
+extern BOOLEAN WriteTexture(_In_z_ PCSTR Path, _In_ PTEXTURE Texture);
 
 /// @brief Get the number of components in a format's pixels
 ///

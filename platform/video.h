@@ -52,7 +52,7 @@ extern FLOAT VidGetDpi(VOID);
 /// @param[in] Name The name of the symbol
 ///
 /// @return The address of the symbol
-extern PVOID PlatGetVulkanFunction(_In_ PVOID Instance, _In_ PCSTR Name);
+extern PVOID PlatGetVulkanFunction(_In_ PVOID Instance, _In_z_ PCSTR Name);
 
 /// @brief Create a Vulkan surface
 ///

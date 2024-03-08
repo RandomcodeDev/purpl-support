@@ -21,10 +21,10 @@ static PCSTR GetSideString(_In_ CONFIGVAR_SIDE Side)
     return "unknown side";
 }
 
-PURPL_MAKE_HASHMAP_ENTRY(CONFIGVAR_MAP, PCHAR, PCONFIGVAR);
+PURPL_MAKE_STRING_HASHMAP_ENTRY(CONFIGVAR_MAP, PCONFIGVAR);
 PCONFIGVAR_MAP CfgVariables;
 
-VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONFIGVAR_TYPE Type,
+VOID CfgDefineVariable(_In_z_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONFIGVAR_TYPE Type,
                            _In_ BOOLEAN Static, _In_ CONFIGVAR_SIDE Side, _In_ BOOLEAN Cheat)
 {
     if (!Name || Type >= ConfigVarTypeCount || stbds_shget(CfgVariables, Name))
@@ -76,7 +76,7 @@ VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONF
     stbds_shput(CfgVariables, Name, Variable);
 }
 
-PCONFIGVAR CfgGetVariable(_In_ PCSTR Name)
+PCONFIGVAR CfgGetVariable(_In_z_ PCSTR Name)
 {
     PCONFIGVAR Variable = stbds_shget(CfgVariables, Name);
     if (!Variable)
@@ -87,7 +87,7 @@ PCONFIGVAR CfgGetVariable(_In_ PCSTR Name)
     return Variable;
 }
 
-VOID CfgSetVariable(_In_ PCSTR Name, _In_ PVOID Value)
+VOID CfgSetVariable(_In_z_ PCSTR Name, _In_ PVOID Value)
 {
     PCONFIGVAR Variable = CfgGetVariable(Name);
     if (!Variable)

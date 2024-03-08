@@ -93,7 +93,7 @@ Return Value:
 }
 
 PTEXTURE
-LoadTexture(_In_ PCSTR Path)
+LoadTexture(_In_z_ PCSTR Path)
 /*++
 
 Routine Description:
@@ -164,7 +164,7 @@ Return Value:
 }
 
 BOOLEAN
-WriteTexture(_In_ PCSTR Path, _In_ PTEXTURE Texture)
+WriteTexture(_In_z_ PCSTR Path, _In_ PTEXTURE Texture)
 /*++
 
 Routine Description:

@@ -12,10 +12,7 @@
 
 #include "log.h"
 
-//
-// Quit if a condition is false
-//
-
+/// @brief Quit if a condition is false
 #define PURPL_ASSERT(Condition)                                                                                        \
     do                                                                                                                 \
     {                                                                                                                  \
@@ -45,9 +42,12 @@
 #define PURPL_MAKE_HASHMAP_ENTRY(Name, Tk, Tv)                                                                         \
     typedef struct Name                                                                                                \
     {                                                                                                                  \
-        Tk key;                                                                                                       \
-        Tv value;                                                                                                     \
+        Tk key;                                                                                                        \
+        Tv value;                                                                                                      \
     } Name, *P##Name;
+
+/// @brief Define a string hashmap entry structure for stb
+#define PURPL_MAKE_STRING_HASHMAP_ENTRY(Name, Tv) PURPL_MAKE_HASHMAP_ENTRY(Name, PCHAR, Tv)
 
 /// @brief Round a size to an aligment
 ///

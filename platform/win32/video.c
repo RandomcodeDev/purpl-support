@@ -173,7 +173,7 @@ static VOID InitializeWindow(VOID)
 #ifdef PURPL_OPENGL
 static HMODULE OpenGl32Handle;
 
-static GLADapiproc GetGlSymbol(_In_ PCSTR Name)
+static GLADapiproc GetGlSymbol(_In_z_ PCSTR Name)
 {
     //LogDebug("Getting OpenGL symbol %s", Name);
     GLADapiproc Symbol = wglGetProcAddress(Name);

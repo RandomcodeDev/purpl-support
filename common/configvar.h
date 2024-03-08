@@ -62,7 +62,7 @@ typedef struct CONFIGVAR
 /// @param[in] Static Whether the variable can be changed after this function is called
 /// @param[in] Side The side of the variable
 /// @param[in] Cheat Whether changing the variable is cheating
-extern VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONFIGVAR_TYPE Type,
+extern VOID CfgDefineVariable(_In_z_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONFIGVAR_TYPE Type,
                               _In_ BOOLEAN Static, _In_ CONFIGVAR_SIDE Side, _In_ BOOLEAN Cheat);
 
 #define CONFIGVAR_DEFINE_BOOLEAN(Name, DefaultValue, Static, Side, Cheat)                                              \
@@ -90,7 +90,7 @@ extern VOID CfgDefineVariable(_In_ PCSTR Name, _In_ CONST PVOID DefaultValue, _I
 /// @param[in] Name The name of the variable
 ///
 /// @return If Name exists, the variable it's tied to. Otherwise, NULL.
-extern PCONFIGVAR CfgGetVariable(_In_ PCSTR Name);
+extern PCONFIGVAR CfgGetVariable(_In_z_ PCSTR Name);
 
 #define CONFIGVAR_HAS_CHANGED(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Changed : FALSE)
 #define CONFIGVAR_CLEAR_CHANGED(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Changed = FALSE : 0)
@@ -104,7 +104,7 @@ extern PCONFIGVAR CfgGetVariable(_In_ PCSTR Name);
 ///
 /// @param[in] Name The name of the variable
 /// @param[in] Value The value of the variable
-extern VOID CfgSetVariable(_In_ PCSTR Name, _In_ PVOID Value);
+extern VOID CfgSetVariable(_In_z_ PCSTR Name, _In_ PVOID Value);
 #define CONFIGVAR_SET_BOOLEAN(Name, Value)                                                                             \
     {                                                                                                                  \
         BOOLEAN Value_ = (BOOLEAN)(Value);                                                                             \

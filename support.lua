@@ -225,6 +225,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
         path.join(deps_root, "cjson"),
         path.join(deps_root, "cglm", "include"),
         path.join(deps_root, "mimalloc", "include"),
+        path.join(deps_root, "xxhash"),
         path.join(deps_root, "zstd", "lib"),
         path.absolute(path.join("$(buildir)", "config"))
     )
@@ -335,6 +336,23 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
     target("stb")
         set_kind("static")
         add_files(path.join(deps_root, "stb.c"))
+        set_warnings("none")
+        set_group("External")
+        on_load(fix_target)
+    target_end()
+
+    target("xxhash")
+        set_kind("static")
+        add_headerfiles(
+            path.join(deps_root, "xxhash", "xxh3.h"),
+            path.join(deps_root, "xxhash", "xxhash.h")
+        )
+        add_files(path.join(deps_root, "xxhash", "xxhash.c"))
+        if is_arch("x86", "x64", "x86_64") then
+            add_headerfiles(path.join(deps_root, "xxhash", "xxh_x86dispatch.h"))
+            add_files(path.join(deps_root, "xxhash", "xxh_x86dispatch.c"))
+        end
+        add_defines("XXH_STATIC_LINKING_ONLY")
         set_warnings("none")
         set_group("External")
         on_load(fix_target)

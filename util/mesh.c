@@ -7,7 +7,7 @@
 #include "mesh.h"
 
 PMESH
-CreateMesh(_In_ PCSTR Material, _In_reads_(VertexCount * sizeof(VERTEX)) PVERTEX Vertices, _In_ SIZE_T VertexCount,
+CreateMesh(_In_z_ PCSTR Material, _In_reads_(VertexCount * sizeof(VERTEX)) PVERTEX Vertices, _In_ SIZE_T VertexCount,
            _In_reads_(IndexCount * sizeof(ivec3)) ivec3 *Indices, _In_ SIZE_T IndexCount)
 {
     PMESH Mesh;
@@ -38,7 +38,7 @@ CreateMesh(_In_ PCSTR Material, _In_reads_(VertexCount * sizeof(VERTEX)) PVERTEX
 }
 
 PMESH
-LoadMesh(_In_ PCSTR Path)
+LoadMesh(_In_z_ PCSTR Path)
 {
     PMESH Mesh;
     UINT64 Size;
@@ -68,7 +68,7 @@ LoadMesh(_In_ PCSTR Path)
 }
 
 BOOLEAN
-WriteMesh(_In_ PCSTR Path, _In_ PMESH Mesh)
+WriteMesh(_In_z_ PCSTR Path, _In_ PMESH Mesh)
 /*++
 
 Routine Description:

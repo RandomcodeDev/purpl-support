@@ -271,7 +271,7 @@ PCSTR PlatGetDescription(VOID)
     return Buffer;
 }
 
-_Noreturn VOID PlatError(_In_ PCSTR Message)
+_Noreturn VOID PlatError(_In_z_ PCSTR Message)
 {
     INT Option;
 
@@ -326,7 +326,7 @@ UINT64 PlatGetMilliseconds(VOID)
 #endif
 }
 
-BOOLEAN PlatCreateDirectory(_In_ PCSTR Path)
+BOOLEAN PlatCreateDirectory(_In_z_ PCSTR Path)
 {
     // literally Unix version but replace mkdir with CreateDirectoryA
 
@@ -355,12 +355,12 @@ BOOLEAN PlatCreateDirectory(_In_ PCSTR Path)
     return TRUE;
 }
 
-VOID PlatPrint(_In_ PCSTR Text)
+VOID PlatPrint(_In_z_ PCSTR Text)
 {
     OutputDebugStringA(Text);
 }
 
-PCHAR PlatFixPath(_In_ PCSTR Path)
+PCHAR PlatFixPath(_In_z_ PCSTR Path)
 {
     PCHAR FixedPath;
     UINT i;
@@ -391,7 +391,7 @@ PCHAR PlatFixPath(_In_ PCSTR Path)
     return FixedPath;
 }
 
-UINT64 PlatGetFileSize(_In_ PCSTR Path)
+UINT64 PlatGetFileSize(_In_z_ PCSTR Path)
 {
     HANDLE File;
     LARGE_INTEGER Size = {};

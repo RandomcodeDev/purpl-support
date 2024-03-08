@@ -75,7 +75,7 @@ typedef struct MESH
 /// @param IndexCount The number of indices
 ///
 /// @return A mesh which can be freed with CmnFree.
-extern PMESH CreateMesh(_In_ PCSTR Material,
+extern PMESH CreateMesh(_In_z_ PCSTR Material,
                         _In_reads_(VertexCount * sizeof(VERTEX))
                             PVERTEX Vertices,
                         _In_ SIZE_T VertexCount,
@@ -87,7 +87,7 @@ extern PMESH CreateMesh(_In_ PCSTR Material,
 /// @param Path The path of the mesh file
 ///
 /// @return The loaded mesh, which can be freed with CmnFree.
-extern PMESH LoadMesh(_In_ PCSTR Path);
+extern PMESH LoadMesh(_In_z_ PCSTR Path);
 
 /// @brief Write a mesh
 ///
@@ -95,4 +95,4 @@ extern PMESH LoadMesh(_In_ PCSTR Path);
 /// @param Mesh The mesh to write
 ///
 /// @return Whether the mesh could be written
-extern BOOLEAN WriteMesh(_In_ PCSTR Path, _In_ PMESH Mesh);
+extern BOOLEAN WriteMesh(_In_z_ PCSTR Path, _In_ PMESH Mesh);

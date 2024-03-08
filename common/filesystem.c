@@ -5,6 +5,7 @@
 /// @copyright (c) Randomcode Developers 2024
 
 #include "filesystem.h"
+#include "packfile.h"
 
 typedef enum FILESYSTEM_SOURCE_TYPE
 {
@@ -18,22 +19,23 @@ typedef struct FILESYSTEM_SOURCE
     FILESYSTEM_SOURCE_TYPE Type;
     PCHAR Path;
     PVOID Handle; // for things other than directories
-    BOOLEAN ReadOnly;
 
-    BOOLEAN (*HasFile)(_In_ struct FILESYSTEM_SOURCE *Source, _In_ PCSTR Path);
-    UINT64 (*GetFileSize)(_In_ PCSTR Path);
+    BOOLEAN (*HasFile)(_In_ PVOID Handle, _In_z_ PCSTR Path);
+    UINT64 (*GetFileSize)(_In_ PVOID Handle, _In_z_ PCSTR Path);
     PVOID(*ReadFile)
-    (_In_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount, _In_ UINT64 Extra);
-    BOOLEAN (*WriteFile)(_In_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size, _In_ BOOLEAN Append);
+    (_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount,
+     _In_ UINT64 Extra);
+    BOOLEAN(*WriteFile)
+    (_In_ PVOID Handle, _In_z_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size, _In_ BOOLEAN Append);
 } FILESYSTEM_SOURCE, *PFILESYSTEM_SOURCE;
 
 PFILESYSTEM_SOURCE FsSources;
 
-static BOOLEAN PhysFsHasFile(_In_ PFILESYSTEM_SOURCE Source, _In_ PCSTR Path)
+static BOOLEAN PhysFsHasFile(_In_ PVOID Handle, _In_z_ PCSTR Path)
 {
     BOOLEAN Exists = FALSE;
 
-    PCHAR FullPath = CmnFormatString("%s/%s", Source->Path, Path);
+    PCHAR FullPath = CmnFormatString("%s/%s", ((PFILESYSTEM_SOURCE)Handle)->Path, Path);
     PCHAR FixedFullPath = PlatFixPath(FullPath);
     CmnFree(FullPath);
 
@@ -52,19 +54,19 @@ static BOOLEAN PhysFsHasFile(_In_ PFILESYSTEM_SOURCE Source, _In_ PCSTR Path)
     return Exists;
 }
 
-static UINT64 PhysFsGetFileSize(_In_ PCSTR Path)
+static UINT64 PhysFsGetFileSize(_In_ PVOID Handle, _In_z_ PCSTR Path)
 {
     return PlatGetFileSize(Path);
 }
 
-BOOLEAN FsCreateDirectory(_In_ PCSTR Path)
+BOOLEAN FsCreateDirectory(_In_z_ PCSTR Path)
 {
     LogTrace("Creating directory %s", Path);
     return PlatCreateDirectory(Path);
 }
 
-static PVOID PhysFsReadFile(_In_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount,
-                            _In_ UINT64 Extra)
+static PVOID PhysFsReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount,
+                            _Out_ PUINT64 ReadAmount, _In_ UINT64 Extra)
 {
     FILE *File;
     PVOID Buffer;
@@ -91,7 +93,7 @@ static PVOID PhysFsReadFile(_In_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 Max
     }
     else
     {
-        Size = PhysFsGetFileSize(Path) + Extra;
+        Size = PhysFsGetFileSize(Handle, Path) + Extra;
     }
     Buffer = CmnAlloc(Size, 1);
     if (!Buffer)
@@ -119,8 +121,8 @@ static PVOID PhysFsReadFile(_In_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 Max
     return Buffer;
 }
 
-static BOOLEAN PhysFsWriteFile(_In_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size,
-                               _In_ BOOLEAN Append)
+BOOLEAN FsWriteFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size,
+                    _In_ BOOLEAN Append)
 {
     FILE *File;
     BOOLEAN Success;
@@ -140,7 +142,7 @@ static BOOLEAN PhysFsWriteFile(_In_ PCSTR Path, _In_reads_bytes_(Size) PVOID Dat
     return Success;
 }
 
-VOID FsAddDirectorySource(_In_ PCSTR Path, _In_ BOOLEAN ReadOnly)
+VOID FsAddDirectorySource(_In_z_ PCSTR Path)
 {
     if (!Path)
     {
@@ -159,9 +161,10 @@ VOID FsAddDirectorySource(_In_ PCSTR Path, _In_ BOOLEAN ReadOnly)
     LogDebug("Adding directory source %s", Source.Path);
 
     stbds_arrput(FsSources, Source);
+    (&stbds_arrlast(FsSources))->Handle = &stbds_arrlast(FsSources);
 }
 
-VOID FsAddPackSource(_In_ PCSTR Path, _In_ BOOLEAN ReadOnly)
+VOID FsAddPackSource(_In_z_ PCSTR Path)
 {
     if (!Path)
     {
@@ -171,28 +174,28 @@ VOID FsAddPackSource(_In_ PCSTR Path, _In_ BOOLEAN ReadOnly)
     FILESYSTEM_SOURCE Source = {0};
     Source.Type = FsSourceTypePackFile;
     Source.Path = CmnFormatString("%s", Path);
-    // Source.Handle = PackLoad(Path);
+    Source.Handle = PackLoad(Path);
     if (!Source.Handle)
     {
         return;
     }
 
-    // Source.HasFile = PackHasFile;
-    // Source.GetFileSize = PackGetFileSize;
-    // Source.ReadFile = PackReadFile;
-    // Source.WriteFile = PackWriteFile;
+    Source.HasFile = PackHasFile;
+    Source.GetFileSize = PackGetFileSize;
+    Source.ReadFile = PackReadFile;
+    Source.WriteFile = PackWriteFile;
 
     LogDebug("Adding pack source %s", Source.Path);
 
     stbds_arrput(FsSources, Source);
 }
 
-static PFILESYSTEM_SOURCE FindFile(_In_ PCSTR Path)
+static PFILESYSTEM_SOURCE FindFile(_In_z_ PCSTR Path)
 {
     // TODO: optimize?
     for (SIZE_T i = 0; i < stbds_arrlenu(FsSources); i++)
     {
-        if (FsSources[i].HasFile(&FsSources[i], Path))
+        if (FsSources[i].HasFile(FsSources[i].Handle, Path))
         {
             LogDebug("Found %s in %s", Path, FsSources[i].Path);
             return &FsSources[i];
@@ -212,7 +215,7 @@ static PFILESYSTEM_SOURCE FindFile(_In_ PCSTR Path)
             PCHAR FullPath = CmnFormatString("%s/%s", Source->Path, Path);                                             \
             PCHAR FixedFullPath = PlatFixPath(FullPath);                                                               \
             CmnFree(FullPath);                                                                                         \
-            ReturnType Return = Source->Name(__VA_ARGS__);                                                             \
+            ReturnType Return = Source->Name(Source->Handle, __VA_ARGS__);                                             \
             CmnFree(FixedFullPath);                                                                                    \
             return Return;                                                                                             \
         }                                                                                                              \
@@ -220,10 +223,10 @@ static PFILESYSTEM_SOURCE FindFile(_In_ PCSTR Path)
     }
 
 X(
-    UINT64, GetFileSize, (_In_ PCSTR Path), {}, , { return 0; }, FixedFullPath)
+    UINT64, GetFileSize, (_In_z_ PCSTR Path), {}, , { return 0; }, FixedFullPath)
 X(
     PVOID, ReadFile,
-    (_In_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount, _In_ UINT64 Extra), {}, ,
+    (_In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount, _In_ UINT64 Extra), {}, ,
     {
         if (!Source)
         {
@@ -231,8 +234,5 @@ X(
         }
     },
     FixedFullPath, Offset, MaxAmount, ReadAmount, Extra)
-X(
-    BOOLEAN, WriteFile, (_In_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size, _In_ BOOLEAN Append), {},
-    &&!Source->ReadOnly, { return FALSE; }, FixedFullPath, Data, Size, Append)
 
 #undef X

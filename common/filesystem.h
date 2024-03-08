@@ -17,26 +17,26 @@
 /// @brief Adds a directory source to the filesystem
 ///
 /// @param[in] Path The path of the directory
-extern VOID FsAddDirectorySource(_In_ PCSTR Path, _In_ BOOLEAN ReadOnly);
+extern VOID FsAddDirectorySource(_In_z_ PCSTR Path, _In_ BOOLEAN ReadOnly);
 
 /// @brief Adds a pack file source to the filesystem
 ///
 /// @param[in] Path The path of the pack file
-extern VOID FsAddPackSource(_In_ PCSTR Path, _In_ BOOLEAN ReadOnly);
+extern VOID FsAddPackSource(_In_z_ PCSTR Path, _In_ BOOLEAN ReadOnly);
 
 /// @brief Gets the size of a file
 ///
 /// @param[in] Path The path to the file
 ///
 /// @return The size of the file in bytes
-extern UINT64 FsGetFileSize(_In_ PCSTR Path);
+extern UINT64 FsGetFileSize(_In_z_ PCSTR Path);
 
 /// @brief Creates a directory
 ///
 /// @param[in] Path The path to the directory
 ///
 /// @return Whether the creation succeeded
-extern BOOLEAN FsCreateDirectory(_In_ PCSTR Path);
+extern BOOLEAN FsCreateDirectory(_In_z_ PCSTR Path);
 
 /// @brief This routine reads a file into a buffer which it allocates.
 ///
@@ -47,7 +47,7 @@ extern BOOLEAN FsCreateDirectory(_In_ PCSTR Path);
 /// @param[in] Extra      Number of extra bytes to allocate.
 ///
 /// @return A pointer to a buffer containing the file's contents, or NULL.
-extern PVOID FsReadFile(_In_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount,
+extern PVOID FsReadFile(_In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount,
                         _In_ UINT64 Extra);
 
 /// @brief Write to a file
@@ -58,4 +58,4 @@ extern PVOID FsReadFile(_In_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmou
 /// @param[in] Append Whether to append to the file or overwrite it (either way, it will be created)
 ///
 /// @return Whether the write succeeded
-extern BOOLEAN FsWriteFile(_In_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size, _In_ BOOLEAN Append);
+extern BOOLEAN FsWriteFile(_In_z_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size, _In_ BOOLEAN Append);
