@@ -398,7 +398,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
 
         set_group("Support")
 
-        add_deps("platform", "stb")
+        add_deps("platform", "stb", "xxhash", "zstd")
         on_load(fix_target)
     target_end()
 

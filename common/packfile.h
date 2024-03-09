@@ -32,48 +32,54 @@
 #define PACKFILE_MAX_CHUNK_SIZE 209715200
 
 /// @brief Extension of a pack file
-#define PACKFILE_EXTENSION ".vpk"
+#define PACKFILE_EXTENSION ".pak"
 
+/// @brief ZSTD compression level of data in pack files
+#define PACKFILE_COMPRESSION_LEVEL 9
+
+#pragma pack(push, 1)
 /// @brief Pack file directory header
 typedef struct PACKFILE_HEADER
 {
     UINT32 Signature;
     UINT32 Version;
     UINT32 TreeSize;
+    UINT16 ArchiveCount;
+    UINT64 LastArchiveLength;
 } PACKFILE_HEADER, *PPACKFILE_HEADER;
 
-/// @brief End of a directory entry
-#define PACKFILE_DIRECTORY_ENTRY_TERMINATOR 0xFFFF
-
 /// @brief Pack file directory entry
-typedef struct PACKFILE_DIRECTORY_ENTRY
+typedef struct PACKFILE_ENTRY
 {
     XXH128_hash_t Hash;
+    XXH128_hash_t CompressedHash;
     UINT16 ArchiveIndex;
     UINT64 Offset;
-    UINT64 Length;
+    UINT64 Size;
+    UINT64 CompressedSize;
     UINT16 PathLength;
     // on-disk: the path
-} PACKFILE_DIRECTORY_ENTRY, *PPACKFILE_DIRECTORY_ENTRY;
+} PACKFILE_ENTRY, *PPACKFILE_ENTRY;
+#pragma pack(pop)
 
-PURPL_MAKE_STRING_HASHMAP_ENTRY(PACKFILE_DIRECTORY_ENTRY_MAP, PACKFILE_DIRECTORY_ENTRY);
+PURPL_MAKE_STRING_HASHMAP_ENTRY(PACKFILE_ENTRY_MAP, PACKFILE_ENTRY);
 
 /// @brief A representation of a pack file
 typedef struct PACKFILE
 {
     PCHAR Path;
     PACKFILE_HEADER Header;
-    PPACKFILE_DIRECTORY_ENTRY_MAP DirectoryEntries;
+    PPACKFILE_ENTRY_MAP Entries;
     UINT16 CurrentArchive;
     UINT64 CurrentOffset;
 } PACKFILE, *PPACKFILE;
 
 /// @brief Create a pack file
 ///
-/// @param[in] DirectoryPath The path to the directory
+/// @param[in] Path The path to the pack file
 ///
 /// @return A pack file, or NULL if it couldn't be created
-extern PPACKFILE PackCreate(_In_z_ PCSTR DirectoryPath);
+extern PPACKFILE PackCreate(_In_z_ PCSTR Path);
 
 /// @brief Save a pack file
 ///

@@ -410,7 +410,7 @@ UINT64 PlatGetFileSize(_In_z_ PCSTR Path)
     if (!GetFileSizeEx(File, &Size))
     {
         Error = GetLastError();
-        LogWarning("Failed to get size of file %s: error %d (0x%X)", Error, Error);
+        LogWarning("Failed to get size of file %s: error %d (0x%X)", Path, Error, Error);
         return 0;
     }
 

@@ -95,7 +95,7 @@ VOID CmnShutdown(VOID)
     LogInfo("Common library shut down");
 }
 
-PCSTR CmnFormatTempString(_In_ _Printf_format_string_ PCSTR Format, ...)
+PCSTR CmnFormatTempString(_In_z_ _Printf_format_string_ PCSTR Format, ...)
 {
     va_list Arguments;
     PCSTR Formatted;
@@ -107,7 +107,7 @@ PCSTR CmnFormatTempString(_In_ _Printf_format_string_ PCSTR Format, ...)
     return Formatted;
 }
 
-PCSTR CmnFormatTempStringVarArgs(_In_ _Printf_format_string_ PCSTR Format, _In_ va_list Arguments)
+PCSTR CmnFormatTempStringVarArgs(_In_z_ _Printf_format_string_ PCSTR Format, _In_ va_list Arguments)
 {
     static CHAR Buffer[1024];
     va_list _Arguments;
@@ -121,7 +121,7 @@ PCSTR CmnFormatTempStringVarArgs(_In_ _Printf_format_string_ PCSTR Format, _In_ 
     return Buffer;
 }
 
-PCHAR CmnFormatStringVarArgs(_In_ _Printf_format_string_ PCSTR Format, _In_ va_list Arguments)
+PCHAR CmnFormatStringVarArgs(_In_z_ _Printf_format_string_ PCSTR Format, _In_ va_list Arguments)
 {
     PCHAR Buffer;
     INT Size;
@@ -137,7 +137,7 @@ PCHAR CmnFormatStringVarArgs(_In_ _Printf_format_string_ PCSTR Format, _In_ va_l
     return Buffer;
 }
 
-PCHAR CmnFormatString(_In_ _Printf_format_string_ PCSTR Format, ...)
+PCHAR CmnFormatString(_In_z_ _Printf_format_string_ PCSTR Format, ...)
 {
     va_list Arguments;
     PCHAR Formatted;
@@ -163,7 +163,7 @@ PCSTR CmnFormatSize(_In_ DOUBLE Size)
 
     Value = Size;
     Prefix = 0;
-    while (Value > 1024)
+    while (Value >= 1024)
     {
         Value /= 1024;
         Prefix++;
@@ -183,7 +183,41 @@ PCSTR CmnFormatSize(_In_ DOUBLE Size)
     return Buffer;
 }
 
-_Noreturn VOID CmnError(_In_ _Printf_format_string_ PCSTR Message, ...)
+PCHAR CmnInsertString(_In_z_ PCSTR String, _In_z_ PCSTR New, _In_ SIZE_T Index)
+{
+    if (!String || !New)
+    {
+        return NULL;
+    }
+
+    SIZE_T Size = strlen(String) + strlen(New) + 1;
+    PCHAR NewString = CmnAlloc(Size, 1);
+    if (!NewString)
+    {
+        return NULL;
+    }
+
+    if (Index > 1)
+    {
+        strncat(NewString, String, PURPL_MIN(Size, Index));
+    }
+
+    strncat(NewString, New, Size);
+
+    if (Index < strlen(String))
+    {
+        strncat(NewString, String + Index, Size);
+    }
+
+    return NewString;
+}
+
+PCHAR CmnAppendString(_In_z_ PCSTR String, _In_z_ PCSTR New)
+{
+    return CmnInsertString(String, New, SIZE_MAX);
+}
+
+_Noreturn VOID CmnError(_In_z_ _Printf_format_string_ PCSTR Message, ...)
 {
     va_list Arguments;
     PCSTR FormattedMessage;

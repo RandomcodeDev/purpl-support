@@ -396,10 +396,10 @@ INT WINAPI WinMain(_In_ HINSTANCE Instance, _In_opt_ HINSTANCE PreviousInstance,
                 strncpy(ParentExeDosPath, ParentExePath, PURPL_ARRAYSIZE(ParentExePath));
             }
 
-            ParentDosHeader = (PIMAGE_DOS_HEADER)FsReadFile(ParentExeDosPath, 0, sizeof(IMAGE_DOS_HEADER), &Size, 0);
+            ParentDosHeader = (PIMAGE_DOS_HEADER)FsReadFile(TRUE, ParentExeDosPath, 0, sizeof(IMAGE_DOS_HEADER), &Size, 0);
             if (ParentDosHeader && ParentDosHeader->e_magic == IMAGE_DOS_SIGNATURE)
             {
-                ParentHeaders = (PIMAGE_NT_HEADERS)FsReadFile(ParentExeDosPath, ParentDosHeader->e_lfanew,
+                ParentHeaders = (PIMAGE_NT_HEADERS)FsReadFile(TRUE, ParentExeDosPath, ParentDosHeader->e_lfanew,
                                                               sizeof(IMAGE_NT_HEADERS), &Size, 0);
                 if (ParentHeaders && ParentHeaders->Signature == IMAGE_NT_SIGNATURE)
                 {

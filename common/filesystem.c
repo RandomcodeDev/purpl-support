@@ -25,8 +25,6 @@ typedef struct FILESYSTEM_SOURCE
     PVOID(*ReadFile)
     (_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount,
      _In_ UINT64 Extra);
-    BOOLEAN(*WriteFile)
-    (_In_ PVOID Handle, _In_z_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size, _In_ BOOLEAN Append);
 } FILESYSTEM_SOURCE, *PFILESYSTEM_SOURCE;
 
 PFILESYSTEM_SOURCE FsSources;
@@ -35,7 +33,8 @@ static BOOLEAN PhysFsHasFile(_In_ PVOID Handle, _In_z_ PCSTR Path)
 {
     BOOLEAN Exists = FALSE;
 
-    PCHAR FullPath = CmnFormatString("%s/%s", ((PFILESYSTEM_SOURCE)Handle)->Path, Path);
+    PCHAR FullPath =
+        CmnFormatString("%s%s%s", Handle ? ((PFILESYSTEM_SOURCE)Handle)->Path : "", Handle ? "/" : "", Path);
     PCHAR FixedFullPath = PlatFixPath(FullPath);
     CmnFree(FullPath);
 
@@ -121,7 +120,7 @@ static PVOID PhysFsReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Of
     return Buffer;
 }
 
-BOOLEAN FsWriteFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size,
+BOOLEAN FsWriteFile(_In_z_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size,
                     _In_ BOOLEAN Append)
 {
     FILE *File;
@@ -156,7 +155,6 @@ VOID FsAddDirectorySource(_In_z_ PCSTR Path)
     Source.HasFile = PhysFsHasFile;
     Source.GetFileSize = PhysFsGetFileSize;
     Source.ReadFile = PhysFsReadFile;
-    Source.WriteFile = PhysFsWriteFile;
 
     LogDebug("Adding directory source %s", Source.Path);
 
@@ -183,7 +181,6 @@ VOID FsAddPackSource(_In_z_ PCSTR Path)
     Source.HasFile = PackHasFile;
     Source.GetFileSize = PackGetFileSize;
     Source.ReadFile = PackReadFile;
-    Source.WriteFile = PackWriteFile;
 
     LogDebug("Adding pack source %s", Source.Path);
 
@@ -209,7 +206,7 @@ static PFILESYSTEM_SOURCE FindFile(_In_z_ PCSTR Path)
     ReturnType Fs##Name Params                                                                                         \
     {                                                                                                                  \
         ExtraBefore;                                                                                                   \
-        PFILESYSTEM_SOURCE Source = FindFile(Path);                                                                    \
+        PFILESYSTEM_SOURCE Source = Raw ? FindFile(Path) : NULL;                                                       \
         if (Source ExtraCondition)                                                                                     \
         {                                                                                                              \
             PCHAR FullPath = CmnFormatString("%s/%s", Source->Path, Path);                                             \
@@ -219,19 +216,25 @@ static PFILESYSTEM_SOURCE FindFile(_In_z_ PCSTR Path)
             CmnFree(FixedFullPath);                                                                                    \
             return Return;                                                                                             \
         }                                                                                                              \
+        else if (Raw ExtraCondition)                                                                                   \
+        {                                                                                                              \
+            PCHAR FixedFullPath = PlatFixPath(Path);                                                                   \
+            ReturnType Return = PhysFs##Name(NULL, __VA_ARGS__);                                                       \
+            return Return;                                                                                             \
+        }                                                                                                              \
         ExtraAfter;                                                                                                    \
     }
 
 X(
-    UINT64, GetFileSize, (_In_z_ PCSTR Path), {}, , { return 0; }, FixedFullPath)
+    UINT64, GetFileSize, (_In_ BOOLEAN Raw, _In_z_ PCSTR Path), {}, , { return 0; }, FixedFullPath)
 X(
     PVOID, ReadFile,
-    (_In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount, _In_ UINT64 Extra), {}, ,
+    (_In_ BOOLEAN Raw, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount,
+     _In_ UINT64 Extra),
+    {}, ,
     {
-        if (!Source)
-        {
-            *ReadAmount = 0;
-        }
+        *ReadAmount = 0;
+        return NULL;
     },
     FixedFullPath, Offset, MaxAmount, ReadAmount, Extra)
 

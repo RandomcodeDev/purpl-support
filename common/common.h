@@ -82,7 +82,7 @@ extern VOID CmnShutdown(VOID);
 /// @param[in] Arguments  Arguments to the format string.
 ///
 /// @return A pointer to a static buffer with the formatted string.
-extern PCSTR CmnFormatTempString(_In_ _Printf_format_string_ PCSTR Format, ...);
+extern PCSTR CmnFormatTempString(_In_z_ _Printf_format_string_ PCSTR Format, ...);
 
 /// @brief This routine formats a printf format string into a static
 ///        buffer for temporary usage.
@@ -92,7 +92,7 @@ extern PCSTR CmnFormatTempString(_In_ _Printf_format_string_ PCSTR Format, ...);
 /// @param[in] ...     Arguments to the format string.
 ///
 /// @return A pointer to a static buffer with the formatted string.
-extern PCSTR CmnFormatTempStringVarArgs(_In_ _Printf_format_string_ PCSTR Format, _In_ va_list Arguments);
+extern PCSTR CmnFormatTempStringVarArgs(_In_z_ _Printf_format_string_ PCSTR Format, _In_ va_list Arguments);
 
 /// @brief This routine formats a printf format string into a dynamically
 /// allocated
@@ -104,7 +104,7 @@ extern PCSTR CmnFormatTempStringVarArgs(_In_ _Printf_format_string_ PCSTR Format
 ///
 /// @return A pointer to a buffer with the formatted string and a NUL terminator
 ///         (size is strlen(Buffer) + 1).
-extern PCHAR CmnFormatString(_In_ _Printf_format_string_ PCSTR Format, ...);
+extern PCHAR CmnFormatString(_In_z_ _Printf_format_string_ PCSTR Format, ...);
 
 /// @brief This routine formats a printf format string into a dynamically
 /// allocated
@@ -115,7 +115,7 @@ extern PCHAR CmnFormatString(_In_ _Printf_format_string_ PCSTR Format, ...);
 /// @param[in] ...     Arguments to the format string.
 ///
 /// @return A pointer to a buffer with the formatted string.
-extern PCHAR CmnFormatStringVarArgs(_In_ _Printf_format_string_ PCSTR Format, _In_ va_list Arguments);
+extern PCHAR CmnFormatStringVarArgs(_In_z_ _Printf_format_string_ PCSTR Format, _In_ va_list Arguments);
 
 /// @brief This routine converts a size into a human-readable string, using the
 ///        most appropriate unit.
@@ -125,8 +125,25 @@ extern PCHAR CmnFormatStringVarArgs(_In_ _Printf_format_string_ PCSTR Format, _I
 /// @return The address of a static buffer containing the string.
 extern PCSTR CmnFormatSize(_In_ DOUBLE Size);
 
+/// @brief Insert a string in a string
+///
+/// @param[in] String The string to insert into
+/// @param[in] New The string to insert
+/// @param[in] Index The index of String to insert New at
+///
+/// @return The modified string
+extern PCHAR CmnInsertString(_In_z_ PCSTR String, _In_z_ PCSTR New, _In_ SIZE_T Index);
+
+/// @brief Append a string
+///
+/// @param[in] String The string to append onto
+/// @param[in] New The string to append
+///
+/// @return The modified string
+extern PCHAR CmnAppendString(_In_z_ PCSTR String, _In_z_ PCSTR New);
+
 /// @brief This routine displays an error message and terminates the program.
 ///
 /// @param[in] Message The error message.
 /// @param[in] ...     The arguments to the error message.
-_Noreturn extern VOID CmnError(_In_ _Printf_format_string_ PCSTR Message, ...);
+_Noreturn extern VOID CmnError(_In_z_ _Printf_format_string_ PCSTR Message, ...);
