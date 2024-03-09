@@ -99,18 +99,19 @@ PPACKFILE PackLoad(_In_z_ PCSTR DirectoryPath)
     }
     else
     {
-        Path = GetDirectoryPath(FixedPath);
+        Path = PlatFixPath(FixedPath);
     }
 
     CmnFree(FixedPath);
 
     LogInfo("Loading pack file %s", Path);
 
+    PCHAR RealDirectoryPath = GetDirectoryPath(Path);
     UINT64 DirectorySize = 0;
-    PBYTE DirectoryRaw = FsReadFile(TRUE, Path, 0, 0, &DirectorySize, 0);
+    PBYTE DirectoryRaw = FsReadFile(TRUE, RealDirectoryPath, 0, 0, &DirectorySize, 0);
     if (!DirectoryRaw)
     {
-        LogError("Failed to read pack file directory %s", Path);
+        LogError("Failed to read pack file directory %s", RealDirectoryPath);
         goto Error;
     }
 
@@ -144,12 +145,15 @@ PPACKFILE PackLoad(_In_z_ PCSTR DirectoryPath)
 
     Pack->CurrentArchive = Pack->Header.ArchiveCount - 1;
     Pack->CurrentOffset = Pack->Header.LastArchiveLength;
+    Pack->Path = Path;
 
     CmnFree(DirectoryRaw);
+    CmnFree(RealDirectoryPath);
 
     return Pack;
 
 Error:
+    CmnFree(RealDirectoryPath);
     CmnFree(DirectoryRaw);
     CmnFree(Path);
 
@@ -192,6 +196,104 @@ UINT64 PackGetFileSize(_In_ PVOID Handle, _In_z_ PCSTR Path)
 PVOID PackReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount,
                    _Out_ PUINT64 ReadAmount, _In_ UINT64 Extra)
 {
+    PPACKFILE Pack = Handle;
+    if (!Pack)
+    {
+        return NULL;
+    }
+
+    LogInfo("Reading file %s from pack %s", Path, Pack->Path);
+
+    PPACKFILE_ENTRY_MAP Pair = stbds_shgetp(Pack->Entries, Path);
+    if (!Pair)
+    {
+        LogError("File does not exist");
+        return NULL;
+    }
+
+    PPACKFILE_ENTRY Entry = &Pair->value;
+
+    PBYTE CompressedData = CmnAlloc(Entry->CompressedSize, 1);
+    if (!CompressedData)
+    {
+        LogError("Failed to allocate %zu bytes: %s", Entry->CompressedSize, strerror(errno));
+        return NULL;
+    }
+
+    UINT64 TotalOffset = 0;
+    UINT64 CurrentOffset = 0;
+    UINT64 SizeToRead = Entry->CompressedSize;
+    UINT16 CurrentArchive = Entry->ArchiveIndex;
+    while (SizeToRead > 0)
+    {
+        PCHAR ArchivePath = GetArchivePath(Pack->Path, CurrentArchive);
+        UINT64 Read = PURPL_MIN(PACKFILE_MAX_CHUNK_SIZE - Pack->CurrentOffset, SizeToRead);
+        PVOID Data = FsReadFile(TRUE, ArchivePath, CurrentOffset, Read, &Read, 0);
+        if (!Data)
+        {
+            LogError("Failed to read file from pack");
+            CmnFree(CompressedData);
+            CmnFree(ArchivePath);
+            CmnFree(Data);
+            return NULL;
+        }
+        CmnFree(ArchivePath);
+        memcpy(CompressedData + TotalOffset, Data, Read);
+        CmnFree(Data);
+        SizeToRead -= Read;
+        TotalOffset += Read;
+        CurrentOffset += Read;
+        if (Pack->CurrentOffset > PACKFILE_MAX_CHUNK_SIZE)
+        {
+            CurrentArchive++;
+            CurrentOffset = 0;
+        }
+    }
+
+    XXH128_hash_t CompressedHash = XXH3_128bits(CompressedData, Entry->CompressedSize);
+    if (memcmp(&CompressedHash, &Entry->CompressedHash, sizeof(XXH128_hash_t)) != 0)
+    {
+        LogError("Compressed data hash does not match: got %llX%llX, expected %llX%llX", CompressedHash.high64,
+                 CompressedHash.low64, Entry->CompressedHash.high64, Entry->CompressedHash.low64);
+        CmnFree(CompressedData);
+        return NULL;
+    }
+
+    PBYTE Data = CmnAlloc(Entry->Size, 1);
+    if (!Data)
+    {
+        LogError("Failed to allocate %zu bytes: %s", Entry->Size, strerror(errno));
+        CmnFree(CompressedData);
+    }
+
+    SIZE_T DecompressedSize = ZSTD_decompress(Data, Entry->Size, CompressedData, Entry->CompressedSize);
+    if (ZSTD_isError(DecompressedSize) || DecompressedSize != Entry->Size)
+    {
+        if (ZSTD_isError(DecompressedSize))
+        {
+            LogError("Decompression failed: %s", ZSTD_getErrorName(DecompressedSize));
+        }
+        else
+        {
+            LogError("Decompressed size does not match: got %s, expected %s", CmnFormatSize(DecompressedSize),
+                     CmnFormatTempString("%s", CmnFormatSize(Entry->Size)));
+        }
+        CmnFree(CompressedData);
+        CmnFree(Data);
+    }
+
+    XXH128_hash_t Hash = XXH3_128bits(Data, Entry->Size);
+    if (memcmp(&Hash, &Entry->Hash, sizeof(XXH128_hash_t)) != 0)
+    {
+        LogError("Compressed hash does not match: got %llX%llX, expected %llX%llX", Hash.high64, Hash.low64,
+                 Entry->Hash.high64, Entry->Hash.low64);
+        CmnFree(Data);
+        return NULL;
+    }
+
+    CmnFree(CompressedData);
+
+    return Data;
 }
 
 BOOLEAN PackAddFile(_Inout_ PVOID Handle, _In_z_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size)
