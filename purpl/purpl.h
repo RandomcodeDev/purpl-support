@@ -112,6 +112,9 @@
 #endif
 
 #include "stb/stb_ds.h"
+// assimp uses stb_image too
+#define stbi_convert_iphone_png_to_rgb_thread stbi_convert_iphone_png_to_rgb_thread_NOCONFLICT
+#define stbi_set_unpremultiply_on_load_thread stbi_set_unpremultiply_on_load_thread_NOCONFLICT
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
 #include "stb/stb_sprintf.h"

@@ -57,6 +57,7 @@
 /// @return The size rounded to be aligned to the alignment
 #define PURPL_ALIGN(Alignment, Size) ((((Size) / (Alignment)) + 1) * (Alignment))
 
+/// @brief Swap two variables
 #define PURPL_SWAP(Type, A, B)                                                                                         \
     do                                                                                                                 \
     {                                                                                                                  \
@@ -64,6 +65,9 @@
         A = B;                                                                                                         \
         B = A;                                                                                                         \
     } while (0)
+
+/// @brief Characters a command line argument can start with
+#define PURPL_ARGUMENT_PREFIXES "-/"
 
 /// @brief Initialize the common library
 ///

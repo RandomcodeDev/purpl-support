@@ -5,6 +5,7 @@
 /// @copyright (c) 2024 Randomcode Developers
 
 #include "common.h"
+#include "configvar.h"
 #include "alloc.h"
 #include "filesystem.h"
 
@@ -14,12 +15,54 @@
 // Lock ? AsLockMutex(Mutex, TRUE) : AsUnlockMutex(Mutex);
 //}
 
+static VOID ParseVariables(_In_ PCHAR* Arguments, _In_ UINT ArgumentCount)
+{
+    for (UINT i = 0; i < ArgumentCount; i++)
+    {
+        // Check if the first character is in the list of prefixes
+        if (strchr(PURPL_ARGUMENT_PREFIXES, Arguments[i][0]))
+        {
+            PCHAR VariableName = CmnFormatTempString("%s", Arguments[i] + 1);
+            PCSTR Value = "1";
+            if (i < ArgumentCount - 1)
+            {
+                Value = Arguments[++i];
+            }
+
+            PCONFIGVAR Variable = CfgGetVariable(VariableName);
+            if (Variable)
+            {
+                LogInfo("Setting variable %s to %s from command line", VariableName, Value);
+                switch (Variable->Type)
+                {
+                case ConfigVarTypeBoolean:
+                    if (tolower(Value[0]) == 't' || tolower(Value[0]) == 'y' || strtoll(Value, NULL, 10) > 0) // true or yes
+                    {
+                        Variable->Current.Boolean = TRUE;
+                    }
+                    else
+                    {
+                        Variable->Current.Boolean = FALSE;
+                    }
+                    break;
+                case ConfigVarTypeInteger:
+                    Variable->Current.Int = strtoll(Value, NULL, 10);
+                    break;
+                case ConfigVarTypeFloat:
+                    Variable->Current.Float = strtod(Value, NULL);
+                    break;
+                case ConfigVarTypeString:
+                    strncpy(Variable->Current.String, Value, PURPL_ARRAYSIZE(Variable->Current.String));
+                    break;
+                }
+            }
+        }
+    }
+}
+
 VOID CmnInitialize(_In_opt_ PCHAR *Arguments, _In_opt_ UINT ArgumentCount)
 {
     LOG_LEVEL Level;
-
-    UNREFERENCED_PARAMETER(ArgumentCount);
-    UNREFERENCED_PARAMETER(Arguments);
 
     PlatInitialize();
 
@@ -39,15 +82,25 @@ VOID CmnInitialize(_In_opt_ PCHAR *Arguments, _In_opt_ UINT ArgumentCount)
     // TODO: implement mutexes
     // LogSetLock(LogLock, AsCreateMutex());
 
+    CONFIGVAR_DEFINE_BOOLEAN("verbose", FALSE, TRUE, ConfigVarSideBoth, FALSE);
+
+    if (ArgumentCount && Arguments)
+    {
+        ParseVariables(Arguments, ArgumentCount);
+    }
+
 #ifdef PURPL_DEBUG
-#ifdef PURPL_VERBOSE
-    Level = LogLevelTrace;
+    if (CONFIGVAR_GET_BOOLEAN("verbose"))
+    {
+        Level = LogLevelTrace;
 #if PURPL_USE_MIMALLOC
-    mi_option_set(mi_option_verbose, TRUE);
+        mi_option_set(mi_option_verbose, TRUE);
 #endif
-#else
-    Level = LogLevelDebug;
-#endif
+    }
+    else
+    {
+        Level = LogLevelDebug;
+    }
 #elif defined PURPL_RELEASE
     Level = LogLevelInfo;
 #endif

@@ -120,8 +120,7 @@ static PVOID PhysFsReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Of
     return Buffer;
 }
 
-BOOLEAN FsWriteFile(_In_z_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size,
-                    _In_ BOOLEAN Append)
+BOOLEAN FsWriteFile(_In_z_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size, _In_ BOOLEAN Append)
 {
     FILE *File;
     BOOLEAN Success;
@@ -206,7 +205,7 @@ static PFILESYSTEM_SOURCE FindFile(_In_z_ PCSTR Path)
     ReturnType Fs##Name Params                                                                                         \
     {                                                                                                                  \
         ExtraBefore;                                                                                                   \
-        PFILESYSTEM_SOURCE Source = Raw ? FindFile(Path) : NULL;                                                       \
+        PFILESYSTEM_SOURCE Source = Raw ? NULL : FindFile(Path);                                                       \
         if (Source ExtraCondition)                                                                                     \
         {                                                                                                              \
             PCHAR FullPath = CmnFormatString("%s/%s", Source->Path, Path);                                             \
@@ -231,7 +230,7 @@ X(
     PVOID, ReadFile,
     (_In_ BOOLEAN Raw, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount,
      _In_ UINT64 Extra),
-    {}, ,
+    {}, &&ReadAmount,
     {
         *ReadAmount = 0;
         return NULL;

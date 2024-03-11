@@ -54,7 +54,8 @@ typedef struct CONFIGVAR
     };
 } CONFIGVAR, *PCONFIGVAR;
 
-/// @brief Define a configuration variable
+/// @brief Define a configuration variable. Should be called before CmnInitialize if you want the variable to be parsed
+/// from the command line arguments.
 ///
 /// @param[in] Name The name of the variable
 /// @param[in] DefaultValue A pointer to the value to set
@@ -72,12 +73,12 @@ extern VOID CfgDefineVariable(_In_z_ PCSTR Name, _In_ CONST PVOID DefaultValue, 
     }
 #define CONFIGVAR_DEFINE_INT(Name, DefaultValue, Static, Side, Cheat)                                                  \
     {                                                                                                                  \
-        INT64 DefaultValue_ = (INT64)(DefaultValue);                                                                       \
+        INT64 DefaultValue_ = (INT64)(DefaultValue);                                                                   \
         CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeInteger, (Static), (Side), (Cheat));                    \
     }
 #define CONFIGVAR_DEFINE_FLOAT(Name, DefaultValue, Static, Side, Cheat)                                                \
     {                                                                                                                  \
-        DOUBLE DefaultValue_ = (DOUBLE)(DefaultValue);                                                                   \
+        DOUBLE DefaultValue_ = (DOUBLE)(DefaultValue);                                                                 \
         CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeFloat, (Static), (Side), (Cheat));                      \
     }
 #define CONFIGVAR_DEFINE_STRING(Name, DefaultValue, Static, Side, Cheat)                                               \
@@ -94,6 +95,8 @@ extern PCONFIGVAR CfgGetVariable(_In_z_ PCSTR Name);
 
 #define CONFIGVAR_HAS_CHANGED(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Changed : FALSE)
 #define CONFIGVAR_CLEAR_CHANGED(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Changed = FALSE : 0)
+
+#define CONFIGVAR_GET_TYPE(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Type : 0)
 
 #define CONFIGVAR_GET_BOOLEAN(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Boolean : FALSE)
 #define CONFIGVAR_GET_INT(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Int : 0)
@@ -112,12 +115,12 @@ extern VOID CfgSetVariable(_In_z_ PCSTR Name, _In_ PVOID Value);
     }
 #define CONFIGVAR_SET_INT(Name, Value)                                                                                 \
     {                                                                                                                  \
-        INT64 Value_ = (INT64)(Value);                                                                                     \
+        INT64 Value_ = (INT64)(Value);                                                                                 \
         CfgSetVariable((Name), &Value_);                                                                               \
     }
 #define CONFIGVAR_SET_FLOAT(Name, Value)                                                                               \
     {                                                                                                                  \
-        DOUBLE Value_ = (DOUBLE)(Value);                                                                                 \
+        DOUBLE Value_ = (DOUBLE)(Value);                                                                               \
         CfgSetVariable((Name), &Value_);                                                                               \
     }
 #define CONFIGVAR_SET_STRING(Name, Value)                                                                              \
