@@ -370,12 +370,6 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
         on_load(fix_target)
     target_end()
 
-    option("verbose")
-        set_default(false)
-        set_description("Enable verbose logging")
-        add_defines("PURPL_VERBOSE")
-    target_end()
-
     target("common")
         set_kind("static")
 

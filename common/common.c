@@ -5,8 +5,8 @@
 /// @copyright (c) 2024 Randomcode Developers
 
 #include "common.h"
-#include "configvar.h"
 #include "alloc.h"
+#include "configvar.h"
 #include "filesystem.h"
 
 // TODO: implement mutexes
@@ -15,7 +15,7 @@
 // Lock ? AsLockMutex(Mutex, TRUE) : AsUnlockMutex(Mutex);
 //}
 
-static VOID ParseVariables(_In_ PCHAR* Arguments, _In_ UINT ArgumentCount)
+static VOID ParseVariables(_In_ PCHAR *Arguments, _In_ UINT ArgumentCount)
 {
     for (UINT i = 0; i < ArgumentCount; i++)
     {
@@ -36,7 +36,8 @@ static VOID ParseVariables(_In_ PCHAR* Arguments, _In_ UINT ArgumentCount)
                 switch (Variable->Type)
                 {
                 case ConfigVarTypeBoolean:
-                    if (tolower(Value[0]) == 't' || tolower(Value[0]) == 'y' || strtoll(Value, NULL, 10) > 0) // true or yes
+                    if (tolower(Value[0]) == 't' || tolower(Value[0]) == 'y' ||
+                        strtoll(Value, NULL, 10) > 0) // true or yes
                     {
                         Variable->Current.Boolean = TRUE;
                     }
@@ -282,15 +283,17 @@ _Noreturn VOID CmnError(_In_z_ _Printf_format_string_ PCSTR Message, ...)
     va_start(Arguments, Message);
     FormattedMessage = CmnFormatStringVarArgs(Message, Arguments);
     va_end(Arguments);
-    BackTrace = PlatCaptureStackBackTrace(1, // Don't include CmnError in the trace
-#ifdef PURPL_VERBOSE
-                                          0 // Everything
-#elif defined PURPL_DEBUG
-                                          5 // A bit more context
+#ifdef PURPL_DEBUG
+    UINT32 MaxFrames = 5;
 #else
-                                          3 // Enough
+    UINT32 MaxFrames = 3;
 #endif
-    );
+    if (CONFIGVAR_GET_BOOLEAN("verbose"))
+    {
+        MaxFrames = 0;
+    }
+    BackTrace = PlatCaptureStackBackTrace(1, // Don't include CmnError in the trace
+                                          MaxFrames);
     Formatted = CmnFormatString("Fatal error: %s\nStack trace:\n%s", FormattedMessage, BackTrace);
     LogFatal("%s", Formatted);
     PlatError(Formatted);
