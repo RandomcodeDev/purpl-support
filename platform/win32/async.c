@@ -88,3 +88,23 @@ VOID AsDetachThread(_In_ PTHREAD Thread)
 {
     ResumeThread(Thread->Handle);
 }
+
+PMUTEX AsCreateMutex(VOID)
+{
+    return CreateMutexA(NULL, FALSE, NULL);
+}
+
+BOOLEAN AsLockMutex(_In_ PMUTEX Mutex, _In_ BOOLEAN Wait)
+{
+    return WaitForSingleObjectEx(Mutex, Wait ? INFINITE : 0, FALSE) == WAIT_OBJECT_0;
+}
+
+VOID AsUnlockMutex(_In_ PMUTEX Mutex)
+{
+    ReleaseMutex(Mutex);
+}
+
+VOID AsDestroyMutex(_In_ PMUTEX Mutex)
+{
+    CloseHandle(Mutex);
+}

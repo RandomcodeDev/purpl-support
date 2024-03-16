@@ -9,11 +9,10 @@
 #include "configvar.h"
 #include "filesystem.h"
 
-// TODO: implement mutexes
-// static VOID LogLock(BOOLEAN Lock, PVOID Mutex)
-//{
-// Lock ? AsLockMutex(Mutex, TRUE) : AsUnlockMutex(Mutex);
-//}
+static VOID LogLock(BOOLEAN Lock, PVOID Mutex)
+{
+    Lock ? (VOID)AsLockMutex(Mutex, TRUE) : AsUnlockMutex(Mutex);
+}
 
 static VOID ParseVariables(_In_ PCHAR *Arguments, _In_ UINT ArgumentCount)
 {
@@ -61,6 +60,8 @@ static VOID ParseVariables(_In_ PCHAR *Arguments, _In_ UINT ArgumentCount)
     }
 }
 
+static PMUTEX LogMutex;
+
 VOID CmnInitialize(_In_opt_ PCHAR *Arguments, _In_opt_ UINT ArgumentCount)
 {
     LOG_LEVEL Level;
@@ -80,8 +81,12 @@ VOID CmnInitialize(_In_opt_ PCHAR *Arguments, _In_opt_ UINT ArgumentCount)
     free(malloc(HugePageCount * 1024 * 1024 * 1024));
 #endif
 
-    // TODO: implement mutexes
-    // LogSetLock(LogLock, AsCreateMutex());
+    LogMutex = AsCreateMutex();
+    if (!LogMutex)
+    {
+        CmnError("Failed to create log mutex");
+    }
+    LogSetLock(LogLock, LogMutex);
 
     CONFIGVAR_DEFINE_BOOLEAN("verbose", FALSE, TRUE, ConfigVarSideBoth, FALSE);
 
@@ -138,6 +143,8 @@ VOID CmnShutdown(VOID)
     }
 
     PlatShutdown();
+
+    AsDestroyMutex(LogMutex);
 
 #if PURPL_USE_MIMALLOC
     // Some memory will still be in use because of the THREAD for the main

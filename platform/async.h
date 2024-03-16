@@ -69,6 +69,12 @@ extern BOOLEAN AsLockMutex(_In_ PMUTEX Mutex, _In_ BOOLEAN Wait);
 /// @param[in] Mutex The mutex to unlock
 extern VOID AsUnlockMutex(_In_ PMUTEX Mutex);
 
+/// @brief Destroy a mutex
+///
+/// @param[in] Mutex The mutex to destroy
+/// @param[in] Wait Whether to wait before destroying the mutex
+extern VOID AsDestroyMutex(_In_ PMUTEX Mutex);
+
 /// @brief A semaphore
 typedef PVOID PSEMAPHORE;
 
