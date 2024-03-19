@@ -173,20 +173,20 @@ Return Value:
         Vertices[i].Position[1] = Mesh->mVertices[i].y;
         Vertices[i].Position[2] = Mesh->mVertices[i].z;
 
-        if ( Mesh->mColors[0] )
-        {
-            Vertices[i].Colour[0] = Mesh->mColors[0][i].r;
-            Vertices[i].Colour[1] = Mesh->mColors[0][i].g;
-            Vertices[i].Colour[2] = Mesh->mColors[0][i].b;
-            Vertices[i].Colour[3] = Mesh->mColors[0][i].a;
-        }
-        else
-        {
+        //if ( Mesh->mColors[0] )
+        //{
+        //    Vertices[i].Colour[0] = Mesh->mColors[0][i].r;
+        //    Vertices[i].Colour[1] = Mesh->mColors[0][i].g;
+        //    Vertices[i].Colour[2] = Mesh->mColors[0][i].b;
+        //    Vertices[i].Colour[3] = Mesh->mColors[0][i].a;
+        //}
+        //else
+        //{
             Vertices[i].Colour[0] = 1.0f;
             Vertices[i].Colour[1] = 1.0f;
             Vertices[i].Colour[2] = 1.0f;
             Vertices[i].Colour[3] = 1.0f;
-        }
+        //}
 
         if ( Mesh->mNormals )
         {

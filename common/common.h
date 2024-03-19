@@ -151,3 +151,13 @@ extern PCHAR CmnAppendString(_In_z_ PCSTR String, _In_z_ PCSTR New);
 /// @param[in] Message The error message.
 /// @param[in] ...     The arguments to the error message.
 _Noreturn extern VOID CmnError(_In_z_ _Printf_format_string_ PCSTR Message, ...);
+
+/// @brief This routine is a modified version of ReactOS's CommandLineToArgvW
+///        that is adjusted to convert ASCII instead of Unicode command lines
+///        and use CmnAlloc and CmnFree instead of LocalAlloc and LocalFree.
+///
+/// @param lpCmdline The command line to parse
+/// @param numargs   This parameter receives the number of arguments parsed
+///
+/// @return An array of parsed arguments
+extern PSTR *CmnParseCommandline(_In_ PCSTR lpCmdline, _Out_ PINT numargs);

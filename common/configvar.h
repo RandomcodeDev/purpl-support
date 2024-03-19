@@ -42,14 +42,15 @@ typedef struct CONFIGVAR
     CONFIGVAR_TYPE Type;
     CONFIGVAR_VALUE Default;
     CONFIGVAR_VALUE Current;
+    CONFIGVAR_SIDE Side;
     union {
         UINT8 Bitflags;
         struct
         {
-            UINT8 Static : 1;
             UINT8 Changed : 1;
-            UINT8 Side : 2;
+            UINT8 Static : 1;
             UINT8 Cheat : 1;
+            UINT8 Internal : 1;
         };
     };
 } CONFIGVAR, *PCONFIGVAR;
@@ -63,27 +64,28 @@ typedef struct CONFIGVAR
 /// @param[in] Static Whether the variable can be changed after this function is called
 /// @param[in] Side The side of the variable
 /// @param[in] Cheat Whether changing the variable is cheating
+/// @param[in] Internal Whether to allow the user to change this variable
 extern VOID CfgDefineVariable(_In_z_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CONFIGVAR_TYPE Type,
-                              _In_ BOOLEAN Static, _In_ CONFIGVAR_SIDE Side, _In_ BOOLEAN Cheat);
+                              _In_ BOOLEAN Static, _In_ CONFIGVAR_SIDE Side, _In_ BOOLEAN Cheat, _In_ BOOLEAN Internal);
 
-#define CONFIGVAR_DEFINE_BOOLEAN(Name, DefaultValue, Static, Side, Cheat)                                              \
+#define CONFIGVAR_DEFINE_BOOLEAN(Name, DefaultValue, Static, Side, Cheat, Internal)                                    \
     {                                                                                                                  \
         BOOLEAN DefaultValue_ = (BOOLEAN)(DefaultValue);                                                               \
-        CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeBoolean, (Static), (Side), (Cheat));                    \
+        CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeBoolean, (Static), (Side), (Cheat), (Internal));        \
     }
-#define CONFIGVAR_DEFINE_INT(Name, DefaultValue, Static, Side, Cheat)                                                  \
+#define CONFIGVAR_DEFINE_INT(Name, DefaultValue, Static, Side, Cheat, Internal)                                        \
     {                                                                                                                  \
         INT64 DefaultValue_ = (INT64)(DefaultValue);                                                                   \
-        CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeInteger, (Static), (Side), (Cheat));                    \
+        CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeInteger, (Static), (Side), (Cheat), (Internal));        \
     }
-#define CONFIGVAR_DEFINE_FLOAT(Name, DefaultValue, Static, Side, Cheat)                                                \
+#define CONFIGVAR_DEFINE_FLOAT(Name, DefaultValue, Static, Side, Cheat, Internal)                                      \
     {                                                                                                                  \
         DOUBLE DefaultValue_ = (DOUBLE)(DefaultValue);                                                                 \
-        CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeFloat, (Static), (Side), (Cheat));                      \
+        CfgDefineVariable((Name), &DefaultValue_, ConfigVarTypeFloat, (Static), (Side), (Cheat), (Internal));          \
     }
-#define CONFIGVAR_DEFINE_STRING(Name, DefaultValue, Static, Side, Cheat)                                               \
+#define CONFIGVAR_DEFINE_STRING(Name, DefaultValue, Static, Side, Cheat, Internal)                                     \
     {                                                                                                                  \
-        CfgDefineVariable((Name), (DefaultValue), ConfigVarTypeString, (Static), (Side), (Cheat));                     \
+        CfgDefineVariable((Name), (DefaultValue), ConfigVarTypeString, (Static), (Side), (Cheat), (Internal));         \
     }
 
 /// @brief Get a configuration variable
