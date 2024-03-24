@@ -13,6 +13,9 @@ Abstract:
 --*/
 
 #include "common/common.h"
+#include "common/configvar.h"
+
+#include "engine/render/render.h"
 
 #include "platform/platform.h"
 #include "platform/video.h"
@@ -21,11 +24,8 @@ Abstract:
 
 static GLFWwindow *Window;
 
-#ifdef PURPL_DEBUG
-static CHAR WindowTitle[128] = PURPL_NAME " v" PURPL_VERSION_STRING " commit " PURPL_BRANCH "-" PURPL_COMMIT;
-#else
-static CHAR WindowTitle[128] = PURPL_NAME " v" PURPL_VERSION_STRING;
-#endif
+static PCHAR WindowTitle;
+
 static INT WindowWidth;
 static INT WindowHeight;
 
@@ -89,6 +89,16 @@ BOOLEAN VidInitialize(_In_ BOOLEAN EnableGl)
 #ifdef PURPL_OPENGL
     }
 #endif
+
+    WindowTitle = CmnFormatString(PURPL_NAME " | " PURPL_BUILD_TYPE " | v" PURPL_VERSION_STRING
+#ifdef PURPL_DEBUG
+                                             " | " PURPL_COMMIT "-" PURPL_BRANCH
+#endif
+#ifdef PURPL_ENGINE
+                                             " | %s renderer",
+                                  RdrGetApiName(CONFIGVAR_GET_INT("rdr_api"))
+#endif
+    );
 
     WindowWidth = 1280;
     WindowHeight = 720;

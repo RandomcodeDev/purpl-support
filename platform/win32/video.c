@@ -14,6 +14,9 @@ Abstract:
 
 #include "common/alloc.h"
 #include "common/common.h"
+#include "common/configvar.h"
+
+#include "engine/render/render.h"
 
 #include "platform/platform.h"
 #include "platform/video.h"
@@ -22,8 +25,8 @@ Abstract:
 
 #ifdef _MSC_VER
 #pragma comment(                                                                                                       \
-    linker,                                                                                                            \
-    "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+        linker,                                                                                                        \
+            "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif
 
 #define IDI_ICON1 103
@@ -32,11 +35,8 @@ static HWND Window = NULL;
 
 static CHAR WindowClassName[] = "PurplWindow";
 
-#ifdef PURPL_DEBUG
-static CHAR WindowTitle[128] = PURPL_NAME " v" PURPL_VERSION_STRING " commit " PURPL_BRANCH "-" PURPL_COMMIT;
-#else
-static CHAR WindowTitle[128] = PURPL_NAME " v" PURPL_VERSION_STRING;
-#endif
+static PCHAR WindowTitle;
+
 static INT32 WindowWidth;
 static INT32 WindowHeight;
 static INT32 ExtraWidth;
@@ -70,10 +70,6 @@ static LRESULT CALLBACK WindowProcedure(_In_ HWND MessageWindow, _In_ UINT Messa
     {
         switch (Message)
         {
-        case WM_SETTEXT: {
-            strncpy(WindowTitle, (PSTR)Lparam, PURPL_ARRAYSIZE(WindowTitle));
-            return 0;
-        }
         case WM_SIZE: {
             RECT ClientArea = {0};
             INT32 NewWidth;
@@ -147,6 +143,16 @@ static VOID InitializeWindow(VOID)
     ExtraWidth = ClientArea.left - AdjustedClientArea.left;
     ExtraHeight = ClientArea.top - AdjustedClientArea.top;
 
+    WindowTitle = CmnFormatString(PURPL_NAME " | " PURPL_BUILD_TYPE " | v" PURPL_VERSION_STRING
+#ifdef PURPL_DEBUG
+                                             " | " PURPL_COMMIT "-" PURPL_BRANCH
+#endif
+#ifdef PURPL_ENGINE
+                                             " | %s renderer",
+                                  RdrGetApiName(CONFIGVAR_GET_INT("rdr_api"))
+#endif
+    );
+
     LogDebug("Creating %dx%d (for internal size %dx%d) window titled %s", WindowWidth, WindowHeight,
              ClientArea.right - ClientArea.left, ClientArea.bottom - ClientArea.top, WindowTitle);
 
@@ -175,7 +181,7 @@ static HMODULE OpenGl32Handle;
 
 static GLADapiproc GetGlSymbol(_In_z_ PCSTR Name)
 {
-    //LogDebug("Getting OpenGL symbol %s", Name);
+    // LogDebug("Getting OpenGL symbol %s", Name);
     GLADapiproc Symbol = wglGetProcAddress(Name);
     if (!Symbol)
     {
@@ -340,6 +346,8 @@ VOID VidShutdown(VOID)
     LogDebug("Destroying window");
     DestroyWindow(Window);
 
+    CmnFree(WindowTitle);
+
     LogInfo("Successfully shut down Windows video");
 }
 
@@ -398,4 +406,3 @@ VkSurfaceKHR VidCreateVulkanSurface(_In_ VkInstance Instance, _In_ PVOID Allocat
     return Surface;
 }
 #endif
-

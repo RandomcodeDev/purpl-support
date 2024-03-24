@@ -160,4 +160,4 @@ _Noreturn extern VOID CmnError(_In_z_ _Printf_format_string_ PCSTR Message, ...)
 /// @param numargs   This parameter receives the number of arguments parsed
 ///
 /// @return An array of parsed arguments
-extern PSTR *CmnParseCommandline(_In_ PCSTR lpCmdline, _Out_ PINT numargs);
+extern PSTR *CmnParseCommandline(_In_ PCSTR lpCmdline, _Out_ PUINT32 numargs);

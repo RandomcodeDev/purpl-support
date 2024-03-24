@@ -15,7 +15,12 @@ Abstract:
 #include "purpl/purpl.h"
 
 #ifdef PURPL_GDK
+#ifdef PURPL_MINGW
+EXTERN_C __attribute__((dllimport)) HRESULT XGameRuntimeInitialize(VOID);
+EXTERN_C __attribute__((dllimport)) VOID XGameRuntimeUninitialize(VOID);
+#else
 #include <XGameRuntimeInit.h>
+#endif
 #endif
 
 BEGIN_EXTERN_C
@@ -67,6 +72,21 @@ VOID PlatInitialize(VOID)
     }
 
     LogInfo("Performing Windows specific initialization");
+#if !defined PURPL_GDKX && (defined PURPL_DEBUG || defined PURPL_RELWITHDEBINFO)
+    LogDebug("Attempting to load debug info");
+    SymSetOptions(SYMOPT_DEBUG | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
+    if (!SymInitialize(GetCurrentProcess(), NULL, FALSE))
+    {
+        DWORD Error = GetLastError();
+        LogError("Failed to initialize DbgHelp: %d (0x%X)", Error, Error);
+    }
+    if (!SymLoadModuleEx(GetCurrentProcess(), NULL, PURPL_EXECUTABLE_NAME ".exe", NULL, (UINT64)GetModuleHandleA(NULL),
+                         0, NULL, 0))
+    {
+        DWORD Error = GetLastError();
+        LogError("Failed to load symbols: %d (0x%X)", Error, Error);
+    }
+#endif
 
 #ifdef PURPL_GDK
     LogInfo("Initializing Xbox Gaming Runtime Services");
@@ -229,7 +249,8 @@ PCSTR PlatGetDescription(VOID)
         RegQueryValueExA(CurrentVersionHandle, "InstallationType", nullptr, nullptr, (LPBYTE)InstallationType, &Size);
 
         Size = sizeof(CurrentBuildNumber);
-        RegQueryValueExA(CurrentVersionHandle, "CurrentBuildNumber", nullptr, nullptr, (LPBYTE)CurrentBuildNumber, &Size);
+        RegQueryValueExA(CurrentVersionHandle, "CurrentBuildNumber", nullptr, nullptr, (LPBYTE)CurrentBuildNumber,
+                         &Size);
 
         Size = sizeof(INT);
         RegQueryValueExA(CurrentVersionHandle, "UBR", nullptr, nullptr, (LPBYTE)&UBR, &Size);

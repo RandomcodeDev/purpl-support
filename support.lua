@@ -9,7 +9,7 @@ function fix_target(target)
     target:add("options", "mimalloc")
     target:add("options", "verbose")
 
-    if is_plat("gdk", "gdkx") then
+    if is_plat("gdk", "gdkx") and get_config("toolchain") ~= "mingw" then
         target:set("prefixname", "")
         if target:kind() == "binary" then
             target:set("extension", ".exe")
@@ -49,7 +49,7 @@ function fix_target(target)
     end
 end
 
-function do_settings()
+function do_settings(support_root)
     set_warnings("everything")
 
     set_languages("gnu11", "cxx23")
@@ -143,7 +143,7 @@ function do_settings()
             "-Wno-multichar",
             "-Wno-cast-function-type",
         {force = true})
-        if is_plat("windows") then
+        if is_plat("windows", "gdk", "gdkx") then
             add_defines("_POSIX_C_SOURCE")
         end
     end
@@ -153,6 +153,7 @@ function do_settings()
             path.join(os.getenv("GRDKLatest"), "GameKit", "Include")
         )
         add_linkdirs(
+            path.join(support_root, "platform", "win32"),
             path.join(os.getenv("GRDKLatest"), "GameKit", "Lib", "amd64")
         )
     end
@@ -205,6 +206,10 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
             add_defines("PURPL_CONSOLE_HOMEBREW")
             switchhb_add_settings(switch_title_id)
         end
+    end
+
+    if get_config("toolchain") == "mingw" then
+        add_defines("PURPL_MINGW")
     end
 
     if is_mode("debug") then
@@ -278,7 +283,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
     end
 
     if set_big_settings then
-        do_settings()
+        do_settings(support_root)
     end
 
     target("cjson")

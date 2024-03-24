@@ -113,3 +113,56 @@ VOID AsDetachThread(_In_ PTHREAD Thread)
 {
     pthread_detach((pthread_t)Thread->Handle);
 }
+
+PMUTEX AsCreateMutex(VOID)
+{
+    pthread_mutex_t *Mutex;
+
+    Mutex = CmnAlloc(1, sizeof(pthread_mutex_t));
+    if (!Mutex)
+    {
+        LogError("Failed to allocate mutex: %s", strerror(errno));
+        return NULL;
+    }
+
+    memcpy(Mutex, &(pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER, sizeof(pthread_mutex_t));
+
+    INT32 Error = pthread_mutex_init(Mutex, NULL);
+    if (Error != 0)
+    {
+        LogError("Failed to initialize mutex: %s", strerror(Error));
+        CmnFree(Mutex);
+        return NULL;
+    }
+
+    return Mutex;
+}
+
+BOOLEAN AsLockMutex(_In_ PMUTEX Mutex, _In_ BOOLEAN Wait)
+{
+    if (Mutex)
+    {
+        if (Wait)
+        {
+            return pthread_mutex_lock(Mutex) == 0;
+        }
+        else
+        {
+            return pthread_mutex_trylock(Mutex) == 0;
+        }
+    }
+}
+
+VOID AsUnlockMutex(_In_ PMUTEX Mutex)
+{
+    pthread_mutex_unlock(Mutex);
+}
+
+VOID AsDestroyMutex(_In_ PMUTEX Mutex)
+{
+    if (Mutex)
+    {
+        pthread_mutex_destroy(Mutex);
+        CmnFree(Mutex);
+    }
+}

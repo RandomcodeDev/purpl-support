@@ -313,7 +313,7 @@ _Noreturn VOID CmnError(_In_z_ _Printf_format_string_ PCSTR Message, ...)
 }
 
 // note: this is GPL code from ReactOS, copyright is theirs
-PSTR *CmnParseCommandline(_In_ PCSTR lpCmdline, _Out_ PINT numargs)
+PSTR *CmnParseCommandline(_In_ PCSTR lpCmdline, _Out_ PUINT32 numargs)
 {
     DWORD argc;
     LPSTR *argv;
@@ -322,39 +322,9 @@ PSTR *CmnParseCommandline(_In_ PCSTR lpCmdline, _Out_ PINT numargs)
     LPSTR cmdline;
     int qcount, bcount;
 
-    if (!numargs)
+    if (!lpCmdline || !numargs)
     {
         return NULL;
-    }
-
-    if (*lpCmdline == 0)
-    {
-        /* Return the path to the executable */
-        DWORD len, deslen = MAX_PATH, size;
-
-        size = sizeof(LPSTR) * 2 + deslen * sizeof(CHAR);
-        for (;;)
-        {
-            argv = CmnAlloc(size, 1);
-            if (!argv)
-                return NULL;
-            len = GetModuleFileNameA(0, (LPSTR)(argv + 2), deslen);
-            if (!len)
-            {
-                CmnFree(argv);
-                return NULL;
-            }
-            if (len < deslen)
-                break;
-            deslen *= 2;
-            size = sizeof(LPSTR) * 2 + deslen * sizeof(CHAR);
-            CmnFree(argv);
-        }
-        argv[0] = (LPSTR)(argv + 2);
-        argv[1] = NULL;
-        *numargs = 1;
-
-        return argv;
     }
 
     /* --- First count the arguments */
