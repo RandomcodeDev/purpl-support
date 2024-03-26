@@ -16,7 +16,9 @@ Abstract:
 #include "common/common.h"
 #include "common/configvar.h"
 
+#ifdef PURPL_ENGINE
 #include "engine/render/render.h"
+#endif
 
 #include "platform/platform.h"
 #include "platform/video.h"
@@ -25,8 +27,8 @@ Abstract:
 
 #ifdef _MSC_VER
 #pragma comment(                                                                                                       \
-        linker,                                                                                                        \
-            "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+    linker,                                                                                                            \
+    "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif
 
 #define IDI_ICON1 103
@@ -70,6 +72,10 @@ static LRESULT CALLBACK WindowProcedure(_In_ HWND MessageWindow, _In_ UINT Messa
     {
         switch (Message)
         {
+        case WM_SETTEXT:
+            CmnFree(WindowTitle);
+            WindowTitle = CmnFormatString("%s", Lparam);
+            break;
         case WM_SIZE: {
             RECT ClientArea = {0};
             INT32 NewWidth;
@@ -307,6 +313,19 @@ BOOLEAN VidInitialize(_In_ BOOLEAN EnableGl)
 BOOLEAN VidUpdate(VOID)
 {
     MSG Message;
+
+#ifdef PURPL_ENGINE
+    // By the point of the first call to VidUpdate, the GPU name is known, but it isn't at the time of VidInitialize, so
+    // this has to go here.
+    static BOOLEAN IsFirstUpdate = TRUE;
+    if (IsFirstUpdate)
+    {
+        PCHAR Title = CmnAppendString(WindowTitle, CmnFormatTempString(" using GPU %s", RdrGetGpuName()));
+        SetWindowTextA(Window, Title); // Window proc stores this into WindowTitle
+        CmnFree(Title);
+        IsFirstUpdate = FALSE;
+    }
+#endif
 
     // ImGui_ImplWin32_NewFrame();
 
