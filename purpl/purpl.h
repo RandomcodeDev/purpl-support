@@ -124,6 +124,9 @@
 #include "zstd.h"
 
 #ifdef PURPL_ENGINE
+#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
+#include "cimgui.h"
+
 #ifdef PURPL_DISCORD
 #include "discord_rpc.h"
 #endif
@@ -134,6 +137,7 @@
 #endif
 #include "flecs.h"
 #endif
+
 
 #ifdef __cplusplus
 #ifndef _Noreturn

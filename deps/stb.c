@@ -14,13 +14,13 @@
 #define FREE free
 #endif
 
-extern void CmnError(const char *Format, ...);
+extern void CmnErrorEx(char ShutdownFirst, const char *Format, ...);
 
-#define PURPL_ASSERT(Condition)                                                \
-    do                                                                         \
-    {                                                                          \
-        if (!(Condition))                                                      \
-            CmnError("Assertion failed: " #Condition);                         \
+#define PURPL_ASSERT(Condition)                                                                                        \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (!(Condition))                                                                                              \
+            CmnErrorEx(FALSE, "Assertion failed: " #Condition);                                                        \
     } while (0);
 
 #define STB_DS_IMPLEMENTATION 1

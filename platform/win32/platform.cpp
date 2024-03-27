@@ -132,7 +132,9 @@ PCSTR PlatCaptureStackBackTrace(_In_ UINT32 FramesToSkip, _In_ UINT32 MaxFrames)
     PVOID ModuleAddress = nullptr;
     // PVOID ModuleHandle = nullptr;
     UINT64 i;
+#ifndef PURPL_GDKX
     DWORD Error;
+#endif
     UINT64 Count;
 
     if (MaxFrames > 0)

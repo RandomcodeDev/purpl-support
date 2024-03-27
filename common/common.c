@@ -284,14 +284,17 @@ PCHAR CmnAppendString(_In_z_ PCSTR String, _In_z_ PCSTR New)
     return CmnInsertString(String, New, SIZE_MAX);
 }
 
-_Noreturn VOID CmnError(_In_z_ _Printf_format_string_ PCSTR Message, ...)
+_Noreturn VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_z_ _Printf_format_string_ PCSTR Message, ...)
 {
     va_list Arguments;
     PCSTR FormattedMessage;
     PCSTR Formatted;
     PCSTR BackTrace;
 
-    CmnShutdown();
+    if (ShutdownFirst)
+    {
+        CmnShutdown();
+    }
 
     va_start(Arguments, Message);
     FormattedMessage = CmnFormatStringVarArgs(Message, Arguments);

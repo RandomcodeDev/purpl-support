@@ -33,6 +33,28 @@ extern DWORD InitialConsoleInputMode;
 extern DWORD InitialConsoleOutputMode;
 extern DWORD InitialConsoleErrorMode;
 
+DWORD ExceptionFilter(DWORD ExceptionCode)
+{
+    switch (ExceptionCode)
+    {
+    case EXCEPTION_BREAKPOINT:
+        DebugBreak();
+        return EXCEPTION_CONTINUE_EXECUTION;
+    // Unless I have to, I don't really care about floating point exceptions, because why should I?
+    case EXCEPTION_FLT_DENORMAL_OPERAND:
+    case EXCEPTION_FLT_DIVIDE_BY_ZERO:
+    case EXCEPTION_FLT_INEXACT_RESULT:
+    case EXCEPTION_FLT_INVALID_OPERATION:
+    case EXCEPTION_FLT_OVERFLOW:
+    case EXCEPTION_FLT_STACK_CHECK:
+    case EXCEPTION_FLT_UNDERFLOW:
+        LogWarning("Got floating-point exception 0x%08X at %s", ExceptionCode, PlatCaptureStackBackTrace(1, 0));
+        return EXCEPTION_CONTINUE_EXECUTION;
+    default:
+        CmnError("Got fatal exception 0x%08X", ExceptionCode);
+    }
+}
+
 /// @brief This routine is the entry point for non-debug Windows builds.
 ///
 /// @param Instance          Module handle.
@@ -97,7 +119,15 @@ INT WINAPI WinMain(_In_ HINSTANCE Instance, _In_opt_ HINSTANCE PreviousInstance,
     }
 #endif
 
-    Result = PurplMain(Arguments, ArgumentCount);
+    //__try
+    //{
+        Result = PurplMain(Arguments, ArgumentCount);
+    //}
+    //__except (ExceptionFilter(GetExceptionCode()))
+    //{
+    //    PEXCEPTION_POINTERS Exception = GetExceptionInformation();
+    //    CmnError("Fatal exception")
+    //}
 
     // Check if the parent process is a console, and pause if it isn't. No
     // error checking because the program is done anyway.
@@ -151,7 +181,8 @@ INT WINAPI WinMain(_In_ HINSTANCE Instance, _In_opt_ HINSTANCE PreviousInstance,
                 strncpy(ParentExeDosPath, ParentExePath, PURPL_ARRAYSIZE(ParentExePath));
             }
 
-            ParentDosHeader = (PIMAGE_DOS_HEADER)FsReadFile(TRUE, ParentExeDosPath, 0, sizeof(IMAGE_DOS_HEADER), &Size, 0);
+            ParentDosHeader =
+                (PIMAGE_DOS_HEADER)FsReadFile(TRUE, ParentExeDosPath, 0, sizeof(IMAGE_DOS_HEADER), &Size, 0);
             if (ParentDosHeader && ParentDosHeader->e_magic == IMAGE_DOS_SIGNATURE)
             {
                 ParentHeaders = (PIMAGE_NT_HEADERS)FsReadFile(TRUE, ParentExeDosPath, ParentDosHeader->e_lfanew,
@@ -160,9 +191,11 @@ INT WINAPI WinMain(_In_ HINSTANCE Instance, _In_opt_ HINSTANCE PreviousInstance,
                 {
                     // Check bitness, offset of Subsystem is different
                     if ((ParentHeaders->FileHeader.Machine & IMAGE_FILE_32BIT_MACHINE &&
-                         ((PIMAGE_NT_HEADERS32)ParentHeaders)->OptionalHeader.Subsystem != IMAGE_SUBSYSTEM_WINDOWS_CUI) ||
+                         ((PIMAGE_NT_HEADERS32)ParentHeaders)->OptionalHeader.Subsystem !=
+                             IMAGE_SUBSYSTEM_WINDOWS_CUI) ||
                         !(ParentHeaders->FileHeader.Machine & IMAGE_FILE_32BIT_MACHINE) &&
-                            ((PIMAGE_NT_HEADERS64)ParentHeaders)->OptionalHeader.Subsystem != IMAGE_SUBSYSTEM_WINDOWS_CUI)
+                            ((PIMAGE_NT_HEADERS64)ParentHeaders)->OptionalHeader.Subsystem !=
+                                IMAGE_SUBSYSTEM_WINDOWS_CUI)
                     {
                         printf("Engine (PID %llu, parent PID %llu) returned %d.\n"
                                "Press any key to exit...",

@@ -148,9 +148,12 @@ extern PCHAR CmnAppendString(_In_z_ PCSTR String, _In_z_ PCSTR New);
 
 /// @brief This routine displays an error message and terminates the program.
 ///
+/// @param[in] ShutdownFirst Whether to attempt a call to CmnShutdown
 /// @param[in] Message The error message.
 /// @param[in] ...     The arguments to the error message.
-_Noreturn extern VOID CmnError(_In_z_ _Printf_format_string_ PCSTR Message, ...);
+_Noreturn extern VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_z_ _Printf_format_string_ PCSTR Message, ...);
+
+#define CmnError(...) CmnErrorEx(TRUE, __VA_ARGS__)
 
 /// @brief This routine is a modified version of ReactOS's CommandLineToArgvW
 ///        that is adjusted to convert ASCII instead of Unicode command lines
