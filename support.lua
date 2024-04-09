@@ -185,11 +185,16 @@ function support_executable(support_root)
     elseif is_plat("switchhb") then
         add_files(path.join(support_root, "platform", "switchhb", "launcher.c"))
         after_build(switchhb_postbuild)
+    elseif is_plat("psp") then
+        add_files(path.join(support_root, "platform", "psp", "launcher.c"))
+        after_build(switchhb_postbuild)
     end
 end
 
 function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, set_big_settings, config_h_in_path, switch_title_id)
     includes(path.join(support_root, "platform", "switchhb", "switch.lua"))
+    includes(path.join(support_root, "platform", "psp", "psp.lua"))
+    includes(path.join(support_root, "platform", "ps3", "ps3.lua"))
 
     if is_plat("windows") then
         add_defines("PURPL_WIN32")
@@ -378,6 +383,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
         if is_plat("linux", "freebsd") then
             add_files(path.join(deps_root, "zstd", "lib", "**", "*.S"))
         end
+        remove_files(path.join(deps_root, "zstd", "lib", "legacy", "*.c"))
         set_warnings("none")
         set_group("External")
         on_load(fix_target)
@@ -449,6 +455,13 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
                 path.join(support_root, "platform", "switchhb", "video.c")
             )
             add_links("nx")
+        elseif is_plat("psp") then
+            add_headerfiles(path.join(support_root, "platform", "psp", "psp.lua"))
+            add_files(
+                path.join(support_root, "platform", "psp", "async.c"),
+                path.join(support_root, "platform", "psp", "platform.c"),
+                path.join(support_root, "platform", "psp", "video.c")
+            )
         end
 
         if use_mimalloc then

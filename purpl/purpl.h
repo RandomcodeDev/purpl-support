@@ -68,7 +68,7 @@
 #include <sys/utsname.h>
 #endif
 
-#ifndef PURPL_SWITCH
+#if !defined PURPL_SWITCH && !defined PURPL_PSP && !defined PURPL_PS3
 #include <dlfcn.h>
 #include <execinfo.h>
 #include <pthread.h>
@@ -84,6 +84,13 @@
 #if defined PURPL_SWITCH && defined PURPL_CONSOLE_HOMEBREW
 #include <pthread.h>
 #include <switch.h>
+
+#define fseeko64 fseeko
+#define stat64 stat
+#endif
+
+#ifdef PURPL_PSP
+#include <pthread.h>
 
 #define fseeko64 fseeko
 #define stat64 stat
