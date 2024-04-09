@@ -23,7 +23,7 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 // argc and argv are already supplied in debug builds, but otherwise they have
 // to be parsed. These store the arguments either way.
 
-static INT ArgumentCount;
+static UINT32 ArgumentCount;
 static PCHAR *Arguments;
 static BOOLEAN ParsedArguments;
 
@@ -33,7 +33,7 @@ extern DWORD InitialConsoleInputMode;
 extern DWORD InitialConsoleOutputMode;
 extern DWORD InitialConsoleErrorMode;
 
-DWORD ExceptionFilter(DWORD ExceptionCode)
+INT ExceptionFilter(DWORD ExceptionCode)
 {
     switch (ExceptionCode)
     {

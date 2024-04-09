@@ -146,6 +146,14 @@ extern PCHAR CmnInsertString(_In_z_ PCSTR String, _In_z_ PCSTR New, _In_ SIZE_T 
 /// @return The modified string
 extern PCHAR CmnAppendString(_In_z_ PCSTR String, _In_z_ PCSTR New);
 
+/// @brief Duplicate a string
+///
+/// @param[in] String The string to duplicate
+/// @param[in] Count The number of characters to copy (0 means all)
+///
+/// @return A duplicate of the string or NULL
+extern PCHAR CmnDuplicateString(_In_z_ PCSTR String, _In_ SIZE_T Count);
+
 /// @brief This routine displays an error message and terminates the program.
 ///
 /// @param[in] ShutdownFirst Whether to attempt a call to CmnShutdown

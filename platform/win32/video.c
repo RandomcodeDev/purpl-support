@@ -74,7 +74,7 @@ static LRESULT CALLBACK WindowProcedure(_In_ HWND MessageWindow, _In_ UINT Messa
         {
         case WM_SETTEXT:
             CmnFree(WindowTitle);
-            WindowTitle = CmnFormatString("%s", Lparam);
+            WindowTitle = CmnDuplicateString((PCSTR)Lparam, 0);
             break;
         case WM_SIZE: {
             RECT ClientArea = {0};

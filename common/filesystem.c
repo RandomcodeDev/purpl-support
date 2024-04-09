@@ -149,7 +149,7 @@ VOID FsAddDirectorySource(_In_z_ PCSTR Path)
 
     FILESYSTEM_SOURCE Source = {0};
     Source.Type = FsSourceTypeDirectory;
-    Source.Path = CmnFormatString("%s", Path);
+    Source.Path = CmnDuplicateString(Path, 0);
 
     Source.HasFile = PhysFsHasFile;
     Source.GetFileSize = PhysFsGetFileSize;
@@ -170,7 +170,7 @@ VOID FsAddPackSource(_In_z_ PCSTR Path)
 
     FILESYSTEM_SOURCE Source = {0};
     Source.Type = FsSourceTypePackFile;
-    Source.Path = CmnFormatString("%s", Path);
+    Source.Path = CmnDuplicateString(Path, 0);
     Source.Handle = PackLoad(Path);
     if (!Source.Handle)
     {

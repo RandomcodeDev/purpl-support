@@ -29,7 +29,7 @@ function fix_target(target)
             target:set("prefixname", "lib")
             target:set("extension", ".nrs")
         end
-    elseif is_plat("switchhb") then
+    elseif is_plat("switchhb", "psp", "ps3") then
         if target:kind() == "binary" then
             target:set("prefixname", "")
             target:set("extension", ".elf")
@@ -98,7 +98,8 @@ function do_settings(support_root)
             "-wd4505", -- unreferenced function with internal linkage has been removed
             "-wd4800", -- implicit conversion to bool, possible information loss
             "-wd5262", -- implicit fallthrough use [[fallthrough]]
-            "-wd4388", -- signed", "unsigned mismatch
+            "-wd4388", -- signed/unsigned mismatch
+            "-wd5054", -- incompatible enums or'd together
         {force = true})
     elseif get_config("toolchain") == "clang" then
         add_cxflags(
@@ -203,8 +204,15 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
     elseif is_plat("switch", "switchhb") then
         add_defines("PURPL_SWITCH", "PURPL_UNIX")
         if is_plat("switchhb") then
-            add_defines("PURPL_CONSOLE_HOMEBREW")
+            add_defines("PURPL_CONSOLE_HOMEBREW", "PURPL_LEGACY_GRAPHICS")
             switchhb_add_settings(switch_title_id)
+        end
+    elseif is_plat("psp", "ps3") then
+        add_defines("PURPL_PLAYSTATION", "PURPL_UNIX", "PURPL_CONSOLE_HOMEBREW", "PURPL_LEGACY_GRAPHICS")
+        if is_plat("psp") then
+            add_defines("PURPL_PSP")
+        elseif is_plat("ps3") then
+            add_defines("PURPL_PS3")
         end
     end
 

@@ -284,6 +284,29 @@ PCHAR CmnAppendString(_In_z_ PCSTR String, _In_z_ PCSTR New)
     return CmnInsertString(String, New, SIZE_MAX);
 }
 
+PCHAR CmnDuplicateString(_In_z_ PCSTR String, _In_ SIZE_T Count)
+{
+    if (!String)
+    {
+        return NULL;
+    }
+
+    if (Count == 0 || Count > strlen(String))
+    {
+        Count = strlen(String);
+    }
+
+    PCHAR New = CmnAlloc(Count + 1, sizeof(CHAR));
+    if (!New)
+    {
+        return NULL;
+    }
+
+    strncpy(New, String, Count);
+
+    return New;
+}
+
 _Noreturn VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_z_ _Printf_format_string_ PCSTR Message, ...)
 {
     va_list Arguments;

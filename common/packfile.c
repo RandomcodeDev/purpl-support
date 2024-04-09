@@ -35,7 +35,7 @@ PPACKFILE PackCreate(_In_z_ PCSTR Path)
         return NULL;
     }
 
-    Pack->Path = CmnFormatString("%s", Path);
+    Pack->Path = CmnDuplicateString(Path, 0);
     Pack->Header.Signature = PACKFILE_SIGNATURE;
     Pack->Header.Version = PACKFILE_FORMAT_VERSION;
 
