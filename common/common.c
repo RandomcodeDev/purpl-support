@@ -16,7 +16,7 @@ static VOID LogLock(BOOLEAN Lock, PVOID Mutex)
 
 static VOID ParseVariables(_In_ PCHAR *Arguments, _In_ UINT ArgumentCount)
 {
-    for (UINT i = 0; i < ArgumentCount; i++)
+    for (UINT i = 1; i < ArgumentCount; i++)
     {
         // Check if the first character is in the list of prefixes
         if (strchr(PURPL_ARGUMENT_PREFIXES, Arguments[i][0]))

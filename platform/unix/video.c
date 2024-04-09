@@ -146,6 +146,16 @@ Return Value:
 
 --*/
 {
+    static BOOL FirstUpdate = TRUE;
+    if (FirstUpdate)
+    {
+        FirstUpdate = FALSE;
+        PCHAR NewTitle = CmnAppendString(WindowTitle, CmnFormatTempString(" using GPU %s", RdrGetGpuName()));
+        CmnFree(WindowTitle);
+        WindowTitle = NewTitle;
+        glfwSetWindowTitle(Window, WindowTitle);
+    }
+
     glfwPollEvents();
 
     if (!WindowClosed)
@@ -274,7 +284,8 @@ VidGetDpi(VOID)
 }
 
 #ifdef PURPL_VULKAN
-VkSurfaceKHR VidCreateVulkanSurface(_In_ VkInstance Instance, _In_ PVOID AllocationCallbacks, _In_opt_ PVOID WindowHandle)
+VkSurfaceKHR VidCreateVulkanSurface(_In_ VkInstance Instance, _In_ PVOID AllocationCallbacks,
+                                    _In_opt_ PVOID WindowHandle)
 /*++
 
 Routine Description:
