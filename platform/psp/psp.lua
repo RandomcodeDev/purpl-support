@@ -14,7 +14,11 @@ toolchain("psp")
     set_toolset("as", "psp-gcc")
 
     on_load(function (toolchain)
+        toolchain:add("cxflags", "-D__unix__")
         toolchain:add("cxflags", "-D_POSIX_C_SOURCE")
+        toolchain:add("cxflags", "-D__INT32_TYPE__=int")
+        toolchain:add("cxflags", "-D__UINT32_TYPE__=unsigned")
+        toolchain:add("ldflags", "-Wl,-zmax-page-size=128")
 
         for _, includedir in ipairs({
             path.join(pspdev, "include"),
@@ -31,15 +35,22 @@ toolchain("psp")
         }) do
             toolchain:add("ldflags", "-L" .. libdir)
         end
+
+        for _, lib in ipairs({
+            "atomic",
+            "pspge",
+            "pspdisplay",
+            "pspvfpu"
+        }) do
+            toolchain:add("ldflags", "-l" .. lib)
+        end
     end)
 toolchain_end()
 
-function psp_add_settings()
-end
-
 function psp_postbuild(target)
     if target:kind() == "binary" then
-        local prx = path.join(path.absolute(target:targetdir()), target:basename() .. ".prx")
+        local pbp = path.join(path.absolute(target:targetdir()), "EBOOT.PBP")
+        local param_sfo = path.join(path.absolute(target:targetdir()), "PARAM.SFO")
         --local nacp = path.join(path.absolute(target:targetdir()), "control.nacp")
         --local romfs = path.join(path.absolute(target:targetdir()), "romfs")
         --os.mkdir(romfs)
@@ -59,9 +70,21 @@ function psp_postbuild(target)
         --    end
         --end
 
-        os.vrunv(path.join(pspdev, "bin", "psp-prxgen"), {
+        os.vrunv(path.join(pspdev, "bin", "mksfoex"), {
+            target:basename(),
+            param_sfo
+        })
+
+        os.vrunv(path.join(pspdev, "bin", "pack-pbp"), {
+            pbp,
+            param_sfo,
+            "NULL",
+            "NULL",
+            "NULL",
+            "NULL",
+            "NULL",
             path.absolute(target:targetfile()),
-            prx
+            "NULL"
         })
     end
 end

@@ -83,9 +83,11 @@ AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize,
         return NULL;
     }
 
+#ifdef PURPL_LINUX
     // For logging purposes, this doesn't matter. It's just for debuggers, so
     // the return value isn't checked.
     pthread_setname_np((pthread_t)Thread->Handle, Thread->Name);
+#endif
 
     pthread_attr_destroy(&Attributes);
 
@@ -125,7 +127,8 @@ PMUTEX AsCreateMutex(VOID)
         return NULL;
     }
 
-    memcpy(Mutex, &(pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER, sizeof(pthread_mutex_t));
+    pthread_mutex_t Initializer = PTHREAD_MUTEX_INITIALIZER;
+    memcpy(Mutex, &Initializer, sizeof(pthread_mutex_t));
 
     INT32 Error = pthread_mutex_init(Mutex, NULL);
     if (Error != 0)

@@ -26,8 +26,6 @@ extern EGLBoolean eglBindAPI(EGLenum Api);
 #include "platform/platform.h"
 #include "platform/video.h"
 
-static NWindow *Window;
-
 static EGLDisplay Display;
 static EGLContext GlContext;
 static EGLSurface Surface;
@@ -52,10 +50,10 @@ static VOID InitializeEgl(VOID)
 
     eglInitialize(Display, NULL, NULL);
 
-    if (!eglBindAPI(EGL_OPENGL_API))
-    {
-        CmnError("Failed to set EGL API to OpenGL: %s", eglGetError());
-    }
+//    if (!eglBindAPI(EGL_OPENGL_API))
+//    {
+//        CmnError("Failed to set EGL API to OpenGL: %s", eglGetError());
+//    }
 
     static CONST INT32 FramebufferAttributes[] = {EGL_RENDERABLE_TYPE,
                                                   EGL_OPENGL_BIT,
@@ -81,7 +79,7 @@ static VOID InitializeEgl(VOID)
         CmnError("No framebuffer configuration found: %s", eglGetError());
     }
 
-    Surface = eglCreateWindowSurface(Display, Config, (EGLNativeWindowType)Window, NULL);
+    Surface = eglCreateWindowSurface(Display, Config, 0, NULL);
     if (!Surface)
     {
         CmnError("Failed to create window surface: %s", eglGetError());
@@ -146,33 +144,11 @@ Return Value:
 
 --*/
 {
-    switch (appletGetOperationMode())
-    {
-    case AppletOperationMode_Handheld:
-        if (WindowWidth != HANDHELD_WIDTH || WindowHeight != HANDHELD_HEIGHT)
-        {
-            WindowWidth = HANDHELD_WIDTH;
-            WindowHeight = HANDHELD_HEIGHT;
-            WindowResized = TRUE;
-            LogInfo("Switched to handheld mode");
-        }
-        break;
-    case AppletOperationMode_Console:
-        if (WindowWidth != DOCKED_WIDTH || WindowHeight != DOCKED_HEIGHT)
-        {
-            WindowWidth = DOCKED_WIDTH;
-            WindowHeight = DOCKED_HEIGHT;
-            WindowResized = TRUE;
-            LogInfo("Switched to docked mode");
-        }
-        break;
-    }
-
 #ifdef PURPL_OPENGL
     eglSwapBuffers(Display, Surface);
 #endif
 
-    return appletMainLoop();
+    return TRUE;
 }
 
 VOID VidShutdown(VOID)
