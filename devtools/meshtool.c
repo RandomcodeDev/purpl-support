@@ -22,11 +22,7 @@ Abstract:
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
 
-_Noreturn
-VOID
-Usage(
-    VOID
-    )
+_Noreturn VOID Usage(VOID)
 /*++
 
 Routine Description:
@@ -43,21 +39,14 @@ Return Value:
 
 --*/
 {
-    printf("Usage:\n"
-           "\n"
-           "\tto <input model> <output Purpl mesh>\t\t\t- Create a mesh\n"
-           "\tfrom <input Purpl mesh> <output OBJ mesh>\t\t- Convert a mesh to an OBJ model\n"
-           );
+    LogInfo("Usage:");
+    LogInfo("\tto <input model> <output Purpl mesh>\t\t\t- Create a mesh");
+    LogInfo("\tfrom <input Purpl mesh> <output OBJ mesh>\t\t- Convert a mesh to an OBJ model");
     exit(EINVAL);
 }
 
-VOID
-ProcessNode(
-    _In_ const struct aiNode* Node,
-    _In_ const struct aiScene* Scene,
-    _Out_ struct aiMesh** Meshes,
-    _Inout_ PUINT32 CurrentMesh
-    )
+VOID ProcessNode(_In_ const struct aiNode *Node, _In_ const struct aiScene *Scene, _Out_ struct aiMesh **Meshes,
+                 _Inout_ PUINT32 CurrentMesh)
 /*++
 
 Routine Description:
@@ -78,50 +67,32 @@ Return Value:
 
 --*/
 {
-    for ( UINT32 i = 0; i < Node->mNumMeshes; i++ )
+    for (UINT32 i = 0; i < Node->mNumMeshes; i++)
     {
         Meshes[*CurrentMesh] = Scene->mMeshes[Node->mMeshes[i]];
         (*CurrentMesh)++;
     }
 
-    for ( UINT32 i = 0; i < Node->mNumChildren; i++ )
+    for (UINT32 i = 0; i < Node->mNumChildren; i++)
     {
-        ProcessNode(
-            Node->mChildren[i],
-            Scene,
-            Meshes,
-            CurrentMesh
-            );
+        ProcessNode(Node->mChildren[i], Scene, Meshes, CurrentMesh);
     }
 }
 
 PCHAR
-GetMaterialName(
-    _In_ const struct aiScene* Scene,
-    _In_ struct aiMesh* Mesh
-    )
+GetMaterialName(_In_ const struct aiScene *Scene, _In_ struct aiMesh *Mesh)
 {
-    struct aiMaterial* Material;
+    struct aiMaterial *Material;
     struct aiString Name;
 
     Material = Scene->mMaterials[Mesh->mMaterialIndex];
-    aiGetMaterialString(
-        Material,
-        AI_MATKEY_NAME,
-        &Name
-        );
+    aiGetMaterialString(Material, AI_MATKEY_NAME, &Name);
 
-    return CmnFormatString(
-        "%s",
-        Name.data
-        );
+    return CmnFormatString("%s", Name.data);
 }
 
 PMESH
-ConvertMesh(
-    _In_ const struct aiScene* Scene,
-    _In_ struct aiMesh* Mesh
-    )
+ConvertMesh(_In_ const struct aiScene *Scene, _In_ struct aiMesh *Mesh)
 /*++
 
 Routine Description:
@@ -141,78 +112,70 @@ Return Value:
 --*/
 {
     PVERTEX Vertices;
-    ivec3* Indices;
+    ivec3 *Indices;
     PMESH OutMesh;
     SIZE_T i;
     PCHAR MaterialName;
 
-    MaterialName = GetMaterialName(
-        Scene,
-        Mesh
-        );
+    MaterialName = GetMaterialName(Scene, Mesh);
 
-    printf("Converting mesh %s with %u vertices and %u faces using material %s\n", Mesh->mName.data, Mesh->mNumVertices, Mesh->mNumFaces, MaterialName);
+    LogInfo("Converting mesh %s with %u vertices and %u faces using material %s", Mesh->mName.data, Mesh->mNumVertices,
+            Mesh->mNumFaces, MaterialName);
 
     Indices = NULL;
 
-    Vertices = CmnAlloc(
-        Mesh->mNumVertices,
-        sizeof(VERTEX)
-        );
-    if ( !Vertices )
+    Vertices = CmnAlloc(Mesh->mNumVertices, sizeof(VERTEX));
+    if (!Vertices)
     {
-        fprintf(stderr, "Failed to allocate %u vertices: %s\n", Mesh->mNumVertices, strerror(errno));
+        LogError("Failed to allocate %u vertices: %s", Mesh->mNumVertices, strerror(errno));
         goto Error;
     }
 
-    for ( i = 0; i < Mesh->mNumVertices; i++ )
+    for (i = 0; i < Mesh->mNumVertices; i++)
     {
-//        printf("%f %f %f\n", Mesh->mVertices[i].x, Mesh->mVertices[i].y, Mesh->mVertices[i].z);
+        //        LogInfo("%f %f %f", Mesh->mVertices[i].x, Mesh->mVertices[i].y, Mesh->mVertices[i].z);
 
         Vertices[i].Position[0] = Mesh->mVertices[i].x;
         Vertices[i].Position[1] = Mesh->mVertices[i].y;
         Vertices[i].Position[2] = Mesh->mVertices[i].z;
 
-        //if ( Mesh->mColors[0] )
+        // if ( Mesh->mColors[0] )
         //{
-        //    Vertices[i].Colour[0] = Mesh->mColors[0][i].r;
-        //    Vertices[i].Colour[1] = Mesh->mColors[0][i].g;
-        //    Vertices[i].Colour[2] = Mesh->mColors[0][i].b;
-        //    Vertices[i].Colour[3] = Mesh->mColors[0][i].a;
-        //}
-        //else
+        //     Vertices[i].Colour[0] = Mesh->mColors[0][i].r;
+        //     Vertices[i].Colour[1] = Mesh->mColors[0][i].g;
+        //     Vertices[i].Colour[2] = Mesh->mColors[0][i].b;
+        //     Vertices[i].Colour[3] = Mesh->mColors[0][i].a;
+        // }
+        // else
         //{
-            Vertices[i].Colour[0] = 1.0f;
-            Vertices[i].Colour[1] = 1.0f;
-            Vertices[i].Colour[2] = 1.0f;
-            Vertices[i].Colour[3] = 1.0f;
+        Vertices[i].Colour[0] = 1.0f;
+        Vertices[i].Colour[1] = 1.0f;
+        Vertices[i].Colour[2] = 1.0f;
+        Vertices[i].Colour[3] = 1.0f;
         //}
 
-        if ( Mesh->mNormals )
+        if (Mesh->mNormals)
         {
             Vertices[i].Normal[0] = Mesh->mNormals[i].x;
             Vertices[i].Normal[1] = Mesh->mNormals[i].y;
             Vertices[i].Normal[2] = Mesh->mNormals[i].z;
         }
 
-        if ( Mesh->mMESHCoords[0] )
+        if (Mesh->mTextureCoords[0])
         {
-            Vertices[i].MESHCoordinate[0] = Mesh->mMESHCoords[0][i].x;
-            Vertices[i].MESHCoordinate[1] = Mesh->mMESHCoords[0][i].y;
+            Vertices[i].TextureCoordinate[0] = Mesh->mTextureCoords[0][i].x;
+            Vertices[i].TextureCoordinate[1] = Mesh->mTextureCoords[0][i].y;
         }
     }
 
-    Indices = CmnAlloc(
-        Mesh->mNumFaces,
-        sizeof(ivec3)
-        );
-    if ( !Indices )
+    Indices = CmnAlloc(Mesh->mNumFaces, sizeof(ivec3));
+    if (!Indices)
     {
-        fprintf(stderr, "Failed to allocate %u indices: %s\n", Mesh->mNumFaces, strerror(errno));
+        LogError("Failed to allocate %u indices: %s", Mesh->mNumFaces, strerror(errno));
         goto Error;
     }
 
-    for ( i = 0; i < Mesh->mNumFaces; i++ )
+    for (i = 0; i < Mesh->mNumFaces; i++)
     {
         // Always 3 because of triangulate
         Indices[i][0] = Mesh->mFaces[i].mIndices[0];
@@ -220,41 +183,31 @@ Return Value:
         Indices[i][2] = Mesh->mFaces[i].mIndices[2];
     }
 
-    OutMesh = CreateMesh(
-        MaterialName,
-        Vertices,
-        Mesh->mNumVertices,
-        Indices,
-        Mesh->mNumFaces
-        );
-    if ( !OutMesh )
+    OutMesh = CreateMesh(MaterialName, Vertices, Mesh->mNumVertices, Indices, Mesh->mNumFaces);
+    if (!OutMesh)
     {
-        fprintf(stderr, "Failed to create mesh\n");
+        LogError("Failed to create mesh");
         goto Error;
     }
 
     return OutMesh;
 Error:
-    if ( MaterialName )
+    if (MaterialName)
     {
         CmnFree(MaterialName);
     }
-    if ( Vertices )
+    if (Vertices)
     {
         CmnFree(Vertices);
     }
-    if ( Indices )
+    if (Indices)
     {
         CmnFree(Indices);
     }
     return NULL;
 }
 
-INT
-ConvertTo(
-    _In_ PCSTR Source,
-    _In_ PCSTR Destination
-    )
+INT ConvertTo(_In_ PCSTR Source, _In_ PCSTR Destination)
 /*++
 
 Routine Description:
@@ -273,8 +226,8 @@ Return Value:
 
 --*/
 {
-    const struct aiScene* Scene;
-    struct aiMesh** Meshes;
+    const struct aiScene *Scene;
+    struct aiMesh **Meshes;
     UINT32 CurrentMesh;
     UINT32 i;
     PMESH Mesh;
@@ -282,70 +235,45 @@ Return Value:
     PCHAR Extension;
     PCSTR OutputName;
 
-    printf("Converting model %s to Purpl mesh %s\n", Source, Destination);
+    LogInfo("Converting model %s to Purpl mesh %s", Source, Destination);
 
     BaseName = CmnFormatString("%s", Destination);
     Extension = NULL;
-    if ( strrchr(
-             BaseName,
-             '.'
-             ) )
+    if (strrchr(BaseName, '.'))
     {
-        Extension = strrchr(
-            BaseName,
-            '.'
-            ) + 1;
-        if ( *Extension != 0 )
+        Extension = strrchr(BaseName, '.') + 1;
+        if (*Extension != 0)
         {
             Extension[-1] = 0;
         }
     }
 
-    Scene = aiImportFile(
-        Source,
-        aiProcess_Triangulate | aiProcess_GenSmoothNormals |
-            aiProcess_OptimizeMeshes | aiProcess_ConvertToLeftHanded
-        );
-    if ( !Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
-         !Scene->mRootNode )
+    Scene = aiImportFile(Source, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_OptimizeMeshes |
+                                     aiProcess_ConvertToLeftHanded);
+    if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode)
     {
-        fprintf(stderr, "Failed to load mesh %s: %s\n", Source,
-                aiGetErrorString());
+        LogError("Failed to load mesh %s: %s", Source, aiGetErrorString());
         return errno;
     }
 
-    Meshes = CmnAlloc(
-        Scene->mNumMeshes,
-        sizeof(struct aiMesh*)
-        );
-    if ( !Meshes )
+    Meshes = CmnAlloc(Scene->mNumMeshes, sizeof(struct aiMesh *));
+    if (!Meshes)
     {
-        fprintf(stderr, "Failed to allocate array of %u meshes: %s\n", Scene->mNumMeshes, strerror(errno));
+        LogError("Failed to allocate array of %u meshes: %s", Scene->mNumMeshes, strerror(errno));
         return errno;
     }
 
     CurrentMesh = 0;
-    ProcessNode(
-        Scene->mRootNode,
-        Scene,
-        Meshes,
-        &CurrentMesh
-        );
+    ProcessNode(Scene->mRootNode, Scene, Meshes, &CurrentMesh);
 
-    for ( i = 0; i < 1; i++ ) //Scene->mNumMeshes; i++ )
+    for (i = 0; i < 1; i++) // Scene->mNumMeshes; i++ )
     {
         OutputName = CmnFormatTempString("%s%s%s", BaseName, Extension ? "." : "", Extension);
-        Mesh = ConvertMesh(
-            Scene,
-            Meshes[i]
-            );
-        printf("Writing mesh %s\n", OutputName);
-        if ( !WriteMesh(
-             OutputName,
-             Mesh
-             ) )
+        Mesh = ConvertMesh(Scene, Meshes[i]);
+        LogInfo("Writing mesh %s", OutputName);
+        if (!WriteMesh(OutputName, Mesh))
         {
-            fprintf(stderr, "Failed to write mesh %s\n", OutputName);
+            LogError("Failed to write mesh %s", OutputName);
             return errno;
         }
     }
@@ -355,11 +283,7 @@ Return Value:
     return 0;
 }
 
-INT
-ConvertFrom(
-    _In_ PCSTR Source,
-    _In_ PCSTR Destination
-    )
+INT ConvertFrom(_In_ PCSTR Source, _In_ PCSTR Destination)
 /*++
 
 Routine Description:
@@ -400,22 +324,14 @@ typedef enum MESHTOOL_MODE
 // Functions for each mode
 //
 
-typedef INT
-(*PFNMESHTOOL_OPERATION)(
-    _In_ PCSTR Source,
-    _In_ PCSTR Destination
-    );
+typedef INT (*PFNMESHTOOL_OPERATION)(_In_ PCSTR Source, _In_ PCSTR Destination);
 PFNMESHTOOL_OPERATION Operations[MeshToolModeCount] = {
     (PFNMESHTOOL_OPERATION)Usage,
     ConvertTo,
     ConvertFrom,
 };
 
-INT
-main(
-    INT argc,
-    PCHAR* argv
-    )
+INT main(INT argc, PCHAR *argv)
 /*++
 
 Routine Description:
@@ -439,25 +355,21 @@ Return Value:
     MESHTOOL_MODE Mode;
     INT Result;
 
-    printf("Purpl Mesh Tool v" PURPL_VERSION_STRING " (supports mesh format v" PURPL_STRINGIZE_EXPAND(MESH_FORMAT_VERSION) ") on %s\n\n", PlatGetDescription());
+    LogInfo("Purpl Mesh Tool v" PURPL_VERSION_STRING
+            " (supports mesh format v" PURPL_STRINGIZE_EXPAND(MESH_FORMAT_VERSION) ") on %s",
+            PlatGetDescription());
 
     CmnInitialize(NULL, 0);
 
-    if ( argc < 4 )
+    if (argc < 4)
     {
         Mode = MeshToolModeNone;
     }
-    else if ( strcmp(
-                argv[1],
-                "to"
-                ) == 0 && argc > 3 )
+    else if (strcmp(argv[1], "to") == 0 && argc > 3)
     {
         Mode = MeshToolModeConvertTo;
     }
-    else if ( strcmp(
-                 argv[1],
-                 "from"
-                 ) == 0 && argc > 3 )
+    else if (strcmp(argv[1], "from") == 0 && argc > 3)
     {
         Mode = MeshToolModeConvertFrom;
     }
@@ -466,10 +378,7 @@ Return Value:
         Mode = MeshToolModeNone;
     }
 
-    Result = Operations[Mode](
-        argv[2],
-        argv[3]
-        );
+    Result = Operations[Mode](argv[2], argv[3]);
 
     CmnShutdown();
 

@@ -36,11 +36,10 @@ Return Value:
 
 --*/
 {
-    printf("Usage:\n"
-           "\n"
-           "\tto <input image> <output Purpl texture>\t\t\t- Create a texture\n"
-           "\tfrom <input Purpl texture> <output PNG image>\t\t- Convert a "
-           "texture to a regular image\n");
+    LogInfo("Usage:");
+    LogInfo("\tto <input image> <output Purpl texture>\t\t\t- Create a texture");
+    LogInfo("\tfrom <input Purpl texture> <output PNG image>\t\t- Convert a ");
+    LogInfo("texture to a regular image");
     exit(EINVAL);
 }
 
@@ -121,20 +120,20 @@ Return Value:
     UINT32 Format;
     PTEXTURE Texture;
 
-    printf("Converting image %s to Purpl texture %s\n", Source, Destination);
+    LogInfo("Converting image %s to Purpl texture %s", Source, Destination);
 
-    printf("Loading image %s\n", Source);
+    LogInfo("Loading image %s", Source);
     ImageBytes =
         stbi_load(Source, (PINT32)&Width, (PINT32)&Height, (PINT32)&Format,
                   STBI_rgb_alpha // Vulkan doesn't like R8G8B8_SRGB
         );
     if (!ImageBytes)
     {
-        fprintf(stderr, "Failed to load image %s: %s", Source, strerror(errno));
+        LogError("Failed to load image %s: %s", Source, strerror(errno));
         return errno;
     }
 
-    printf("Creating Purpl texture\n");
+    LogInfo("Creating Purpl texture");
     Texture = CreateTexture(TextureFormatRgba8,
                             //        ConvertFormat(
                             //            Format,
@@ -143,20 +142,21 @@ Return Value:
                             Width, Height, ImageBytes);
     if (!Texture)
     {
-        fprintf(stderr, "Failed to convert image %s\n", Source);
+        LogError("Failed to convert image %s", Source);
+        return errno;
     }
 
-    printf("Writing texture to %s\n", Destination);
+    LogInfo("Writing texture to %s", Destination);
     if (!WriteTexture(Destination, Texture))
     {
-        fprintf(stderr, "Failed to write texture to %s: %s\n", Destination,
+        LogError("Failed to write texture to %s: %s", Destination,
                 strerror(errno));
         return errno;
     }
 
     stbi_image_free(ImageBytes);
     CmnFree(Texture);
-    printf("Done\n");
+    LogInfo("Done");
     return 0;
 }
 
@@ -182,18 +182,18 @@ Return Value:
     // PBYTE ImageBytes;
     PTEXTURE Texture;
 
-    printf("Converting Purpl texture %s to PNG %s\n", Source, Destination);
+    LogInfo("Converting Purpl texture %s to PNG %s", Source, Destination);
 
-    printf("Loading texture %s\n", Source);
+    LogInfo("Loading texture %s", Source);
     Texture = LoadTexture(Source);
     if (!Texture)
     {
-        fprintf(stderr, "Failed to load texture %s: %s", Source,
+        LogError("Failed to load texture %s: %s", Source,
                 strerror(errno));
         return errno;
     }
 
-    printf("Writing PNG %s from format %d texture\n", Destination,
+    LogInfo("Writing PNG %s from format %d texture", Destination,
            Texture->Format);
     stbi_write_png(Destination, Texture->Width, Texture->Height,
                    (INT32)GetFormatComponents(Texture->Format), Texture->Pixels,
@@ -201,7 +201,7 @@ Return Value:
                        (INT32)GetFormatPitch(Texture->Format));
 
     CmnFree(Texture);
-    printf("Done\n");
+    LogInfo("Done");
     return 0;
 }
 
@@ -252,9 +252,9 @@ Return Value:
     TEXTURETOOL_MODE Mode;
     INT Result;
 
-    printf("Purpl Texture Tool v" PURPL_VERSION_STRING
+    LogInfo("Purpl Texture Tool v" PURPL_VERSION_STRING
            " (supports texture format v" PURPL_STRINGIZE_EXPAND(
-               TEXTURE_FORMAT_VERSION) ") on %s\n\n",
+               TEXTURE_FORMAT_VERSION) ") on %s",
            PlatGetDescription());
 
     CmnInitialize(NULL, 0);

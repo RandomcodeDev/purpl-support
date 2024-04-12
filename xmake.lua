@@ -11,6 +11,6 @@ set_version("0.0.0", {build = "%Y%m%d%H%M"})
 includes("support.lua")
 setup_support(".", "deps", true, false, false, true, nil)
 
-add_requires("assimp")
+add_requires("assimp", "dirent")
 
 includes("devtools/xmake.lua")

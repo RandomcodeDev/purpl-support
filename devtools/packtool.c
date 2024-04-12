@@ -12,6 +12,12 @@ Abstract:
 
 --*/
 
+#ifdef PURPL_WIN32
+#include "dirent.h"
+#else
+#include <dirent.h>
+#endif
+
 #include "purpl/purpl.h"
 
 #include "common/alloc.h"
@@ -37,27 +43,107 @@ Return Value:
 
 --*/
 {
-    printf("Usage:\n"
-           "\n"
-           "\tcreate <packfile> <input> [<input...>]\t\t\t- Create a pack file\n"
-           "\textract <packfile> [folder]\t\t\t\t- Extract a pack file\n"
-           "\tlist <packfile> [<regex>] [<-verbose>]\t\t\t\t- List a pack file's contents\n");
+    LogInfo("Usage:");
+    LogInfo("\tcreate <directory base name> <input> [<input...>]\t\t- Create a pack file");
+    LogInfo("\textract <pack directory> [folder]\t\t\t\t\t\t- Extract a pack file");
+    LogInfo("\tlist <pack directory> [<regex>] [<-verbose>]\t\t\t- List a pack file's contents");
     exit(EINVAL);
 }
 
-INT Create(_In_ PPACKFILE *PackFile, _In_ PCHAR *Arguments)
+static VOID AddFile(_Inout_ PPACKFILE PackFile, _In_z_ PCSTR Path, _In_z_ PCSTR InnerPath)
 {
-
+    UINT64 Size = 0;
+    PVOID Data = FsReadFile(TRUE, Path, 0, 0, &Size, 0);
+    if (Data)
+    {
+        LogInfo("%s -> %s/%s", Path, PackFile->Path, InnerPath);
+        PackAddFile(PackFile, InnerPath, Data, Size);
+    }
 }
 
-INT Extract(_In_ PPACKFILE *PackFile, _In_ PCHAR *Arguments)
+static VOID AddDirectory(_Inout_ PPACKFILE PackFile, _In_ DIR *Directory, _In_z_ PCSTR Path,
+                         _In_opt_z_ PCSTR InnerBasePath)
 {
+    if (Path)
+    {
+        LogInfo("%s -> %s%s%s", Path, PackFile->Path, InnerBasePath ? "/" : "", InnerBasePath ? InnerBasePath : "");
+    }
 
+    struct dirent *Entry;
+    while ((Entry = readdir(Directory)))
+    {
+        if (strncmp(Entry->d_name, ".", Entry->d_namlen) == 0 || strncmp(Entry->d_name, "..", Entry->d_namlen) == 0)
+        {
+            continue;
+        }
+
+        PCHAR FullPath = CmnFormatString("%s/%.*s", Path, (INT)Entry->d_namlen, Entry->d_name);
+        PURPL_ASSERT(FullPath != NULL);
+        PCHAR InnerPath = CmnFormatString("%s%s%.*s", InnerBasePath ? InnerBasePath : "", InnerBasePath ? "/" : "",
+                                          (INT)Entry->d_namlen, Entry->d_name);
+        PURPL_ASSERT(InnerPath != NULL);
+
+        if (Entry->d_type == DT_DIR)
+        {
+            DIR *SubDirectory = opendir(FullPath);
+            if (SubDirectory)
+            {
+                AddDirectory(PackFile, SubDirectory, FullPath, InnerPath);
+                closedir(SubDirectory);
+            }
+        }
+        else if (Entry->d_type == DT_REG)
+        {
+            AddFile(PackFile, FullPath, InnerPath);
+        }
+        else
+        {
+            LogInfo("%d", Entry->d_type);
+        }
+
+        CmnFree(FullPath);
+        CmnFree(InnerPath);
+    }
 }
 
-INT List(_In_ PPACKFILE *PackFile, _In_ PCHAR *Arguments)
+static INT Create(_In_ PPACKFILE PackFile, _In_ PCHAR *Arguments, _In_ UINT32 ArgumentCount)
 {
+    for (UINT32 i = 0; i < ArgumentCount; i++)
+    {
+        PCHAR Path = PlatFixPath(Arguments[i]);
+        PURPL_ASSERT(Path != NULL);
+        DIR *Directory = opendir(Path);
+        if (Directory)
+        {
+            AddDirectory(PackFile, Directory, Path, NULL);
+        }
+        else
+        {
+            AddFile(PackFile, Path, NULL);
+        }
+        CmnFree(Path);
+    }
 
+    PackSave(PackFile, NULL);
+}
+
+static INT Extract(_In_ PPACKFILE PackFile, _In_ PCHAR *Arguments, _In_ UINT32 ArgumentCount)
+{
+}
+
+static INT List(_In_ PPACKFILE PackFile, _In_ PCHAR *Arguments, _In_ UINT32 ArgumentCount)
+{
+    for (UINT64 i = 0; i < stbds_shlenu(PackFile->Entries); i++)
+    {
+        PPACKFILE_ENTRY Entry = &PackFile->Entries[i].value;
+        LogInfo("%s", PackFile->Entries[i].key);
+        LogInfo("\tArchive: %hu", Entry->ArchiveIndex);
+        LogInfo("\tOffset: %s", CmnFormatSize(Entry->Offset));
+        LogInfo("\tSize: %s", CmnFormatSize(Entry->Size));
+        LogInfo("\tCompressed size: %s", CmnFormatSize(Entry->CompressedSize));
+        LogInfo("\tHash: 0x%llX%llX", Entry->Hash.low64, Entry->Hash.high64);
+        LogInfo("\tCompressed hash: 0x%llX%llX", Entry->CompressedHash.low64, Entry->CompressedHash.high64);
+    }
 }
 
 //
@@ -109,13 +195,13 @@ Return Value:
     PACKTOOL_MODE Mode;
     INT Result;
 
-    printf("Purpl Pack Tool v" PURPL_VERSION_STRING
-           " (supports pack format v" PURPL_STRINGIZE_EXPAND(PACK_FORMAT_VERSION) ") on %s\n\n",
-           PlatGetDescription());
+    LogInfo("Purpl Pack Tool v" PURPL_VERSION_STRING
+            " (supports pack format v" PURPL_STRINGIZE_EXPAND(PACK_FORMAT_VERSION) ") on %s",
+            PlatGetDescription());
 
     CmnInitialize(NULL, 0);
 
-    if (argc < 4)
+    if (argc < 3)
     {
         Mode = PackToolModeNone;
     }
@@ -127,6 +213,10 @@ Return Value:
     {
         Mode = PackToolModeExtract;
     }
+    else if (strcmp(argv[1], "list") == 0)
+    {
+        Mode = PackToolModeList;
+    }
     else
     {
         Mode = PackToolModeNone;
@@ -136,17 +226,17 @@ Return Value:
 
     if (Mode == PackToolModeCreate)
     {
-        if (FsHasFile(TRUE, argv[2]))
+        if (FsHasFile(TRUE, CmnFormatTempString("%s_dir.pak", argv[2])))
         {
-            printf("Pack file %s already exists, remove it [Y/N]? ", argv[2]);
+            LogWarning("Pack file %s already exists, remove it [Y/N]? ", CmnFormatTempString("%s_dir.pak", argv[2]));
             if (toupper(getchar()) == 'Y')
             {
-                printf("Removing file\n");
+                LogWarning("Removing file");
                 remove(argv[2]);
             }
             else
             {
-                printf("Not removing file\n");
+                LogWarning("Not removing file");
                 return EEXIST;
             }
         }
@@ -157,7 +247,8 @@ Return Value:
         PackFile = PackLoad(argv[2]);
     }
 
-    Result = Operations[Mode](PackFile, argv + 2, argc - 2);
+    Result = Operations[Mode](PackFile, argv + 3, argc - 3);
+    PackFree(PackFile);
 
     CmnShutdown();
 

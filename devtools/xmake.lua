@@ -9,6 +9,7 @@ target("packtool")
     set_kind("binary")
     add_files("packtool.c")
     add_deps("common", "platform")
+    add_packages("dirent")
 target_end()
 
 target("texturetool")

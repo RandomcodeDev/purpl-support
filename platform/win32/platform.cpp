@@ -418,22 +418,21 @@ UINT64 PlatGetFileSize(_In_z_ PCSTR Path)
 {
     HANDLE File;
     LARGE_INTEGER Size = {};
-    OFSTRUCT OpenStruct = {};
     DWORD Error;
 
-    OpenStruct.cBytes = sizeof(OFSTRUCT);
-    File = (HANDLE)(UINT_PTR)OpenFile(Path, &OpenStruct, OF_READ);
+    File =
+        CreateFileA(Path, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (!File)
     {
-        Error = OpenStruct.nErrCode;
-        LogWarning("Failed to open file %s to get its size: error %d (0x%X)", Error, Error);
+        Error = GetLastError();
+        LogError("Failed to open file %s to read its size: error %d (0x%X)", Path, Error, Error);
         return 0;
     }
 
     if (!GetFileSizeEx(File, &Size))
     {
         Error = GetLastError();
-        LogWarning("Failed to get size of file %s: error %d (0x%X)", Path, Error, Error);
+        LogError("Failed to get size of file %s: error %d (0x%X)", Path, Error, Error);
         return 0;
     }
 

@@ -138,9 +138,9 @@ PPACKFILE PackLoad(_In_z_ PCSTR DirectoryPath)
     PPACKFILE_ENTRY Entry = (PPACKFILE_ENTRY)(DirectoryRaw + sizeof(PACKFILE_HEADER));
     while ((PBYTE)Entry + Entry->PathLength < DirectoryRaw + DirectorySize)
     {
-        PCHAR EntryPath = CmnFormatTempString("%.*s", Entry->PathLength, (PCSTR)(Entry + 1));
+        PCHAR EntryPath = CmnFormatString("%.*s", Entry->PathLength, (PCSTR)(Entry + 1));
         stbds_shput(Pack->Entries, EntryPath, *Entry);
-        Entry = (PPACKFILE_ENTRY)(EntryPath + Entry->PathLength);
+        Entry = (PPACKFILE_ENTRY)((PBYTE)(Entry + 1) + Entry->PathLength);
     }
 
     Pack->CurrentArchive = Pack->Header.ArchiveCount - 1;
@@ -165,7 +165,11 @@ VOID PackFree(_Inout_ PVOID Handle)
     if (Handle)
     {
         PPACKFILE Pack = Handle;
-        stbds_arrfree(Pack->Entries);
+        for (UINT64 i = 0; i < stbds_shlenu(Pack->Entries); i++)
+        {
+            CmnFree(Pack->Entries[i].key);
+        }
+        stbds_shfree(Pack->Entries);
         CmnFree(Pack->Path);
     }
 }
@@ -331,8 +335,9 @@ BOOLEAN PackAddFile(_Inout_ PVOID Handle, _In_z_ PCSTR Path, _In_reads_bytes_(Si
     Entry.Offset = Pack->CurrentOffset;
     Entry.Size = Size;
     Entry.CompressedSize = CompressedSize;
+    Entry.PathLength = strlen(Path);
 
-    stbds_shput(Pack->Entries, Path, Entry);
+    stbds_shput(Pack->Entries, CmnDuplicateString(Path, Entry.PathLength), Entry);
 
     UINT64 DataOffset = 0;
     UINT64 SizeToWrite = CompressedSize;
