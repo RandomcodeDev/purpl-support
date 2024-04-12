@@ -5,6 +5,12 @@ target("meshtool")
     add_packages("assimp")
 target_end()
 
+target("packtool")
+    set_kind("binary")
+    add_files("packtool.c")
+    add_deps("common", "platform")
+target_end()
+
 target("texturetool")
     set_kind("binary")
     add_files("texturetool.c")

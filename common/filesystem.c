@@ -225,6 +225,8 @@ static PFILESYSTEM_SOURCE FindFile(_In_z_ PCSTR Path)
     }
 
 X(
+    BOOLEAN, HasFile, (_In_ BOOLEAN Raw, _In_z_ PCSTR Path), {}, , { return 0; }, FixedFullPath)
+X(
     UINT64, GetFileSize, (_In_ BOOLEAN Raw, _In_z_ PCSTR Path), {}, , { return 0; }, FixedFullPath)
 X(
     PVOID, ReadFile,

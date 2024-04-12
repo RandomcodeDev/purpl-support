@@ -205,7 +205,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
     elseif is_plat("linux") then
         add_defines("PURPL_LINUX", "PURPL_UNIX")
     elseif is_plat("freebsd") then
-        add_defines("CmnFreeBSD", "PURPL_UNIX")
+        add_defines("PURPL_FREEBSD", "PURPL_UNIX")
     elseif is_plat("switch", "switchhb") then
         add_defines("PURPL_SWITCH", "PURPL_UNIX")
         if is_plat("switchhb") then
@@ -243,6 +243,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
         path.join(deps_root, "cjson"),
         path.join(deps_root, "cglm", "include"),
         path.join(deps_root, "mimalloc", "include"),
+        path.join(deps_root, "tiny-regex-c"),
         path.join(deps_root, "xxhash"),
         path.join(deps_root, "zstd", "lib"),
         path.absolute(path.join("$(buildir)", "config"))
@@ -353,7 +354,17 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
 
     target("stb")
         set_kind("static")
+        add_headerfiles(path.join(deps_root, "stb", "*.h"))
         add_files(path.join(deps_root, "stb.c"))
+        set_warnings("none")
+        set_group("External")
+        on_load(fix_target)
+    target_end()
+
+    target("regex")
+        set_kind("static")
+        add_headerfiles(path.join(deps_root, "tiny-regex-c", "re.h"))
+        add_files(path.join(deps_root, "tiny-regex-c", "re.c"))
         set_warnings("none")
         set_group("External")
         on_load(fix_target)

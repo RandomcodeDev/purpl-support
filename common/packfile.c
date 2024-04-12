@@ -99,7 +99,7 @@ PPACKFILE PackLoad(_In_z_ PCSTR DirectoryPath)
     }
     else
     {
-        Path = PlatFixPath(FixedPath);
+        Path = CmnDuplicateString(FixedPath, 0);
     }
 
     CmnFree(FixedPath);

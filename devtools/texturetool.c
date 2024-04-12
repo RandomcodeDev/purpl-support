@@ -209,21 +209,21 @@ Return Value:
 // Tool mode
 //
 
-typedef enum MESHTOOL_MODE
+typedef enum TEXTURETOOL_MODE
 {
     TextureToolModeNone,
     TextureToolModeConvertTo,
     TextureToolModeConvertFrom,
     TextureToolModeCount
-} MESHTOOL_MODE, *PMESHTOOL_MODE;
+} TEXTURETOOL_MODE, *PTEXTURETOOL_MODE;
 
 //
 // Functions for each mode
 //
 
-typedef INT (*PFNMESHTOOL_OPERATION)(_In_ PCSTR Source, _In_ PCSTR Destination);
-PFNMESHTOOL_OPERATION Operations[TextureToolModeCount] = {
-    (PFNMESHTOOL_OPERATION)Usage,
+typedef INT (*PFNTEXTURETOOL_OPERATION)(_In_ PCSTR Source, _In_ PCSTR Destination);
+PFNTEXTURETOOL_OPERATION Operations[TextureToolModeCount] = {
+    (PFNTEXTURETOOL_OPERATION)Usage,
     ConvertTo,
     ConvertFrom,
 };
@@ -249,7 +249,7 @@ Return Value:
 
 --*/
 {
-    MESHTOOL_MODE Mode;
+    TEXTURETOOL_MODE Mode;
     INT Result;
 
     printf("Purpl Texture Tool v" PURPL_VERSION_STRING

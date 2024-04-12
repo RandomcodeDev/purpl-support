@@ -19,3 +19,6 @@
 [submodule "deps/mimalloc"]
 	path = deps/mimalloc
 	url = https://github.com/microsoft/mimalloc
+[submodule "deps/tiny-regex-x"]
+	path = deps/tiny-regex-c
+	url = https://github.com/kokke/tiny-regex-c

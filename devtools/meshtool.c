@@ -4,7 +4,7 @@ Copyright (c) 2024 MobSlicer152
 
 Module Name:
 
-    texturetool.c
+    MESHtool.c
 
 Abstract:
 
@@ -195,10 +195,10 @@ Return Value:
             Vertices[i].Normal[2] = Mesh->mNormals[i].z;
         }
 
-        if ( Mesh->mTextureCoords[0] )
+        if ( Mesh->mMESHCoords[0] )
         {
-            Vertices[i].TextureCoordinate[0] = Mesh->mTextureCoords[0][i].x;
-            Vertices[i].TextureCoordinate[1] = Mesh->mTextureCoords[0][i].y;
+            Vertices[i].MESHCoordinate[0] = Mesh->mMESHCoords[0][i].x;
+            Vertices[i].MESHCoordinate[1] = Mesh->mMESHCoords[0][i].y;
         }
     }
 

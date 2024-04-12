@@ -24,6 +24,14 @@ extern VOID FsAddDirectorySource(_In_z_ PCSTR Path);
 /// @param[in] Path The path of the pack file
 extern VOID FsAddPackSource(_In_z_ PCSTR Path);
 
+/// @brief Checks if a file exists
+///
+/// @param[in] Raw Whether to skip source abstraction
+/// @param[in] Path The path to the file
+///
+/// @return Whether the file exists
+extern BOOLEAN FsHasFile(_In_ BOOLEAN Raw, _In_z_ PCSTR Path);
+
 /// @brief Gets the size of a file
 ///
 ///
