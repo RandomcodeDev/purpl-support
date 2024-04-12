@@ -15,7 +15,9 @@ Abstract:
 #include "common/common.h"
 #include "common/configvar.h"
 
+#ifdef PURPL_ENGINE
 #include "engine/render/render.h"
+#endif
 
 #include "platform/platform.h"
 #include "platform/video.h"
@@ -150,10 +152,12 @@ Return Value:
     if (FirstUpdate)
     {
         FirstUpdate = FALSE;
+#ifdef PURPL_ENGINE
         PCHAR NewTitle = CmnAppendString(WindowTitle, CmnFormatTempString(" using GPU %s", RdrGetGpuName()));
         CmnFree(WindowTitle);
         WindowTitle = NewTitle;
         glfwSetWindowTitle(Window, WindowTitle);
+#endif
     }
 
     glfwPollEvents();

@@ -187,11 +187,11 @@ function support_executable(support_root)
         after_build(switchhb_postbuild)
     elseif is_plat("psp") then
         add_files(path.join(support_root, "platform", "psp", "launcher.c"))
-        after_build(switchhb_postbuild)
+        after_build(psp_postbuild)
     end
 end
 
-function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, set_big_settings, config_h_in_path, switch_title_id)
+function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, opengl, set_big_settings, config_h_in_path, switch_title_id)
     includes(path.join(support_root, "platform", "switchhb", "switch.lua"))
     includes(path.join(support_root, "platform", "psp", "psp.lua"))
     includes(path.join(support_root, "platform", "ps3", "ps3.lua"))
@@ -293,6 +293,9 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
         elseif is_plat("switchhb") then
             add_defines("EGL_NO_X11")
             add_links("EGL", "glapi", "drm_nouveau", "nx")
+        elseif is_plat("psp") then
+            add_links("GL")
+            --psp_add_pspgl(support_root, deps_root)
         end
     end
 
@@ -461,7 +464,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
         elseif is_plat("switchhb") then
             add_headerfiles(path.join(support_root, "platform", "switchhb", "switch.lua"))
             add_files(
-                path.join(support_root, "platform", "switchhb", "async.c"),
+                path.join(support_root, "platform", "unix", "async.c"),
                 path.join(support_root, "platform", "switchhb", "platform.c"),
                 path.join(support_root, "platform", "switchhb", "video.c")
             )
@@ -469,7 +472,7 @@ function setup_support(support_root, deps_root, use_mimalloc, vulkan, opengl, se
         elseif is_plat("psp") then
             add_headerfiles(path.join(support_root, "platform", "psp", "psp.lua"))
             add_files(
-                path.join(support_root, "platform", "psp", "async.c"),
+                path.join(support_root, "platform", "unix", "async.c"),
                 path.join(support_root, "platform", "psp", "platform.c"),
                 path.join(support_root, "platform", "psp", "video.c")
             )
