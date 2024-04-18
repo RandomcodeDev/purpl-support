@@ -34,6 +34,7 @@ static INT WindowHeight;
 static BOOLEAN WindowResized;
 static BOOLEAN WindowFocused;
 BOOLEAN WindowClosed;
+static BOOLEAN GlEnabled;
 
 static VOID GlfwErrorCallback(_In_ INT Error, _In_ PCSTR Description)
 {
@@ -118,14 +119,15 @@ BOOLEAN VidInitialize(_In_ BOOLEAN EnableGl)
     //    glfwShowWindow(Window);
 
 #ifdef PURPL_OPENGL
-    if (EnableGl)
+    GlEnabled = EnableGl;
+    if (GlEnabled)
     {
         glfwMakeContextCurrent(Window);
         gladLoadGL(glfwGetProcAddress);
     }
 #endif
 
-    return EnableGl;
+    return GlEnabled;
 }
 
 BOOLEAN
@@ -172,7 +174,10 @@ Return Value:
     }
 
 #ifdef PURPL_OPENGL
-    glfwSwapBuffers(Window);
+    if (GlEnabled)
+    {
+        glfwSwapBuffers(Window);
+    }
 #endif
 
     glfwGetWindowSize(Window, &WindowWidth, &WindowHeight);

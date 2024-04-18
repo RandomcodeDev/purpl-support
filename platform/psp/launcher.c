@@ -16,8 +16,8 @@ Abstract:
 
 #include "common/common.h"
 
-PSP_MODULE_INFO(PURPL_EXECUTABLE_NAME, 0, 1, 0);
-PSP_MAIN_THREAD_ATTR(THREAD_ATTR_VFPU | THREAD_ATTR_USER);
+//PSP_MODULE_INFO(PURPL_EXECUTABLE_NAME, 0, 1, 0);
+//PSP_MAIN_THREAD_ATTR(THREAD_ATTR_VFPU | THREAD_ATTR_USER);
 
 unsigned int sce_newlib_nocreate_thread_in_start = 1;
 const char *sce_newlib_main_thread_name = "main";
@@ -44,7 +44,7 @@ Return Value:
 --*/
 {
     INT Result;
-    
+
     InitializeMainThread((PFN_THREAD_START)main);
 
     Result = PurplMain(argv, argc);
