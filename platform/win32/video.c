@@ -188,12 +188,13 @@ static HMODULE OpenGl32Handle;
 static GLADapiproc GetGlSymbol(_In_z_ PCSTR Name)
 {
     // LogDebug("Getting OpenGL symbol %s", Name);
-    GLADapiproc Symbol = wglGetProcAddress(Name);
+    PROC Symbol = wglGetProcAddress(Name);
     if (!Symbol)
     {
-        Symbol = (GLADapiproc)GetProcAddress(OpenGl32Handle, Name);
+        Symbol = GetProcAddress(OpenGl32Handle, Name);
     }
-    return Symbol;
+
+    return (GLADapiproc)Symbol;
 }
 
 static BOOLEAN EnableOpenGl(VOID)

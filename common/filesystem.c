@@ -29,7 +29,7 @@ typedef struct FILESYSTEM_SOURCE
 
 PFILESYSTEM_SOURCE FsSources;
 
-static BOOLEAN PhysFsHasFile(_In_ PVOID Handle, _In_z_ PCSTR Path)
+static BOOLEAN PhysFsHasFile(_In_opt_ PVOID Handle, _In_z_ PCSTR Path)
 {
     BOOLEAN Exists = FALSE;
 
@@ -65,9 +65,11 @@ BOOLEAN FsCreateDirectory(_In_z_ PCSTR Path)
         LogTrace("Creating directory %s", Path);
         return PlatCreateDirectory(Path);
     }
+
+    return FALSE;
 }
 
-static PVOID PhysFsReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount,
+static PVOID PhysFsReadFile(_In_opt_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount,
                             _Out_ PUINT64 ReadAmount, _In_ UINT64 Extra)
 {
     FILE *File;

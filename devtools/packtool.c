@@ -119,16 +119,19 @@ static INT Create(_In_ PPACKFILE PackFile, _In_ PCHAR *Arguments, _In_ UINT32 Ar
         }
         else
         {
-            AddFile(PackFile, Path, NULL);
+            AddFile(PackFile, Path, Path);
         }
         CmnFree(Path);
     }
 
     PackSave(PackFile, NULL);
+
+    return 0;
 }
 
 static INT Extract(_In_ PPACKFILE PackFile, _In_ PCHAR *Arguments, _In_ UINT32 ArgumentCount)
 {
+    return 0;
 }
 
 static INT List(_In_ PPACKFILE PackFile, _In_ PCHAR *Arguments, _In_ UINT32 ArgumentCount)
@@ -144,6 +147,8 @@ static INT List(_In_ PPACKFILE PackFile, _In_ PCHAR *Arguments, _In_ UINT32 Argu
         LogInfo("\tHash: 0x%llX%llX", Entry->Hash.low64, Entry->Hash.high64);
         LogInfo("\tCompressed hash: 0x%llX%llX", Entry->CompressedHash.low64, Entry->CompressedHash.high64);
     }
+
+    return 0;
 }
 
 //

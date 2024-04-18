@@ -21,7 +21,7 @@ static VOID ParseVariables(_In_ PCHAR *Arguments, _In_ UINT ArgumentCount)
         // Check if the first character is in the list of prefixes
         if (strchr(PURPL_ARGUMENT_PREFIXES, Arguments[i][0]))
         {
-            PCHAR VariableName = CmnFormatTempString("%s", Arguments[i] + 1);
+            PSTR VariableName = (PSTR)CmnFormatTempString("%s", Arguments[i] + 1);
             PCSTR Value = "1";
             if (i < ArgumentCount - 1)
             {

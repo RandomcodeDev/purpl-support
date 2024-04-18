@@ -24,6 +24,7 @@ repo_tools_native_dir = ""
 dxc = ""
 meshtool = ""
 texturetool = ""
+packtool = ""
 
 verbose = False
 rebuild = False
@@ -165,6 +166,7 @@ def main():
     dxc = find_tool(repo_tools_native_dir, "dxc")
     meshtool = find_tool(tools_dir, "meshtool")
     texturetool = find_tool(tools_dir, "texturetool")
+    packtool = find_tool(tools_dir, "packtool")
 
     if purge:
         print(f"Purging {output_dir}")
@@ -250,6 +252,7 @@ def main():
         except FileExistsError:
             pass
 
+    build_asset(lambda src, dest: [packtool, "create", dest.replace("_dir.pak", ""), src], output_dir, os.path.join(assets_dir, "assets_dir.pak"))
 
 if __name__ == "__main__":
     main()

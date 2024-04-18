@@ -36,7 +36,7 @@ VOID CfgDefineVariable(_In_z_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CO
     PURPL_ASSERT(Variable != NULL);
 
     Variable->Side = Side & 0b11;
-    PSTR SideString = CmnFormatTempString("%s", GetSideString(Variable->Side));
+    PSTR SideString = (PSTR)CmnFormatTempString("%s", GetSideString(Variable->Side));
     SideString[0] = (CHAR)toupper(SideString[0]);
 
     Variable->Static = Static;
