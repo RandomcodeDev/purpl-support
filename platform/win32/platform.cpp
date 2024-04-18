@@ -368,11 +368,15 @@ BOOLEAN PlatCreateDirectory(_In_z_ PCSTR Path)
         if (*p == '/')
         {
             *p = 0;
-            CreateDirectoryA(Path, nullptr);
+            CreateDirectoryA(TempPath, nullptr);
             *p = '/';
         }
     }
-    CreateDirectoryA(Path, nullptr);
+
+    if (!CreateDirectoryA(Path, nullptr))
+    {
+        LogError("Failed to create directory %s", Path);
+    }
 
     // should probably for real check return values
     return TRUE;

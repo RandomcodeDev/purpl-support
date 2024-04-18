@@ -39,7 +39,7 @@ static BOOLEAN PhysFsHasFile(_In_ PVOID Handle, _In_z_ PCSTR Path)
     CmnFree(FullPath);
 
     FILE *File = fopen(FixedFullPath, "r");
-    if (File || (!File && errno != ENOENT)) // Should be about right
+    if (File || (!File && errno != ENOENT && errno != EPERM)) // Should be about right
     {
         Exists = TRUE;
         if (File)
@@ -60,8 +60,11 @@ static UINT64 PhysFsGetFileSize(_In_ PVOID Handle, _In_z_ PCSTR Path)
 
 BOOLEAN FsCreateDirectory(_In_z_ PCSTR Path)
 {
-    LogTrace("Creating directory %s", Path);
-    return PlatCreateDirectory(Path);
+    if (!PhysFsHasFile(NULL, Path))
+    {
+        LogTrace("Creating directory %s", Path);
+        return PlatCreateDirectory(Path);
+    }
 }
 
 static PVOID PhysFsReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount,
