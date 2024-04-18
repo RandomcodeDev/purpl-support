@@ -22,7 +22,9 @@ extern VOID FsAddDirectorySource(_In_z_ PCSTR Path);
 /// @brief Adds a pack file source to the filesystem
 ///
 /// @param[in] Path The path of the pack file
-extern VOID FsAddPackSource(_In_z_ PCSTR Path);
+///
+/// @return Whether the pack was added successfully as a source
+extern BOOLEAN FsAddPackSource(_In_z_ PCSTR Path);
 
 /// @brief Checks if a file exists
 ///

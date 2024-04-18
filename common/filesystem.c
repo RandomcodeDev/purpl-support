@@ -66,7 +66,7 @@ BOOLEAN FsCreateDirectory(_In_z_ PCSTR Path)
         return PlatCreateDirectory(Path);
     }
 
-    return FALSE;
+    return TRUE;
 }
 
 static PVOID PhysFsReadFile(_In_opt_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount,
@@ -166,11 +166,11 @@ VOID FsAddDirectorySource(_In_z_ PCSTR Path)
     (&stbds_arrlast(FsSources))->Handle = &stbds_arrlast(FsSources);
 }
 
-VOID FsAddPackSource(_In_z_ PCSTR Path)
+BOOLEAN FsAddPackSource(_In_z_ PCSTR Path)
 {
     if (!Path)
     {
-        return;
+        return FALSE;
     }
 
     FILESYSTEM_SOURCE Source = {0};
@@ -179,7 +179,7 @@ VOID FsAddPackSource(_In_z_ PCSTR Path)
     Source.Handle = PackLoad(Path);
     if (!Source.Handle)
     {
-        return;
+        return FALSE;
     }
 
     Source.HasFile = PackHasFile;
@@ -189,6 +189,8 @@ VOID FsAddPackSource(_In_z_ PCSTR Path)
     LogDebug("Adding pack source %s", Source.Path);
 
     stbds_arrput(FsSources, Source);
+
+    return TRUE;
 }
 
 static PFILESYSTEM_SOURCE FindFile(_In_z_ PCSTR Path)
@@ -213,9 +215,18 @@ static PFILESYSTEM_SOURCE FindFile(_In_z_ PCSTR Path)
         PFILESYSTEM_SOURCE Source = Raw ? NULL : FindFile(Path);                                                       \
         if (Source ExtraCondition)                                                                                     \
         {                                                                                                              \
-            PCHAR FullPath = CmnFormatString("%s/%s", Source->Path, Path);                                             \
-            PCHAR FixedFullPath = PlatFixPath(FullPath);                                                               \
-            CmnFree(FullPath);                                                                                         \
+            PCHAR FixedFullPath = NULL;                                                                                \
+            if (Source->Type == FsSourceTypeDirectory)                                                                 \
+            {                                                                                                          \
+                PCHAR FullPath = CmnFormatString("%s/%s", Source->Path, Path);                                         \
+                FixedFullPath = PlatFixPath(FullPath);                                                                 \
+                                                                                                                       \
+                CmnFree(FullPath);                                                                                     \
+            }                                                                                                          \
+            else                                                                                                       \
+            {                                                                                                          \
+                FixedFullPath = PlatFixPath(Path);                                                                     \
+            }                                                                                                          \
             ReturnType Return = Source->Name(Source->Handle, __VA_ARGS__);                                             \
             CmnFree(FixedFullPath);                                                                                    \
             return Return;                                                                                             \

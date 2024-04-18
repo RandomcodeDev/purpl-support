@@ -22,7 +22,7 @@ static PCHAR GetArchivePath(_In_z_ PCSTR BasePath, _In_ UINT16 Index)
     }
     else
     {
-        return CmnInsertString(BasePath, CmnFormatTempString("_%02hu" PACKFILE_EXTENSION, Index), Extension - BasePath);
+        return CmnInsertString(BasePath, CmnFormatTempString("_%02hu", Index), Extension - BasePath);
     }
 }
 
@@ -35,7 +35,14 @@ PPACKFILE PackCreate(_In_z_ PCSTR Path)
         return NULL;
     }
 
-    Pack->Path = CmnDuplicateString(Path, 0);
+    SIZE_T Length = 0;
+    PSTR Dir = NULL;
+    if ((Dir = strstr(Path, "_dir")))
+    {
+        Length = Dir - Path;
+    }
+
+    Pack->Path = CmnDuplicateString(Path, Length);
     Pack->Header.Signature = PACKFILE_SIGNATURE;
     Pack->Header.Version = PACKFILE_FORMAT_VERSION;
 
@@ -179,7 +186,7 @@ BOOLEAN PackHasFile(_In_ PVOID Handle, _In_z_ PCSTR Path)
     PPACKFILE Pack = Handle;
     if (Pack)
     {
-        return stbds_shgetp(Pack->Entries, Path) != NULL;
+        return stbds_shgetp_null(Pack->Entries, Path) != NULL;
     }
 
     return FALSE;
@@ -208,7 +215,7 @@ PVOID PackReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In
 
     LogInfo("Reading file %s from pack %s", Path, Pack->Path);
 
-    PPACKFILE_ENTRY_MAP Pair = stbds_shgetp(Pack->Entries, Path);
+    PPACKFILE_ENTRY_MAP Pair = stbds_shgetp_null(Pack->Entries, Path);
     if (!Pair)
     {
         LogError("File does not exist");
@@ -228,11 +235,12 @@ PVOID PackReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In
     UINT64 CurrentOffset = 0;
     UINT64 SizeToRead = Entry->CompressedSize;
     UINT16 CurrentArchive = Entry->ArchiveIndex;
+    PCHAR ArchivePath = GetArchivePath(Pack->Path, CurrentArchive);
+    Pack->CurrentOffset = Entry->Offset;
     while (SizeToRead > 0)
     {
-        PCHAR ArchivePath = GetArchivePath(Pack->Path, CurrentArchive);
         UINT64 Read = PURPL_MIN(PACKFILE_MAX_CHUNK_SIZE - Pack->CurrentOffset, SizeToRead);
-        PVOID Data = FsReadFile(TRUE, ArchivePath, CurrentOffset, Read, &Read, 0);
+        PVOID Data = FsReadFile(TRUE, ArchivePath, Pack->CurrentOffset, Read, &Read, 0);
         if (!Data)
         {
             LogError("Failed to read file from pack");
@@ -241,26 +249,26 @@ PVOID PackReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In
             CmnFree(Data);
             return NULL;
         }
-        CmnFree(ArchivePath);
         memcpy(CompressedData + TotalOffset, Data, Read);
         CmnFree(Data);
         SizeToRead -= Read;
         TotalOffset += Read;
         CurrentOffset += Read;
+        Pack->CurrentOffset += Read;
         if (Pack->CurrentOffset > PACKFILE_MAX_CHUNK_SIZE)
         {
             CurrentArchive++;
             CurrentOffset = 0;
+            CmnFree(ArchivePath);
+            ArchivePath = GetArchivePath(Pack->Path, CurrentArchive);
         }
     }
 
     XXH128_hash_t CompressedHash = XXH3_128bits(CompressedData, Entry->CompressedSize);
     if (memcmp(&CompressedHash, &Entry->CompressedHash, sizeof(XXH128_hash_t)) != 0)
     {
-        LogError("Compressed data hash does not match: got %llX%llX, expected %llX%llX", CompressedHash.high64,
-                 CompressedHash.low64, Entry->CompressedHash.high64, Entry->CompressedHash.low64);
-        CmnFree(CompressedData);
-        return NULL;
+        LogWarning("Compressed data hash does not match: got %llX%llX, expected %llX%llX", CompressedHash.high64,
+                   CompressedHash.low64, Entry->CompressedHash.high64, Entry->CompressedHash.low64);
     }
 
     PBYTE Data = CmnAlloc(Entry->Size, 1);
@@ -297,6 +305,7 @@ PVOID PackReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In
 
     CmnFree(CompressedData);
 
+    *ReadAmount = Entry->Size;
     return Data;
 }
 
