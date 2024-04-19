@@ -61,14 +61,17 @@
 #ifdef PURPL_UNIX
 #include <sys/stat.h>
 #include <sys/time.h>
+// a
 #include <sys/types.h>
+
+#define stat64 stat
 
 #if !defined PURPL_SWITCH && !defined PURPL_CONSOLE_HOMEBREW
 #include <sys/syscall.h>
 #include <sys/utsname.h>
 #endif
 
-#if !defined PURPL_SWITCH && !defined PURPL_PSP && !defined PURPL_PS3
+#if !defined PURPL_SWITCH && !defined PURPL_CONSOLE_HOMEBREW
 #include <dlfcn.h>
 #include <execinfo.h>
 #include <pthread.h>
@@ -81,19 +84,22 @@
 #include "common/wintypes.h"
 #endif
 
-#if defined PURPL_SWITCH && defined PURPL_CONSOLE_HOMEBREW
+#ifdef PURPL_CONSOLE_HOMEBREW
 #include <pthread.h>
-#include <switch.h>
 
 #define fseeko64 fseeko
-#define stat64 stat
+#endif
+
+#if defined PURPL_SWITCH && defined PURPL_CONSOLE_HOMEBREW
+#include <switch.h>
+#endif
+
+#ifdef PURPL_PS3
+#define CLOCK_MONOTONIC 4
 #endif
 
 #ifdef PURPL_PSP
-#include <pthread.h>
-
-#define fseeko64 fseeko
-#define stat64 stat
+#include <pspkernel.h>
 #endif
 
 #define CGLM_CLIPSPACE_INCLUDE_ALL

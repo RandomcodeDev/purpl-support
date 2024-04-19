@@ -24,7 +24,7 @@ static PVOID ThreadEntry(_In_ PVOID Thread)
     AsCurrentThread = Thread;
     AsCurrentThread->ReturnValue =
         AsCurrentThread->ThreadStart(AsCurrentThread->UserData);
-    return (PVOID)AsCurrentThread->ReturnValue;
+    return (PVOID)(UINT64)AsCurrentThread->ReturnValue;
 }
 
 VOID InitializeMainThread(_In_ PFN_THREAD_START StartAddress)

@@ -218,6 +218,7 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
             add_defines("PURPL_PSP")
         elseif is_plat("ps3") then
             add_defines("PURPL_PS3")
+            ps3_add_settings(support_root, deps_root)
         end
     end
 
@@ -476,6 +477,13 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
                 path.join(support_root, "platform", "psp", "platform.c"),
                 path.join(support_root, "platform", "psp", "video.c")
             )
+        elseif is_plat("ps3") then
+            add_headerfiles(path.join(support_root, "platform", "ps3", "ps3.lua"))
+            add_files(
+                path.join(support_root, "platform", "unix", "async.c"),
+                path.join(support_root, "platform", "ps3", "platform.c"),
+                path.join(support_root, "platform", "ps3", "video.c")
+            )
         end
 
         if use_mimalloc then
@@ -484,6 +492,9 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
 
         if opengl then
             add_deps("glad")
+            if is_plat("ps3") then
+                add_deps("rsxgl")
+            end
         end
 
         set_group("Support")

@@ -72,15 +72,15 @@ static VOID AddDirectory(_Inout_ PPACKFILE PackFile, _In_ DIR *Directory, _In_z_
     struct dirent *Entry;
     while ((Entry = readdir(Directory)))
     {
-        if (strncmp(Entry->d_name, ".", Entry->d_namlen) == 0 || strncmp(Entry->d_name, "..", Entry->d_namlen) == 0)
+        if (strcmp(Entry->d_name, ".") == 0 || strcmp(Entry->d_name, "..") == 0)
         {
             continue;
         }
 
-        PCHAR FullPath = CmnFormatString("%s/%.*s", Path, (INT)Entry->d_namlen, Entry->d_name);
+        PCHAR FullPath = CmnFormatString("%s/%s", Path, Entry->d_name);
         PURPL_ASSERT(FullPath != NULL);
-        PCHAR InnerPath = CmnFormatString("%s%s%.*s", InnerBasePath ? InnerBasePath : "", InnerBasePath ? "/" : "",
-                                          (INT)Entry->d_namlen, Entry->d_name);
+        PCHAR InnerPath = CmnFormatString("%s%s%s", InnerBasePath ? InnerBasePath : "", InnerBasePath ? "/" : "",
+                                          Entry->d_name);
         PURPL_ASSERT(InnerPath != NULL);
 
         if (Entry->d_type == DT_DIR)

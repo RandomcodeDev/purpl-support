@@ -16,8 +16,6 @@ Abstract:
 
 #include "platform/platform.h"
 
-#include "GLFW/glfw3.h"
-
 extern BOOLEAN WindowClosed;
 static VOID SignalHandler(_In_ INT Signal, _In_ siginfo_t *SignalInformation, _In_opt_ PVOID UserData)
 {
@@ -219,6 +217,7 @@ Return Value:
                            (UINT64)Frames[i]);
     }
 
+    // NOTE: because this is allocated by libc, it has to be freed by libc
     free(Symbols);
 
     return Buffer;
@@ -384,7 +383,7 @@ BOOLEAN PlatCreateDirectory(_In_ PCSTR Path)
 
 PCHAR PlatFixPath(_In_ PCSTR Path)
 {
-    return CmnFormatString("%s", Path);
+    return CmnDuplicateString(Path, 0);
 }
 
 UINT64 PlatGetFileSize(_In_ PCSTR Path)
