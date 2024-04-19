@@ -96,7 +96,7 @@ VOID CmnInitialize(_In_opt_ PCHAR *Arguments, _In_opt_ UINT ArgumentCount)
 
     CONFIGVAR_DEFINE_BOOLEAN("verbose", FALSE, TRUE, ConfigVarSideBoth, FALSE, FALSE);
 
-    if (ArgumentCount && Arguments)
+    if (ArgumentCount > 1 && Arguments)
     {
         ParseVariables(Arguments, ArgumentCount);
     }

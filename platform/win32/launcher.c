@@ -94,9 +94,8 @@ INT WINAPI WinMain(_In_ HINSTANCE Instance, _In_opt_ HINSTANCE PreviousInstance,
 
     if (!Arguments)
     {
-        ArgumentCount = 0;
-        Arguments = CmnParseCommandline(CommandLine, &ArgumentCount);
-        ParsedArguments = TRUE;
+        ArgumentCount = __argc;
+        Arguments = __argv;
     }
 
 #ifndef PURPL_DEBUG
@@ -133,7 +132,7 @@ INT WINAPI WinMain(_In_ HINSTANCE Instance, _In_opt_ HINSTANCE PreviousInstance,
     // error checking because the program is done anyway.
 
 #ifndef PURPL_GDKX
-#if _WIN32_WINNT > 0x502
+#if _WIN32_WINNT >= 0x0A00
     SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), InitialConsoleInputMode);
     SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), InitialConsoleOutputMode);
     SetConsoleMode(GetStdHandle(STD_ERROR_HANDLE), InitialConsoleErrorMode);

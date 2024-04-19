@@ -22,6 +22,7 @@ repo_tools_dir = ""
 repo_tools_native_dir = ""
 
 dxc = ""
+spirv_cross = ""
 meshtool = ""
 texturetool = ""
 packtool = ""
@@ -38,14 +39,16 @@ def main():
             if env_dir != None and os.path.exists(env_dir):
                 return env_dir
 
-            guess_dir = os.path.abspath(os.path.join(
-                os.path.dirname(__file__),
-                "..",
-                "build",
-                platform.system().lower(),
-                platform.machine().replace("AMD64", "x64"),
-                "release",
-            ))
+            guess_dir = os.path.abspath(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    "..",
+                    "build",
+                    platform.system().lower(),
+                    platform.machine().replace("AMD64", "x64"),
+                    "release",
+                )
+            )
             if os.path.exists(guess_dir):
                 return guess_dir
 
@@ -55,13 +58,17 @@ def main():
         parser.add_argument(
             "-a",
             "--assets-dir",
-            default=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "assets")),
+            default=os.path.abspath(
+                os.path.join(os.path.dirname(__file__), "..", "..", "assets")
+            ),
             help="Path to the assets directory (default: assets directory two above the script directory)",
         )
         parser.add_argument(
             "-o",
             "--output-dir",
-            default=os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..", "assets", "out"),
+            default=os.path.join(
+                os.path.abspath(os.path.dirname(__file__)), "..", "..", "assets", "out"
+            ),
             help="Path to the output directory (default: assets_dir/out)",
         )
         parser.add_argument(
@@ -164,6 +171,7 @@ def main():
         return path
 
     dxc = find_tool(repo_tools_native_dir, "dxc")
+    spirv_cross = find_tool(repo_tools_native_dir, "spirv-cross")
     meshtool = find_tool(tools_dir, "meshtool")
     texturetool = find_tool(tools_dir, "texturetool")
     packtool = find_tool(tools_dir, "packtool")
@@ -243,6 +251,19 @@ def main():
                             f"{name}.{extension}.spv",
                         ),
                     )
+                    build_asset(
+                        lambda src, dest: [spirv_cross, src, "--output", dest],
+                        os.path.join(
+                            root.replace(assets_dir, output_dir),
+                            "vulkan",
+                            f"{name}.{extension}.spv",
+                        ),
+                        os.path.join(
+                            root.replace(assets_dir, output_dir),
+                            "opengl",
+                            f"{name}.{extension}.glsl",
+                        ),
+                    )
 
     if os.path.exists(os.path.join(assets_dir, "fonts")):
         try:
@@ -252,7 +273,17 @@ def main():
         except FileExistsError:
             pass
 
-    build_asset(lambda src, dest: [packtool, "create", dest.replace("_dir.pak", ""), src], output_dir, os.path.join(assets_dir, "assets_dir.pak"))
+    if os.path.exists(os.path.join(assets_dir, "assets_dir.pak")):
+        for item in os.listdir(assets_dir):
+            if item.endswith(".pak"):
+                os.remove(os.path.join(assets_dir, item))
+
+    build_asset(
+        lambda src, dest: [packtool, "create", dest.replace("_dir.pak", ""), src],
+        output_dir,
+        os.path.join(assets_dir, "assets_dir.pak")
+    )
+
 
 if __name__ == "__main__":
     main()

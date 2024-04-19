@@ -36,8 +36,8 @@ PPACKFILE PackCreate(_In_z_ PCSTR Path)
     }
 
     SIZE_T Length = 0;
-    PSTR Dir = NULL;
-    if ((Dir = strstr(Path, "_dir")))
+    PSTR Dir = strstr(Path, "_dir");
+    if (Dir)
     {
         Length = Dir - Path;
     }
@@ -271,7 +271,7 @@ PVOID PackReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In
                    CompressedHash.low64, Entry->CompressedHash.high64, Entry->CompressedHash.low64);
     }
 
-    PBYTE Data = CmnAlloc(Entry->Size, 1);
+    PBYTE Data = CmnAlloc(Entry->Size + Extra, 1);
     if (!Data)
     {
         LogError("Failed to allocate %zu bytes: %s", Entry->Size, strerror(errno));
@@ -294,6 +294,8 @@ PVOID PackReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In
         CmnFree(Data);
     }
 
+    CmnFree(CompressedData);
+
     XXH128_hash_t Hash = XXH3_128bits(Data, Entry->Size);
     if (memcmp(&Hash, &Entry->Hash, sizeof(XXH128_hash_t)) != 0)
     {
@@ -303,10 +305,29 @@ PVOID PackReadFile(_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In
         return NULL;
     }
 
-    CmnFree(CompressedData);
+    SIZE_T Size = 0;
+    if (MaxAmount > 0)
+    {
+        Size = MaxAmount + Extra;
+    }
+    else
+    {
+        Size = Entry->Size + Extra;
+    }
 
-    *ReadAmount = Entry->Size;
-    return Data;
+    PBYTE RequestedData = CmnAlloc(Size, 1);
+    if (!RequestedData)
+    {
+        LogError("Failed to allocate memory for requested data: %s", strerror(errno));
+        CmnFree(Data);
+        return NULL;
+    }
+
+    memcpy(RequestedData, Data + Offset, Entry->Size - Offset);
+    CmnFree(Data);
+
+    *ReadAmount = Size;
+    return RequestedData;
 }
 
 BOOLEAN PackAddFile(_Inout_ PVOID Handle, _In_z_ PCSTR Path, _In_reads_bytes_(Size) PVOID Data, _In_ UINT64 Size)
@@ -344,7 +365,7 @@ BOOLEAN PackAddFile(_Inout_ PVOID Handle, _In_z_ PCSTR Path, _In_reads_bytes_(Si
     Entry.Offset = Pack->CurrentOffset;
     Entry.Size = Size;
     Entry.CompressedSize = CompressedSize;
-    Entry.PathLength = strlen(Path);
+    Entry.PathLength = (UINT16)strlen(Path);
 
     stbds_shput(Pack->Entries, CmnDuplicateString(Path, Entry.PathLength), Entry);
 
