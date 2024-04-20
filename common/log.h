@@ -15,7 +15,6 @@
 #define LOG_H
 
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -40,17 +39,17 @@ typedef enum LOG_LEVEL
 typedef struct LOG_EVENT
 {
     va_list ArgList;
-    CONST char *Format;
-    CONST char *File;
+    PCSTR Format;
+    PCSTR File;
     struct tm *Time;
-    void *Data;
+    PVOID Data;
     int64_t Line;
-    bool HexLine;
+    BOOLEAN HexLine;
     LOG_LEVEL Level;
 } LOG_EVENT;
 
-typedef void (*PFN_LOG_LOG)(LOG_EVENT *Event);
-typedef void (*PFN_LOG_LOCK)(bool Lock, void *Data);
+typedef VOID (*PFN_LOG_LOG)(LOG_EVENT *Event);
+typedef VOID (*PFN_LOG_LOCK)(BOOLEAN Lock, PVOID Data);
 
 #define LogTrace(...)                                                          \
     LogMessage(LogLevelTrace, __FILE__, __LINE__, false, __VA_ARGS__)
@@ -65,21 +64,21 @@ typedef void (*PFN_LOG_LOCK)(bool Lock, void *Data);
 #define LogFatal(...)                                                          \
     LogMessage(LogLevelFatal, __FILE__, __LINE__, false, __VA_ARGS__)
 
-extern CONST char *LogGetLevelString(LOG_LEVEL Level);
+extern PCSTR LogGetLevelString(LOG_LEVEL Level);
 
-extern void LogSetLock(PFN_LOG_LOCK Lock, void *Data);
+extern VOID LogSetLock(PFN_LOG_LOCK Lock, PVOID Data);
 
-extern void LogSetLevel(LOG_LEVEL Level);
+extern VOID LogSetLevel(LOG_LEVEL Level);
 
 extern LOG_LEVEL LogGetLevel(VOID);
 
-extern void LogSetQuiet(bool Quiet);
+extern VOID LogSetQuiet(BOOLEAN Quiet);
 
-extern int LogAddCallback(PFN_LOG_LOG Callback, void *Data, LOG_LEVEL Level);
+extern int LogAddCallback(PFN_LOG_LOG Callback, PVOID Data, LOG_LEVEL Level);
 
 extern int LogAddFile(FILE *File, LOG_LEVEL Level);
 
-extern void LogMessage(LOG_LEVEL Level, CONST char *File, uint64_t Line,
-                       bool HexLine, CONST char *Format, ...);
+extern VOID LogMessage(LOG_LEVEL Level, PCSTR File, uint64_t Line,
+                       BOOLEAN HexLine, PCSTR Format, ...);
 
 #endif

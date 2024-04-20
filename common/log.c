@@ -30,27 +30,27 @@
 typedef struct LOG_CALLBACK
 {
     PFN_LOG_LOG Log;
-    void *Data;
+    PVOID Data;
     LOG_LEVEL Level;
 } LOG_CALLBACK;
 
 static struct LOG_STATE
 {
-    void *Data;
+    PVOID Data;
     PFN_LOG_LOCK Lock;
     LOG_LEVEL Level;
-    bool Quiet;
+    BOOLEAN Quiet;
     LOG_CALLBACK Callbacks[LOG_MAX_CALLBACKS];
 } LogState;
 
-static CONST char *LevelStrings[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
+static PCSTR LevelStrings[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 
 #if !(defined PURPL_SWITCH && !defined PURPL_CONSOLE_HOMEBREW)
 #ifdef LOG_USE_COLOR
-static CONST char *LevelColours[] = {"\x1b[38;5;197m", "\x1b[36m", "\x1b[32m", "\x1b[33m", "\x1b[31m", "\x1b[35m"};
+static PCSTR LevelColours[] = {"\x1b[38;5;197m", "\x1b[36m", "\x1b[32m", "\x1b[33m", "\x1b[31m", "\x1b[35m"};
 #endif
 
-static void StdoutCallback(LOG_EVENT *Event)
+static VOID StdoutCallback(LOG_EVENT *Event)
 {
     char Buffer[64] = {0};
     Buffer[strftime(Buffer, sizeof(Buffer), "%H:%M:%S", Event->Time)] = '\0';
@@ -75,7 +75,7 @@ static void StdoutCallback(LOG_EVENT *Event)
 #endif
 
 #ifdef PURPL_HAVE_PLATPRINT
-static void PlatPrintCallback(LOG_EVENT *Event)
+static VOID PlatPrintCallback(LOG_EVENT *Event)
 /*++
 
 Routine Description:
@@ -111,7 +111,7 @@ Return Value:
 }
 #endif
 
-static void FileCallback(LOG_EVENT *Event)
+static VOID FileCallback(LOG_EVENT *Event)
 {
     char Buffer[64] = {0};
     Buffer[strftime(Buffer, sizeof(Buffer), "%Y-%m-%d %H:%M:%S", Event->Time)] = '\0';
@@ -125,7 +125,7 @@ static void FileCallback(LOG_EVENT *Event)
     fflush(Event->Data);
 }
 
-static void LogLock(void)
+static VOID LogLock(VOID)
 {
     if (LogState.Lock)
     {
@@ -133,7 +133,7 @@ static void LogLock(void)
     }
 }
 
-static void LogUnlock(void)
+static VOID LogUnlock(VOID)
 {
     if (LogState.Lock)
     {
@@ -147,13 +147,13 @@ char *LogGetLevelString(LOG_LEVEL Level)
     return LevelStrings[Level];
 }
 
-void LogSetLock(PFN_LOG_LOCK Lock, void *Data)
+VOID LogSetLock(PFN_LOG_LOCK Lock, PVOID Data)
 {
     LogState.Lock = Lock;
     LogState.Data = Data;
 }
 
-void LogSetLevel(LOG_LEVEL Level)
+VOID LogSetLevel(LOG_LEVEL Level)
 {
     LogState.Level = Level;
 }
@@ -164,12 +164,12 @@ LogGetLevel(VOID)
     return LogState.Level;
 }
 
-void LogSetQuiet(bool Quiet)
+VOID LogSetQuiet(BOOLEAN Quiet)
 {
     LogState.Quiet = Quiet;
 }
 
-int LogAddCallback(PFN_LOG_LOG Callback, void *Data, LOG_LEVEL Level)
+int LogAddCallback(PFN_LOG_LOG Callback, PVOID Data, LOG_LEVEL Level)
 {
     for (int i = 0; i < LOG_MAX_CALLBACKS; i++)
     {
@@ -187,7 +187,7 @@ int LogAddFile(FILE *File, LOG_LEVEL Level)
     return LogAddCallback(FileCallback, File, Level);
 }
 
-static void InitEvent(LOG_EVENT *Event, void *Data)
+static VOID InitEvent(LOG_EVENT *Event, PVOID Data)
 {
     if (!Event->Time)
     {
@@ -197,7 +197,7 @@ static void InitEvent(LOG_EVENT *Event, void *Data)
     Event->Data = Data;
 }
 
-void LogMessage(LOG_LEVEL Level, CONST char *File, uint64_t Line, bool HexLine, CONST char *Format, ...)
+VOID LogMessage(LOG_LEVEL Level, PCSTR File, uint64_t Line, BOOLEAN HexLine, PCSTR Format, ...)
 {
     LOG_EVENT Event = {
         .Format = Format,

@@ -9,7 +9,7 @@
 #include "purpl/purpl.h"
 
 /// @brief A pointer to a thread start function
-typedef INT (*PFN_THREAD_START)(_In_opt_ PVOID UserData);
+typedef UINT_PTR (*PFN_THREAD_START)(_In_opt_ PVOID UserData);
 
 /// @brief Data about a thread
 typedef struct THREAD
@@ -17,12 +17,15 @@ typedef struct THREAD
     CHAR Name[32];
     PFN_THREAD_START ThreadStart;
     PVOID UserData;
-    INT ReturnValue;
+    UINT_PTR ReturnValue;
     PVOID Handle;
 } THREAD, *PTHREAD;
 
 /// @brief The current thread (not fully valid for the main thread)
 extern _Thread_local PTHREAD AsCurrentThread;
+
+/// @brief Default stack size for a thread
+#define PURPL_DEFAULT_THREAD_STACK_SIZE 0x1000
 
 /// @brief Create a suspended thread
 ///
@@ -41,7 +44,7 @@ extern PTHREAD AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize, _In_ P
 /// @param[in] Thread The thread to join
 ///
 /// @return The thread's return value
-extern INT AsJoinThread(_In_ PTHREAD Thread);
+extern UINT_PTR AsJoinThread(_In_ PTHREAD Thread);
 
 /// @brief Run a thread, use AsJoinThread to clean up its data at some point
 ///
@@ -76,27 +79,32 @@ extern VOID AsUnlockMutex(_In_ PMUTEX Mutex);
 extern VOID AsDestroyMutex(_In_ PMUTEX Mutex);
 
 /// @brief A semaphore
-typedef PVOID PSEMAPHORE;
+typedef struct SEMAPHORE *PSEMAPHORE;
 
 /// @brief Create a semaphore
 ///
-/// @param[in] Max The maximum reference count for the semaphore
+/// @param[in] InitialValue The initial value of the semaphore
 ///
 /// @return A semaphore
-extern PSEMAPHORE AsCreateSemaphore(_In_ UINT64 Max);
+extern PSEMAPHORE AsCreateSemaphore(_In_ UINT64 InitialValue);
 
-/// @brief Increase the reference count of a semaphore
+/// @brief Destroy a semaphore
 ///
-/// @param[in] Semaphore The semaphore to acquire
+/// @param[in] Semaphore The semaphore to destroy
+extern VOID AsDestroySemaphore(_Inout_ PSEMAPHORE Semaphore);
+
+/// @brief Test a semaphore
+///
+/// @param[in] Semaphore The semaphore to test
 /// @param[in] Wait Whether to wait
 ///
 /// @return Whether the semaphore was acquired
-extern BOOLEAN AsAcquireSemaphore(_In_ PSEMAPHORE Semaphore, _In_ BOOLEAN Wait);
+extern BOOLEAN AsTestSemaphore(_In_ PSEMAPHORE Semaphore, _In_ BOOLEAN Wait);
 
-/// @brief Decrease the reference count of a semaphore
+/// @brief Increment a semaphore
 ///
-/// @param[in] Semaphore The semaphore to release
+/// @param[in] Semaphore The semaphore to increment
 /// @param[in] Wait Whether to wait
 ///
 /// @return Whether the semaphore was acquired
-extern BOOLEAN AsReleaseSemaphore(_In_ PSEMAPHORE Semaphore, _In_ BOOLEAN Wait);
+extern BOOLEAN AsIncrementSemaphore(_In_ PSEMAPHORE Semaphore, _In_ BOOLEAN Wait);

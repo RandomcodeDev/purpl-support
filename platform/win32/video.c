@@ -53,6 +53,7 @@ static HDC DeviceContext;
 static HGLRC GlContext;
 #endif
 
+#ifndef PURPL_XBOX360
 static LRESULT CALLBACK WindowProcedure(_In_ HWND MessageWindow, _In_ UINT Message, _In_ WPARAM Wparam,
                                         _In_ LPARAM Lparam)
 {
@@ -370,6 +371,23 @@ VOID VidShutdown(VOID)
 
     LogInfo("Successfully shut down Windows video");
 }
+#else
+VOID VidInitialize(_In_ BOOLEAN EnableOpenGl)
+{
+    WindowWidth = 1280;
+    WindowHeight = 720;
+}
+
+BOOLEAN VidUpdate(VOID)
+{
+    return TRUE;
+}
+
+VOID VidShutdown(VOID)
+{
+
+}
+#endif
 
 VOID VidGetSize(_Out_opt_ PUINT32 Width, _Out_opt_ PUINT32 Height)
 {

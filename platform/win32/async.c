@@ -23,7 +23,7 @@ static VOID ThreadEntry(_In_ PVOID Thread)
 {
     AsCurrentThread = Thread;
     AsCurrentThread->ReturnValue = AsCurrentThread->ThreadStart(AsCurrentThread->UserData);
-    ExitThread(AsCurrentThread->ReturnValue);
+    ExitThread((DWORD)AsCurrentThread->ReturnValue);
 }
 
 VOID InitializeMainThread(_In_ PFN_THREAD_START StartAddress)
@@ -68,9 +68,9 @@ PTHREAD AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize, _In_ PFN_THRE
     return Thread;
 }
 
-INT AsJoinThread(_In_ PTHREAD Thread)
+UINT_PTR AsJoinThread(_In_ PTHREAD Thread)
 {
-    INT ReturnValue;
+    UINT_PTR ReturnValue;
 
     if (Thread->Handle)
     {

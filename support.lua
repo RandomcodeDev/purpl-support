@@ -6,10 +6,7 @@ if not is_plat("switch") then
 end
 
 function fix_target(target)
-    target:add("options", "mimalloc")
-    target:add("options", "verbose")
-
-    if is_plat("gdk", "gdkx") and get_config("toolchain") ~= "mingw" then
+    if is_plat("gdk", "gdkx", "xbox360") and get_config("toolchain") ~= "mingw" then
         target:set("prefixname", "")
         if target:kind() == "binary" then
             target:set("extension", ".exe")
@@ -52,13 +49,15 @@ end
 function do_settings(support_root)
     set_warnings("everything")
 
-    set_languages("gnu11", "cxx23")
+    if not is_plat("xbox360") then
+        set_languages("gnu11", "cxx23")
+    end
     set_exceptions("cxx")
 
     add_defines("_CRT_SECURE_NO_WARNINGS")
     add_defines("_GNU_SOURCE")
 
-    if get_config("toolchain") == "msvc" then
+    if get_config("toolchain") == "msvc" or get_config("toolchain") == "xbox360" then
         add_cxflags("-Qspectre", "-EHsc", {force = true})
         -- all of these are either external or inconsequential
         add_cxflags(
@@ -157,6 +156,10 @@ function do_settings(support_root)
             path.join(support_root, "platform", "win32"),
             path.join(os.getenv("GRDKLatest"), "GameKit", "Lib", "amd64")
         )
+    elseif is_plat("xbox360") then
+        add_includedirs(
+            path.join(support_root, "platform", "win32")
+        )
     end
 end
 
@@ -194,7 +197,10 @@ end
 function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, opengl, set_big_settings, config_h_in_path, switch_title_id)
     includes(path.join(support_root, "platform", "switchhb", "switch.lua"))
     includes(path.join(support_root, "platform", "psp", "psp.lua"))
+
+    -- I don't think they still care about 7th gen, but these have to go to the private branch if so
     includes(path.join(support_root, "platform", "ps3", "ps3.lua"))
+    includes(path.join(support_root, "platform", "win32", "xbox360.lua"))
 
     if is_plat("windows") then
         add_defines("PURPL_WIN32")
@@ -220,6 +226,8 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
             add_defines("PURPL_PS3")
             ps3_add_settings(support_root, deps_root)
         end
+    elseif is_plat("xbox360") then
+        add_defines("PURPL_WIN32", "PURPL_XBOX360")
     end
 
     if get_config("toolchain") == "mingw" then
@@ -399,6 +407,9 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
             add_files(path.join(deps_root, "zstd", "lib", "**", "*.S"))
         end
         remove_files(path.join(deps_root, "zstd", "lib", "legacy", "*.c"))
+        add_defines(
+            "_BitScanReverse(a, b) *(a) = ZSTD_countTrailingZeroes32_fallback((b))",
+            "_BitScanForward(a, b) *(a) = ZSTD_countLeadingZeroes32_fallback((b))")
         set_warnings("none")
         set_group("External")
         on_load(fix_target)
@@ -433,6 +444,7 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
     target("platform")
         set_kind("static")
         add_headerfiles(path.join(support_root, "platform", "*.h"))
+        add_files(path.join(support_root, "platform", "*.c"))
 
         if is_plat("gdk", "gdkx", "windows") then
             add_files(
