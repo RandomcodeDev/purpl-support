@@ -18,7 +18,7 @@ CreateMesh(_In_z_ PCSTR Material, _In_reads_(VertexCount * sizeof(VERTEX)) PVERT
         return NULL;
     }
 
-    Mesh = CmnAlloc(1, sizeof(MESH));
+    Mesh = CmnAllocType(1, MESH);
     if (!Mesh)
     {
         LogError("Could not allocate mesh");

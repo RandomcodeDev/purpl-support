@@ -65,6 +65,11 @@ extern PCSTR PlatGetUserDataDirectory(VOID);
 /// @return A number of milliseconds.
 extern UINT64 PlatGetMilliseconds(VOID);
 
+/// @brief Sleep
+///
+/// @param[in] Duration The amount of time to sleep for, in milliseconds
+extern VOID PlatSleep(_In_ UINT64 Duration);
+
 /// @brief Recursively creates a directory.
 ///
 /// @param[in] Path The path of the directory to create.

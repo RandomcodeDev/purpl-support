@@ -349,6 +349,11 @@ UINT64 PlatGetMilliseconds(VOID)
 #endif
 }
 
+VOID PlatSleep(_In_ UINT64 Duration)
+{
+    Sleep((DWORD)Duration);
+}
+
 BOOLEAN PlatCreateDirectory(_In_z_ PCSTR Path)
 {
     // literally Unix version but replace mkdir with CreateDirectoryA
@@ -397,7 +402,7 @@ PCHAR PlatFixPath(_In_z_ PCSTR Path)
         return nullptr;
     }
 
-    FixedPath = (PCHAR)CmnAlloc(1, strlen(Path) + 1);
+    FixedPath = CmnAllocType(strlen(Path) + 1, CHAR);
     if (!FixedPath)
     {
         return nullptr;

@@ -67,7 +67,7 @@ Return Value:
         Size += EstimateTextureSize(Format, Width, Height);
     }
 
-    Texture = CmnAlloc(1, Size);
+    Texture = CmnAllocType(Size, BYTE);
     if (!Texture)
     {
         LogError("Could not allocate texture");
@@ -137,7 +137,7 @@ Return Value:
 
     Data = (PBYTE)Texture + TEXTURE_HEADER_SIZE;
 
-    RealTexture = CmnAlloc(1, sizeof(TEXTURE) + GetTextureSize(*Texture));
+    RealTexture = CmnAllocType(sizeof(TEXTURE) + GetTextureSize(*Texture), BYTE);
     if (!RealTexture)
     {
         LogError("Failed to allocate %zu bytes for texture", sizeof(TEXTURE) + GetTextureSize(*Texture));
@@ -194,7 +194,7 @@ Return Value:
 
     LogInfo("Writing texture to %s", Path);
 
-    Data = CmnAlloc(1, ZSTD_COMPRESSBOUND(GetTextureSize(*Texture)));
+    Data = CmnAllocType(ZSTD_COMPRESSBOUND(GetTextureSize(*Texture)), BYTE);
     if (!Data)
     {
         LogError("Failed to allocate memory for texture compression");

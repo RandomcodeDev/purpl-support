@@ -17,7 +17,7 @@ Abstract:
 
 #include "platform/async.h"
 
-_Thread_local PTHREAD AsCurrentThread;
+_Thread_local PAS_THREAD AsCurrentThread;
 
 static VOID ThreadEntry(_In_ PVOID Thread)
 {
@@ -28,7 +28,7 @@ static VOID ThreadEntry(_In_ PVOID Thread)
 
 VOID InitializeMainThread(_In_ PFN_THREAD_START StartAddress)
 {
-    AsCurrentThread = CmnAlloc(1, sizeof(THREAD));
+    AsCurrentThread = CmnAllocType(1, THREAD);
     if (AsCurrentThread)
     {
         strncpy(AsCurrentThread->Name, "main", PURPL_ARRAYSIZE(AsCurrentThread->Name));
@@ -36,16 +36,16 @@ VOID InitializeMainThread(_In_ PFN_THREAD_START StartAddress)
     }
 }
 
-PTHREAD AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize, _In_ PFN_THREAD_START ThreadStart, _In_opt_ PVOID UserData)
+PAS_THREAD AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize, _In_ PFN_THREAD_START ThreadStart, _In_opt_ PVOID UserData)
 {
-    PTHREAD Thread;
+    PAS_THREAD Thread;
     DWORD Error;
 
     LogInfo("Creating thread %s with %zu-byte stack, entry point 0x%llX, and "
             "userdata 0x%llX",
             Name, StackSize, ThreadStart, UserData);
 
-    Thread = CmnAlloc(1, sizeof(THREAD));
+    Thread = CmnAllocType(1, THREAD);
     if (!Thread)
     {
         LogError("Failed to allocate thread data: %s", strerror(errno));
@@ -68,7 +68,7 @@ PTHREAD AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize, _In_ PFN_THRE
     return Thread;
 }
 
-UINT_PTR AsJoinThread(_In_ PTHREAD Thread)
+UINT_PTR AsJoinThread(_In_ PAS_THREAD Thread)
 {
     UINT_PTR ReturnValue;
 
@@ -84,27 +84,37 @@ UINT_PTR AsJoinThread(_In_ PTHREAD Thread)
     return ReturnValue;
 }
 
-VOID AsDetachThread(_In_ PTHREAD Thread)
+VOID AsDetachThread(_In_ PAS_THREAD Thread)
+{
+    AsResumeThread(Thread);
+}
+
+VOID AsSuspendThread(_In_ PAS_THREAD Thread)
+{
+    SuspendThread(Thread->Handle);
+}
+
+VOID AsResumeThread(_In_ PAS_THREAD Thread)
 {
     ResumeThread(Thread->Handle);
 }
 
-PMUTEX AsCreateMutex(VOID)
+PAS_MUTEX AsCreateMutex(VOID)
 {
     return CreateMutexA(NULL, FALSE, NULL);
 }
 
-BOOLEAN AsLockMutex(_In_ PMUTEX Mutex, _In_ BOOLEAN Wait)
+BOOLEAN AsLockMutex(_In_ PAS_MUTEX Mutex, _In_ BOOLEAN Wait)
 {
     return WaitForSingleObjectEx(Mutex, Wait ? INFINITE : 0, FALSE) == WAIT_OBJECT_0;
 }
 
-VOID AsUnlockMutex(_In_ PMUTEX Mutex)
+VOID AsUnlockMutex(_In_ PAS_MUTEX Mutex)
 {
     ReleaseMutex(Mutex);
 }
 
-VOID AsDestroyMutex(_In_ PMUTEX Mutex)
+VOID AsDestroyMutex(_In_ PAS_MUTEX Mutex)
 {
     CloseHandle(Mutex);
 }

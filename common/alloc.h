@@ -41,6 +41,16 @@
 #define CmnAlloc(Count, Size) calloc(Count, Size)
 #endif
 
+/// @fn CmnAllocType
+///
+/// @brief Allocate memory
+///
+/// @param[in] Count The number of elements to allocate
+/// @param[in] Type The type of element to allocate
+///
+/// @return A block of memory
+#define CmnAllocType(Count, Type) ((Type *)CmnAlloc((Count), sizeof(Type)))
+
 /// @fn CmnRealloc
 ///
 /// @brief Resize an allocated block of memory
@@ -62,7 +72,7 @@
 ///
 /// @param[in] Alignment The alignment of the memory
 /// @param[in] Size The size of the memory
-/// 
+///
 /// @return A block of memory
 #if PURPL_USE_MIMALLOC
 #define CmnAlignedAlloc(Alignment, Size) mi_aligned_alloc(Alignment, Size)
@@ -77,7 +87,7 @@
 /// @fn CmnFree
 ///
 /// @brief Free memory
-/// 
+///
 /// @param[in,out] Block The block of memory to free
 #if PURPL_USE_MIMALLOC
 #define CmnFree(Block)                                                         \

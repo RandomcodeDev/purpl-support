@@ -32,7 +32,7 @@ VOID CfgDefineVariable(_In_z_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CO
         return;
     }
 
-    PCONFIGVAR Variable = CmnAlloc(1, sizeof(CONFIGVAR));
+    PCONFIGVAR Variable = CmnAllocType(1, CONFIGVAR);
     PURPL_ASSERT(Variable != NULL);
 
     Variable->Side = Side & 0b11;

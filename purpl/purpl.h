@@ -24,8 +24,6 @@
 #include <ctype.h>
 #include <errno.h>
 #include <math.h>
-#include <stdalign.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
@@ -38,7 +36,11 @@
 #endif
 
 #define WIN32_LEAN_AND_MEAN
+#ifdef PUPL_XBOX360
+#include <xbox.h>
+#else
 #include <windows.h>
+#endif
 
 #ifdef __cplusplus
 #include <comdef.h>
@@ -137,17 +139,10 @@
 #include "zstd.h"
 
 #ifdef PURPL_ENGINE
-#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-#include "cimgui.h"
-
 #ifdef PURPL_DISCORD
 #include "discord_rpc.h"
 #endif
 
-#if defined(PURPL_DEBUG) || defined(PURPL_RELWITHDEBINFO)
-#define FLECS_HTTP
-#define FLECS_REST
-#endif
 #include "flecs.h"
 #endif
 

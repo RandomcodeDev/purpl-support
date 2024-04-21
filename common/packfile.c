@@ -28,7 +28,7 @@ static PCHAR GetArchivePath(_In_z_ PCSTR BasePath, _In_ UINT16 Index)
 
 PPACKFILE PackCreate(_In_z_ PCSTR Path)
 {
-    PPACKFILE Pack = CmnAlloc(1, sizeof(PACKFILE));
+    PPACKFILE Pack = CmnAllocType(1, PACKFILE);
     if (!Pack)
     {
         LogError("Failed to allocate pack file: %s", strerror(errno));
@@ -128,7 +128,7 @@ PPACKFILE PackLoad(_In_z_ PCSTR DirectoryPath)
         goto Error;
     }
 
-    PPACKFILE Pack = CmnAlloc(1, sizeof(PACKFILE));
+    PPACKFILE Pack = CmnAllocType(1, PACKFILE);
     if (!Pack)
     {
         LogError("Failed to allocate pack file structure");

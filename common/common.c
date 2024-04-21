@@ -66,7 +66,7 @@ static VOID ParseVariables(_In_ PCHAR *Arguments, _In_ UINT ArgumentCount)
     }
 }
 
-static PMUTEX LogMutex;
+static PAS_MUTEX LogMutex;
 
 VOID CmnInitialize(_In_opt_ PCHAR *Arguments, _In_opt_ UINT ArgumentCount)
 {

@@ -372,8 +372,9 @@ VOID VidShutdown(VOID)
     LogInfo("Successfully shut down Windows video");
 }
 #else
-VOID VidInitialize(_In_ BOOLEAN EnableOpenGl)
+VOID VidInitialize(_In_ BOOLEAN EnableGl)
 {
+    UNREFERENCED_PARAMETER(EnableGl);
     WindowWidth = 1280;
     WindowHeight = 720;
 }
