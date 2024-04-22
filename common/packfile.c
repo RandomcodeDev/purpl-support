@@ -184,7 +184,7 @@ VOID PackFree(_Inout_ PVOID Handle)
 BOOLEAN PackHasFile(_In_ PVOID Handle, _In_z_ PCSTR Path)
 {
     PPACKFILE Pack = Handle;
-    if (Pack)
+    if (Pack && Path)
     {
         return stbds_shgetp_null(Pack->Entries, Path) != NULL;
     }
@@ -195,7 +195,7 @@ BOOLEAN PackHasFile(_In_ PVOID Handle, _In_z_ PCSTR Path)
 UINT64 PackGetFileSize(_In_ PVOID Handle, _In_z_ PCSTR Path)
 {
     PPACKFILE Pack = Handle;
-    if (Pack)
+    if (Pack && Path)
     {
         // "Default" return value is just zero initialized, so this works either way
         return stbds_shget(Pack->Entries, Path).Size;

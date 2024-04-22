@@ -55,7 +55,7 @@ BOOLEAN AsTestSemaphore(_In_ PAS_SEMAPHORE Semaphore, _In_ BOOLEAN Wait)
             {
                 Semaphore->Value--;
                 AsUnlockMutex(Semaphore->Mutex);
-                break;
+                return TRUE;
             }
         }
         else
@@ -71,7 +71,10 @@ BOOLEAN AsIncrementSemaphore(_In_ PAS_SEMAPHORE Semaphore, _In_ BOOLEAN Wait)
     {
         Semaphore->Value++;
         AsUnlockMutex(Semaphore->Mutex);
+        return TRUE;
     }
+
+    return FALSE;
 }
 
 typedef struct AS_CONDITION_VARIABLE
@@ -79,11 +82,24 @@ typedef struct AS_CONDITION_VARIABLE
     PAS_MUTEX Mutex;
     PAS_THREAD Next;
     PAS_THREAD Previous;
-} CONDITION_VARIABLE, *PAS_CONDITION_VARIABLE;
+} AS_CONDITION_VARIABLE, *PAS_CONDITION_VARIABLE;
 
 PAS_CONDITION_VARIABLE AsCreateCondition(VOID)
 {
-    PAS_CONDITION_VARIABLE Condition = CmnAllocType(1, CONDITION_VARIABLE);
+    PAS_CONDITION_VARIABLE Condition = CmnAllocType(1, AS_CONDITION_VARIABLE);
+    if (!Condition)
+    {
+        return NULL;
+    }
+
+    Condition->Mutex = AsCreateMutex();
+    if (!Condition->Mutex)
+    {
+        CmnFree(Condition);
+        return NULL;
+    }
+
+    return Condition;
 }
 
 VOID AsWaitCondition(_Inout_ PAS_CONDITION_VARIABLE Condition, _In_ PAS_MUTEX Mutex)
