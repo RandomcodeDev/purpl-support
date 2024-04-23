@@ -112,7 +112,7 @@ typedef struct TEXTURE
 /// EstimateTextureSize bytes)
 ///
 /// @return A texture which can be freed with CmnFree
-extern PTEXTURE CreateTexture(_In_ TEXTURE_FORMAT Format, _In_ UINT32 Width, _In_ UINT32 Height, _In_ PVOID Data);
+extern PTEXTURE CreateTexture(_In_ TEXTURE_FORMAT Format, _In_ UINT32 Width, _In_ UINT32 Height, _In_opt_ PVOID Data);
 
 /// @brief Load a texture from a file
 ///

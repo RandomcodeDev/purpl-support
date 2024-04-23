@@ -90,42 +90,42 @@
 ///
 /// @param[in,out] Block The block of memory to free
 #if PURPL_USE_MIMALLOC
-#define CmnFree(Block)                                                         \
-    {                                                                          \
-        (Block) ? mi_free((PVOID)(Block)) : (VOID)0;                           \
-        (Block) = NULL;                                                        \
+#define CmnFree(Block)                                                                                                 \
+    {                                                                                                                  \
+        (Block) ? mi_free((PVOID)(Block)) : (VOID)0;                                                                   \
+        *(VOID **)&(Block) = NULL;                                                                                     \
     }
 #else
-#define CmnFree(Block)                                                         \
-    {                                                                          \
-        (Block) ? free((PVOID)(Block)) : (VOID)0;                              \
-        (Block) = NULL;                                                        \
+#define CmnFree(Block)                                                                                                 \
+    {                                                                                                                  \
+        (Block) ? free((PVOID)(Block)) : (VOID)0;                                                                      \
+        *(VOID **)&(Block) = NULL;                                                                                     \
     }
 #endif
 
 /// @fn CmnAlignedFree
 ///
 /// @brief Free aligned memory
-/// 
+///
 /// @param[in,out] Block The block of memory to free
 #if PURPL_USE_MIMALLOC
-#define CmnAlignedFree(Block)                                                  \
-    {                                                                          \
-        (Block) ? mi_free(Block) : (VOID)0;                                    \
-        (Block) = NULL;                                                        \
+#define CmnAlignedFree(Block)                                                                                          \
+    {                                                                                                                  \
+        (Block) ? mi_free(Block) : (VOID)0;                                                                            \
+        (Block) = NULL;                                                                                                \
     }
 #else
 #ifdef PURPL_WIN32
-#define CmnAlignedFree(Block)                                                  \
-    {                                                                          \
-        (Block) ? _aligned_free(Block) : (VOID)0;                              \
-        (Block) = NULL;                                                        \
+#define CmnAlignedFree(Block)                                                                                          \
+    {                                                                                                                  \
+        (Block) ? _aligned_free(Block) : (VOID)0;                                                                      \
+        (Block) = NULL;                                                                                                \
     }
 #else
-#define CmnAlignedFree(Block)                                                  \
-    {                                                                          \
-        (Block) ? free(Block) : (VOID)0;                                       \
-        (Block) = NULL;                                                        \
+#define CmnAlignedFree(Block)                                                                                          \
+    {                                                                                                                  \
+        (Block) ? free(Block) : (VOID)0;                                                                               \
+        (Block) = NULL;                                                                                                \
     }
 #endif
 #endif
@@ -133,19 +133,17 @@
 /// @fn CmnAlignedRealloc
 ///
 /// @brief Resize aligned memory
-/// 
+///
 /// @param[in] Block The block of memory to resize
 /// @param[in] Alignment The new alignment
 /// @param[in] Size The new size
-/// 
+///
 /// @return A block of memory with the same data as the old block
 #if PURPL_USE_MIMALLOC
-#define CmnAlignedRealloc(Block, Alignment, Size)                              \
-    mi_aligned_recalloc(Block, 1, Size, Alignment)
+#define CmnAlignedRealloc(Block, Alignment, Size) mi_aligned_recalloc(Block, 1, Size, Alignment)
 #else
 #ifdef PURPL_WIN32
-#define CmnAlignedRealloc(Block, Alignment, Size)                              \
-    _aligned_realloc(Block, 1, Size, Alignment)
+#define CmnAlignedRealloc(Block, Alignment, Size) _aligned_realloc(Block, 1, Size, Alignment)
 #else
 extern PVOID CmnAlignedRealloc(PVOID Block, SIZE_T Alignment, SIZE_T Size);
 #endif

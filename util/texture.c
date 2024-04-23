@@ -29,7 +29,7 @@ static UINT8 FormatPitches[TextureFormatCount] = {
 };
 
 PTEXTURE
-CreateTexture(_In_ TEXTURE_FORMAT Format, _In_ UINT32 Width, _In_ UINT32 Height, _In_ PVOID Data)
+CreateTexture(_In_ TEXTURE_FORMAT Format, _In_ UINT32 Width, _In_ UINT32 Height, _In_opt_ PVOID Data)
 /*++
 
 Routine Description:
@@ -67,7 +67,7 @@ Return Value:
         Size += EstimateTextureSize(Format, Width, Height);
     }
 
-    Texture = CmnAllocType(Size, BYTE);
+    Texture = (PTEXTURE)CmnAllocType(Size, BYTE);
     if (!Texture)
     {
         LogError("Could not allocate texture");
@@ -137,7 +137,7 @@ Return Value:
 
     Data = (PBYTE)Texture + TEXTURE_HEADER_SIZE;
 
-    RealTexture = CmnAllocType(sizeof(TEXTURE) + GetTextureSize(*Texture), BYTE);
+    RealTexture = (PTEXTURE)CmnAllocType(sizeof(TEXTURE) + GetTextureSize(*Texture), BYTE);
     if (!RealTexture)
     {
         LogError("Failed to allocate %zu bytes for texture", sizeof(TEXTURE) + GetTextureSize(*Texture));
