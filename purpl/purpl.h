@@ -63,7 +63,6 @@
 #ifdef PURPL_UNIX
 #include <sys/stat.h>
 #include <sys/time.h>
-// a
 #include <sys/types.h>
 
 #define stat64 stat

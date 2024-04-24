@@ -49,6 +49,7 @@ def main():
                     "release",
                 )
             )
+            print(f"Trying to find tools in {guess_dir}")
             if os.path.exists(guess_dir):
                 return guess_dir
 

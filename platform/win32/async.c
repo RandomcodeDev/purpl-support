@@ -28,7 +28,7 @@ static VOID ThreadEntry(_In_ PVOID Thread)
 
 VOID InitializeMainThread(_In_ PFN_THREAD_START StartAddress)
 {
-    AsCurrentThread = CmnAllocType(1, THREAD);
+    AsCurrentThread = CmnAllocType(1, AS_THREAD);
     if (AsCurrentThread)
     {
         strncpy(AsCurrentThread->Name, "main", PURPL_ARRAYSIZE(AsCurrentThread->Name));
@@ -45,7 +45,7 @@ PAS_THREAD AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize, _In_ PFN_T
             "userdata 0x%llX",
             Name, StackSize, ThreadStart, UserData);
 
-    Thread = CmnAllocType(1, THREAD);
+    Thread = CmnAllocType(1, AS_THREAD);
     if (!Thread)
     {
         LogError("Failed to allocate thread data: %s", strerror(errno));

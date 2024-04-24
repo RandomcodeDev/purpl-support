@@ -12,14 +12,14 @@
 typedef UINT_PTR (*PFN_THREAD_START)(_In_opt_ PVOID UserData);
 
 /// @brief Data about a thread
-typedef struct THREAD
+typedef struct AS_THREAD
 {
     CHAR Name[32];
     PFN_THREAD_START ThreadStart;
     PVOID UserData;
     UINT_PTR ReturnValue;
     PVOID Handle;
-} THREAD, *PAS_THREAD;
+} AS_THREAD, *PAS_THREAD;
 
 /// @brief The current thread (not fully valid for the main thread)
 extern _Thread_local PAS_THREAD AsCurrentThread;
