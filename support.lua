@@ -449,6 +449,7 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
         if is_plat("gdk", "gdkx", "windows") then
             add_files(
                 path.join(support_root, "platform", "win32", "async.c"),
+                path.join(support_root, "platform", "win32", "input.c"),
                 path.join(support_root, "platform", "win32", "platform.cpp"),
                 path.join(support_root, "platform", "win32", "video.c")
             )
