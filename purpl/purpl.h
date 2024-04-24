@@ -65,6 +65,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#define fseeko64 fseeko
 #define stat64 stat
 
 #if !defined PURPL_SWITCH && !defined PURPL_CONSOLE_HOMEBREW

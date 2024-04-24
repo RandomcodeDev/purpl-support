@@ -17,7 +17,7 @@ Abstract:
 
 #include "platform/async.h"
 
-_Thread_local PTHREAD AsCurrentThread;
+_Thread_local PAS_THREAD AsCurrentThread;
 
 static PVOID ThreadEntry(_In_ PVOID Thread)
 {
@@ -29,17 +29,16 @@ static PVOID ThreadEntry(_In_ PVOID Thread)
 
 VOID InitializeMainThread(_In_ PFN_THREAD_START StartAddress)
 {
-    AsCurrentThread = CmnAlloc(1, sizeof(THREAD));
+    AsCurrentThread = CmnAlloc(1, sizeof(AS_THREAD));
     strncpy(AsCurrentThread->Name, "main",
             PURPL_ARRAYSIZE(AsCurrentThread->Name));
     AsCurrentThread->ThreadStart = StartAddress;
 }
 
-PTHREAD
-AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize,
+PAS_THREAD AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize,
                _In_ PFN_THREAD_START ThreadStart, _In_opt_ PVOID UserData)
 {
-    PTHREAD Thread;
+    PAS_THREAD Thread;
     INT Error;
     pthread_attr_t Attributes;
 
@@ -47,7 +46,7 @@ AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize,
             "userdata 0x%llX",
             Name, StackSize, ThreadStart, UserData);
 
-    Thread = CmnAlloc(1, sizeof(THREAD));
+    Thread = CmnAlloc(1, sizeof(AS_THREAD));
     if (!Thread)
     {
         LogError("Failed to allocate thread data: %s", strerror(errno));
@@ -83,18 +82,12 @@ AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize,
         return NULL;
     }
 
-#ifdef PURPL_LINUX
-    // For logging purposes, this doesn't matter. It's just for debuggers, so
-    // the return value isn't checked.
-    pthread_setname_np((pthread_t)Thread->Handle, Thread->Name);
-#endif
-
     pthread_attr_destroy(&Attributes);
 
     return Thread;
 }
 
-INT AsJoinThread(_In_ PTHREAD Thread)
+UINT_PTR AsJoinThread(_In_ PAS_THREAD Thread)
 {
     PVOID ReturnValue;
 
@@ -108,15 +101,15 @@ INT AsJoinThread(_In_ PTHREAD Thread)
 
     CmnFree(Thread);
 
-    return (INT)ReturnValue;
+    return (UINT_PTR)ReturnValue;
 }
 
-VOID AsDetachThread(_In_ PTHREAD Thread)
+VOID AsDetachThread(_In_ PAS_THREAD Thread)
 {
     pthread_detach((pthread_t)Thread->Handle);
 }
 
-PMUTEX AsCreateMutex(VOID)
+PAS_MUTEX AsCreateMutex(VOID)
 {
     pthread_mutex_t *Mutex;
 
@@ -141,7 +134,7 @@ PMUTEX AsCreateMutex(VOID)
     return Mutex;
 }
 
-BOOLEAN AsLockMutex(_In_ PMUTEX Mutex, _In_ BOOLEAN Wait)
+BOOLEAN AsLockMutex(_In_ PAS_MUTEX Mutex, _In_ BOOLEAN Wait)
 {
     if (Mutex)
     {
@@ -154,14 +147,16 @@ BOOLEAN AsLockMutex(_In_ PMUTEX Mutex, _In_ BOOLEAN Wait)
             return pthread_mutex_trylock(Mutex) == 0;
         }
     }
+
+    return FALSE;
 }
 
-VOID AsUnlockMutex(_In_ PMUTEX Mutex)
+VOID AsUnlockMutex(_In_ PAS_MUTEX Mutex)
 {
     pthread_mutex_unlock(Mutex);
 }
 
-VOID AsDestroyMutex(_In_ PMUTEX Mutex)
+VOID AsDestroyMutex(_In_ PAS_MUTEX Mutex)
 {
     if (Mutex)
     {

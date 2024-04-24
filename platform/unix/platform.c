@@ -352,6 +352,11 @@ UINT64 PlatGetMilliseconds(VOID)
     return Time.tv_sec * 1000 + Time.tv_nsec / 1000000;
 }
 
+VOID PlatSleep(_In_ UINT64 Duration)
+{
+    sleep(Duration);
+}
+
 BOOLEAN PlatCreateDirectory(_In_ PCSTR Path)
 {
     // https://stackoverflow.com/questions/2336242/recursive-mkdir-system-call-on-unix
