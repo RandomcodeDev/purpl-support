@@ -17,25 +17,12 @@ typedef enum INPUT_TYPE
     InputTypeCount
 } INPUT_TYPE, *PINPUT_TYPE;
 
-typedef enum INPUT_KEY INPUT_KEY, *PINPUT_KEY;
-typedef enum INPUT_MOUSE_BUTTON INPUT_MOUSE_BUTTON, *PINPUT_MOUSE_BUTTON;
-typedef enum INPUT_CONTROLLER_BUTTON INPUT_CONTROLLER_BUTTON, *PINPUT_CONTROLLER_BUTTON;
-
-BEGIN_EXTERN_C
-
-/// @brief Get whether a key is down or not
-///
-/// @param[in] Key The key to get the state of
-extern BOOLEAN InGetKeyState(_In_ INPUT_KEY Key);
-
-END_EXTERN_C
-
 /// @brief Keys, based on position on QWERTY keyboard
 typedef enum INPUT_KEY
 {
     // row 1
 
-    InputKeyEscape,
+    InputKeyEscape = 0,
     InputKeyF1,
     InputKeyF2,
     InputKeyF3,
@@ -153,4 +140,88 @@ typedef enum INPUT_KEY
     InputKeyRight,
     InputKeyNumpad0,
     InputKeyNumpadPeriod,
+
+    InputKeyCount
 } INPUT_KEY, *PINPUT_KEY;
+
+/// @brief Get the current state of a key
+#define INPUT_GET_KEY(Key) (InState.Keyboard[InputKey##Key])
+
+/// @brief Mouse buttons
+typedef enum INPUT_MOUSE_BUTTON
+{
+    InputMouseButtonLeft,
+    InputMouseButtonMiddle,
+    InputMouseButtonRight,
+    InputMouseButton4,
+    InputMouseButton5,
+    InputMouseButtonCount
+} INPUT_MOUSE_BUTTON, *PINPUT_MOUSE_BUTTON;
+
+/// @brief Get the current state of a mouse button
+#define INPUT_GET_MOUSE_BUTTOM(Button) (InState.MouseButtons[InputMouseButton##Button])
+
+/// @brief Controller buttons, names/positions based on Xbox controller
+typedef enum INPUT_CONTROLLER_BUTTON
+{
+    InputControllerButtonA,
+    InputControllerButtonB,
+    InputControllerButtonX,
+    InputControllerButtonY,
+
+    InputControllerButtonStart,
+    InputControllerButtonSelect,
+
+    InputControllerButtonLeftStick,
+    InputControllerButtonRightStick,
+
+    InputControllerButtonUp,
+    InputControllerButtonDown,
+    InputControllerButtonLeft,
+    InputControllerButtonRight,
+
+    InputControllerButtonLeftTrigger,
+    InputControllerButtonRightTrigger,
+    InputControllerButtonLeftShoulder,
+    InputControllerButtonRightShoulder,
+
+    InputControllerButtonCount
+} INPUT_CONTROLLER_BUTTON, *PINPUT_CONTROLLER_BUTTON;
+
+/// @brief Get the current state of a controller button
+#define INPUT_GET_CONTROLLER_BUTTON(Button) (InState.Keyboard[InputKey##Key])
+
+/// @brief Input state
+typedef struct INPUT_STATE
+{
+    INPUT_TYPE Type;
+
+    BOOLEAN Keyboard[InputKeyCount];
+    BOOLEAN MouseButtons[InputMouseButtonCount];
+    BOOLEAN ControllerButtons[InputControllerButtonCount];
+
+    UINT32 ControllerIndex;
+
+    // 0 - RdrGetWidth()/RdrGetHeight()
+    ivec2 MousePosition;
+
+    vec2 LeftAxis;
+    vec2 RightAxis;
+    vec2 DpadAxis;
+} INPUT_STATE, *PINPUT_STATE;
+
+BEGIN_EXTERN_C
+
+/// @brief Input state
+extern INPUT_STATE InState;
+
+/// @brief Initialize input
+extern VOID InInitialize(VOID);
+
+/// @brief Update input state
+extern VOID InUpdateState(VOID);
+
+/// @brief Shut down input
+extern VOID InShutdown(VOID);
+
+END_EXTERN_C

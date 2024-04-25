@@ -20,6 +20,7 @@ Abstract:
 #include "engine/render/render.h"
 #endif
 
+#include "platform/input.h"
 #include "platform/platform.h"
 #include "platform/video.h"
 
@@ -39,10 +40,13 @@ static CHAR WindowClassName[] = "PurplWindow";
 
 static PCHAR WindowTitle;
 
-static INT32 WindowWidth;
-static INT32 WindowHeight;
+INT32 WindowWidth;
+INT32 WindowHeight;
 static INT32 ExtraWidth;
 static INT32 ExtraHeight;
+
+INT32 WindowX;
+INT32 WindowY;
 
 static BOOLEAN WindowResized;
 static BOOLEAN WindowFocused;
@@ -52,6 +56,10 @@ static HDC DeviceContext;
 #ifdef PURPL_OPENGL
 static HGLRC GlContext;
 #endif
+
+// Must match input.c
+#define KEYBOARD_COUNT 256
+extern BOOLEAN Keyboard[KEYBOARD_COUNT];
 
 #ifndef PURPL_XBOX360
 static LRESULT CALLBACK WindowProcedure(_In_ HWND MessageWindow, _In_ UINT Message, _In_ WPARAM Wparam,
@@ -95,10 +103,26 @@ static LRESULT CALLBACK WindowProcedure(_In_ HWND MessageWindow, _In_ UINT Messa
             WindowHeight = NewHeight;
             return 0;
         }
+        case WM_MOVE: {
+            RECT ClientArea = {0};
+
+            GetClientRect(Window, &ClientArea);
+            WindowX = ClientArea.left;
+            WindowY = ClientArea.top;
+
+            break;
+        }
         case WM_ACTIVATEAPP:
             WindowFocused = (BOOLEAN)Wparam;
             LogInfo("Window %s", WindowFocused ? "focused" : "unfocused");
             return 0;
+        case WM_KEYDOWN:
+        case WM_KEYUP:
+            for (UINT32 Key = 0; Key < KEYBOARD_COUNT; Key++)
+            {
+                Keyboard[Key] = GetAsyncKeyState(Key) & 0x0001;
+            }
+            break;
         case WM_DESTROY:
         case WM_CLOSE: {
             LogInfo("Window closed");
@@ -173,6 +197,8 @@ static VOID InitializeWindow(VOID)
     GetClientRect(Window, &ClientArea);
     WindowWidth = ClientArea.right - ClientArea.left;
     WindowHeight = ClientArea.bottom - ClientArea.top;
+    WindowX = ClientArea.left;
+    WindowY = ClientArea.top;
 
     WindowResized = FALSE;
     WindowFocused = TRUE;
@@ -416,6 +442,11 @@ PVOID VidGetObject(VOID)
 FLOAT VidGetDpi(VOID)
 {
     return (FLOAT)GetDpiForWindow(Window);
+}
+
+VOID VidSetCursorVisibility(_In_ BOOLEAN Visible)
+{
+    ShowCursor(Visible);
 }
 
 #ifdef PURPL_VULKAN

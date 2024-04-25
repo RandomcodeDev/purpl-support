@@ -100,10 +100,16 @@ extern PCONFIGVAR CfgGetVariable(_In_z_ PCSTR Name);
 
 #define CONFIGVAR_GET_TYPE(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Type : 0)
 
-#define CONFIGVAR_GET_BOOLEAN(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Boolean : FALSE)
-#define CONFIGVAR_GET_INT(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Int : 0)
-#define CONFIGVAR_GET_FLOAT(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Float : 0.0)
-#define CONFIGVAR_GET_STRING(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.String.Value : NULL)
+#define CONFIGVAR_GET_BOOLEAN_EX(Name, DefaultValue) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Boolean : (DefaultValue))
+#define CONFIGVAR_GET_INT_EX(Name, DefaultValue) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Int : (DefaultValue))
+#define CONFIGVAR_GET_FLOAT_EX(Name, DefaultValue) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Float : (DefaultValue))
+#define CONFIGVAR_GET_STRING_EX(Name, DefaultValue)                                                                       \
+    (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.String.Value : (DefaultValue))
+
+#define CONFIGVAR_GET_BOOLEAN(Name) CONFIGVAR_GET_BOOLEAN_EX(Name, FALSE)
+#define CONFIGVAR_GET_INT(Name) CONFIGVAR_GET_INT_EX(Name, 0)
+#define CONFIGVAR_GET_FLOAT(Name) CONFIGVAR_GET_FLOAT_EX(Name, 0.0)
+#define CONFIGVAR_GET_STRING(Name) CONFIGVAR_GET_STRING_EX(Name, NULL)
 
 /// @brief Set a configuration variable
 ///
