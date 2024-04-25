@@ -139,7 +139,7 @@ typedef enum INPUT_KEY
     InputKeyDown,
     InputKeyRight,
     InputKeyNumpad0,
-    InputKeyNumpadPeriod,
+    InputKeyDecimal,
 
     InputKeyCount
 } INPUT_KEY, *PINPUT_KEY;
@@ -217,6 +217,9 @@ extern INPUT_STATE InState;
 
 /// @brief Initialize input
 extern VOID InInitialize(VOID);
+
+/// @brief Toggle whether the cursor is locked to the center of the screen and invisible
+extern VOID InLockCursor(_In_ BOOLEAN Locked);
 
 /// @brief Update input state
 extern VOID InUpdateState(VOID);

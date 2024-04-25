@@ -45,9 +45,6 @@ extern PVOID VidGetObject(VOID);
 /// @return The current DPI
 extern FLOAT VidGetDpi(VOID);
 
-/// @brief Toggle the cursor
-extern VOID VidSetCursorVisibility(_In_ BOOLEAN Visible);
-
 #ifdef PURPL_VULKAN
 /// @brief Get the address of a Vulkan symbol
 ///

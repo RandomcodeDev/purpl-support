@@ -45,8 +45,8 @@ INT32 WindowHeight;
 static INT32 ExtraWidth;
 static INT32 ExtraHeight;
 
-INT32 WindowX;
-INT32 WindowY;
+static INT32 WindowX;
+static INT32 WindowY;
 
 static BOOLEAN WindowResized;
 static BOOLEAN WindowFocused;
@@ -442,11 +442,6 @@ PVOID VidGetObject(VOID)
 FLOAT VidGetDpi(VOID)
 {
     return (FLOAT)GetDpiForWindow(Window);
-}
-
-VOID VidSetCursorVisibility(_In_ BOOLEAN Visible)
-{
-    ShowCursor(Visible);
 }
 
 #ifdef PURPL_VULKAN
