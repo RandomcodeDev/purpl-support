@@ -49,6 +49,12 @@ end
 function do_settings(support_root)
     set_warnings("everything")
 
+    if is_mode("debug") then
+        set_runtimes("MDd")
+    else
+        set_runtimes("MD")
+    end
+
     if not is_plat("xbox360") then
         set_languages("gnu11", "cxx23")
     end
@@ -446,13 +452,16 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
         add_headerfiles(path.join(support_root, "platform", "*.h"))
         add_files(path.join(support_root, "platform", "*.c"))
 
-        if is_plat("gdk", "gdkx", "windows") then
+        if is_plat("gdk", "gdkx", "xbox360", "windows") then
             add_files(
                 path.join(support_root, "platform", "win32", "async.c"),
                 path.join(support_root, "platform", "win32", "input.c"),
                 path.join(support_root, "platform", "win32", "platform.cpp"),
                 path.join(support_root, "platform", "win32", "video.c")
             )
+            if is_plat("xbox360") then
+                xbox360_add_settings(support_root, deps_root)
+            end
             add_links("advapi32", "gdi32", "kernel32", "shell32", "user32")
             if not is_plat("gdkx") then
                 add_links("dbghelp")
@@ -471,6 +480,7 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
             add_headerfiles(path.join(support_root, "..", "..", "platform", "switch", "switch.lua"))
             add_files(
                 path.join(support_root, "..", "..", "platform", "switch", "async.cpp"),
+                path.join(support_root, "..", "..", "platform", "switch", "input.cpp"),
                 path.join(support_root, "..", "..", "platform", "switch", "platform.cpp"),
                 path.join(support_root, "..", "..", "platform", "switch", "video.cpp")
             )

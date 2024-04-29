@@ -414,24 +414,25 @@ static VOID UnlockCursor(VOID)
 
 VOID InUpdateState(VOID)
 {
-    AsLockMutex(Mutex, TRUE);
-
-    InState.Type = InputTypeKeyboardAndMouse;
-
-    UpdateKeyboard();
-    UpdateMouse();
-    UpdateController();
-
-    if (CursorLocked && VidFocused())
+    if (AsLockMutex(Mutex, TRUE))
     {
-        LockCursor();
-    }
-    else
-    {
-        UnlockCursor();
-    }
+        InState.Type = InputTypeKeyboardAndMouse;
 
-    AsUnlockMutex(Mutex);
+        UpdateKeyboard();
+        UpdateMouse();
+        UpdateController();
+
+        if (CursorLocked && VidFocused())
+        {
+            LockCursor();
+        }
+        else
+        {
+            UnlockCursor();
+        }
+
+        AsUnlockMutex(Mutex);
+    }
 }
 
 VOID InShutdown(VOID)

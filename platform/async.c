@@ -63,6 +63,8 @@ BOOLEAN AsTestSemaphore(_In_ PAS_SEMAPHORE Semaphore, _In_ BOOLEAN Wait)
             return FALSE;
         }
     } while (Wait);
+
+    return FALSE;
 }
 
 BOOLEAN AsIncrementSemaphore(_In_ PAS_SEMAPHORE Semaphore, _In_ BOOLEAN Wait)

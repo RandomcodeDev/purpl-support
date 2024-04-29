@@ -18,6 +18,7 @@ toolchain("xbox360")
         toolchain:add("cxxflags", "-TP")
         toolchain:add("cxflags", "-X")
         toolchain:add("cxflags", "-Dalignof=__alignof")
+        toolchain:add("cxflags", "-D_XBOX")
         toolchain:add("ldflags", "-nodefaultlib")
         toolchain:add("ldflags", "-xex:no")
 
@@ -37,6 +38,7 @@ toolchain("xbox360")
 toolchain_end()
 
 function xbox360_add_settings(support_root, deps_root)
+    add_forceincludes(path.absolute(path.join(support_root, "platform", "win32", "360intrin.h")))
 end
 
 function xbox360_postbuild(target)

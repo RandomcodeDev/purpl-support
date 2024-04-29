@@ -265,7 +265,7 @@ PCSTR PlatGetDescription(VOID)
 
         snprintf(Buffer, PURPL_ARRAYSIZE(Buffer),
 #ifdef _DEBUG
-                 "%s %s %u.%u.%s %s%s",
+                 "%s %s %lu.%lu.%s %s%s",
 #else
                  "%s %s %lu.%lu.%s.%lu %s%s",
 #endif

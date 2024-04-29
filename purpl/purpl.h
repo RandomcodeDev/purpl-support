@@ -36,8 +36,9 @@
 #endif
 
 #define WIN32_LEAN_AND_MEAN
-#ifdef PUPL_XBOX360
-#include <xbox.h>
+#ifdef PURPL_XBOX360
+#include <xtl.h>
+#include <xboxmath.h>
 #else
 #include <windows.h>
 #endif
