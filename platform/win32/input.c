@@ -9,7 +9,7 @@
 extern INT32 WindowWidth;
 extern INT32 WindowHeight;
 
-#define KEYBOARD_COUNT 256
+#define KEYBOARD_COUNT 255
 
 INPUT_STATE InState;
 static PAS_MUTEX Mutex;

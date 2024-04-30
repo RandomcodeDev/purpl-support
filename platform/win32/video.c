@@ -58,7 +58,7 @@ static HGLRC GlContext;
 #endif
 
 // Must match input.c
-#define KEYBOARD_COUNT 256
+#define KEYBOARD_COUNT 255
 extern BOOLEAN Keyboard[KEYBOARD_COUNT];
 
 #ifndef PURPL_XBOX360
