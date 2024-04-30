@@ -20,6 +20,7 @@ typedef struct AS_THREAD
     UINT_PTR ReturnValue;
     PVOID Handle;
 } AS_THREAD, *PAS_THREAD;
+typedef struct AS_THREAD *const PCAS_THREAD;
 
 /// @brief The current thread (not fully valid for the main thread)
 extern _Thread_local PAS_THREAD AsCurrentThread;
@@ -36,7 +37,7 @@ extern _Thread_local PAS_THREAD AsCurrentThread;
 ///
 /// @return The new thread
 extern PAS_THREAD AsCreateThread(_In_opt_ PCSTR Name, _In_ UINT64 StackSize, _In_ PFN_THREAD_START ThreadStart,
-                              _In_opt_ PVOID UserData);
+                                 _In_opt_ PVOID UserData);
 
 /// @brief Wait for a thread to finish, get its return value, and clean up the
 /// THREAD structure

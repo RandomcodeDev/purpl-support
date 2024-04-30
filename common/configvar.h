@@ -10,34 +10,26 @@
 #include "common/common.h"
 
 /// @brief Data type of a variable
-typedef enum CONFIGVAR_TYPE
-{
-    ConfigVarTypeBoolean, // BOOLEAN
-    ConfigVarTypeInteger, // INT32
-    ConfigVarTypeFloat,   // FLOAT
-    ConfigVarTypeString,  // String, up to 64 characters including NUL
-    ConfigVarTypeCount
-} CONFIGVAR_TYPE, *PCONFIGVAR_TYPE;
+PURPL_MAKE_TAG(enum, CONFIGVAR_TYPE,
+               {ConfigVarTypeBoolean, // BOOLEAN
+                ConfigVarTypeInteger, // INT32
+                ConfigVarTypeFloat,   // FLOAT
+                ConfigVarTypeString,  // String, up to 64 characters including NUL
+                ConfigVarTypeCount})
 
 /// @brief The side of a variable
-typedef enum CONFIGVAR_SIDE
-{
-    ConfigVarSideBoth,
-    ConfigVarSideClientOnly,
-    ConfigVarSideServerOnly
-} CONFIGVAR_SIDE, *PCONFIGVAR_SIDE;
+PURPL_MAKE_TAG(enum, CONFIGVAR_SIDE, {ConfigVarSideBoth, ConfigVarSideClientOnly, ConfigVarSideServerOnly})
 
 /// @brief The value of a configuration variable
-typedef union CONFIGVAR_VALUE {
+PURPL_MAKE_TAG(union, CONFIGVAR_VALUE, {
     BOOLEAN Boolean;
     INT64 Int;
     DOUBLE Float;
     CHAR String[64];
-} CONFIGVAR_VALUE, *PCONFIGVAR_VALUE;
+})
 
 /// @brief A configuration variable. Do not modify the fields directly.
-typedef struct CONFIGVAR
-{
+PURPL_MAKE_TAG(struct, CONFIGVAR, {
     CHAR Name[32];
     CONFIGVAR_TYPE Type;
     CONFIGVAR_VALUE Default;
@@ -53,7 +45,7 @@ typedef struct CONFIGVAR
             UINT8 Internal : 1;
         };
     };
-} CONFIGVAR, *PCONFIGVAR;
+})
 
 /// @brief Define a configuration variable. Should be called before CmnInitialize if you want the variable to be parsed
 /// from the command line arguments.
@@ -100,10 +92,13 @@ extern PCONFIGVAR CfgGetVariable(_In_z_ PCSTR Name);
 
 #define CONFIGVAR_GET_TYPE(Name) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Type : 0)
 
-#define CONFIGVAR_GET_BOOLEAN_EX(Name, DefaultValue) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Boolean : (DefaultValue))
-#define CONFIGVAR_GET_INT_EX(Name, DefaultValue) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Int : (DefaultValue))
-#define CONFIGVAR_GET_FLOAT_EX(Name, DefaultValue) (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Float : (DefaultValue))
-#define CONFIGVAR_GET_STRING_EX(Name, DefaultValue)                                                                       \
+#define CONFIGVAR_GET_BOOLEAN_EX(Name, DefaultValue)                                                                   \
+    (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Boolean : (DefaultValue))
+#define CONFIGVAR_GET_INT_EX(Name, DefaultValue)                                                                       \
+    (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Int : (DefaultValue))
+#define CONFIGVAR_GET_FLOAT_EX(Name, DefaultValue)                                                                     \
+    (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.Float : (DefaultValue))
+#define CONFIGVAR_GET_STRING_EX(Name, DefaultValue)                                                                    \
     (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.String.Value : (DefaultValue))
 
 #define CONFIGVAR_GET_BOOLEAN(Name) CONFIGVAR_GET_BOOLEAN_EX(Name, FALSE)

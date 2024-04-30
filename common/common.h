@@ -38,13 +38,21 @@
 /// @brief Make a string, expanding one level of macros
 #define PURPL_STRINGIZE_EXPAND(X) PURPL_STRINGIZE(X)
 
+/// @brief Create a struct/enum/union with the right name format
+#define PURPL_MAKE_TAG(type_, name, ...)                                                                               \
+    typedef type_ name __VA_ARGS__ name, *P##name;                                                                     \
+    typedef type_ name const *PC##name;
+
+/// @brief Make an ECS component
+#define PURPL_MAKE_COMPONENT(type_, name, ...)                                                                         \
+    PURPL_MAKE_TAG(type_, name, __VA_ARGS__) extern ECS_COMPONENT_DECLARE(name);
+
 /// @brief Define a hashmap entry structure for stb
 #define PURPL_MAKE_HASHMAP_ENTRY(Name, Tk, Tv)                                                                         \
-    typedef struct Name                                                                                                \
-    {                                                                                                                  \
+    PURPL_MAKE_TAG(struct, Name, {                                                                                     \
         Tk key;                                                                                                        \
         Tv value;                                                                                                      \
-    } Name, *P##Name;
+    })
 
 /// @brief Define a string hashmap entry structure for stb
 #define PURPL_MAKE_STRING_HASHMAP_ENTRY(Name, Tv) PURPL_MAKE_HASHMAP_ENTRY(Name, PCHAR, Tv)
@@ -161,6 +169,7 @@ extern PCHAR CmnDuplicateString(_In_z_ PCSTR String, _In_ SIZE_T Count);
 /// @param[in] ...     The arguments to the error message.
 _Noreturn extern VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_z_ _Printf_format_string_ PCSTR Message, ...);
 
+/// @brief This routine displays an error message and terminates the program.
 #define CmnError(...) CmnErrorEx(TRUE, __VA_ARGS__)
 
 /// @brief This routine is a modified version of ReactOS's CommandLineToArgvW

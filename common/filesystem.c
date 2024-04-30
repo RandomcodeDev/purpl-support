@@ -7,15 +7,9 @@
 #include "filesystem.h"
 #include "packfile.h"
 
-typedef enum FILESYSTEM_SOURCE_TYPE
-{
-    FsSourceTypeDirectory,
-    FsSourceTypePackFile,
-    FsSourceTypeCount
-} FILESYSTEM_SOURCE_TYPE, *PFILESYSTEM_SOURCE_TYPE;
+PURPL_MAKE_TAG(enum, FILESYSTEM_SOURCE_TYPE, {FsSourceTypeDirectory, FsSourceTypePackFile, FsSourceTypeCount})
 
-typedef struct FILESYSTEM_SOURCE
-{
+PURPL_MAKE_TAG(struct, FILESYSTEM_SOURCE, {
     FILESYSTEM_SOURCE_TYPE Type;
     PCHAR Path;
     PVOID Handle; // for things other than directories
@@ -25,7 +19,7 @@ typedef struct FILESYSTEM_SOURCE
     PVOID(*ReadFile)
     (_In_ PVOID Handle, _In_z_ PCSTR Path, _In_ UINT64 Offset, _In_ UINT64 MaxAmount, _Out_ PUINT64 ReadAmount,
      _In_ UINT64 Extra);
-} FILESYSTEM_SOURCE, *PFILESYSTEM_SOURCE;
+})
 
 PFILESYSTEM_SOURCE FsSources;
 

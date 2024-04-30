@@ -39,18 +39,16 @@
 
 #pragma pack(push, 1)
 /// @brief Pack file directory header
-typedef struct PACKFILE_HEADER
-{
+PURPL_MAKE_TAG(struct, PACKFILE_HEADER, {
     UINT32 Signature;
     UINT32 Version;
     UINT32 TreeSize;
     UINT16 ArchiveCount;
     UINT64 LastArchiveLength;
-} PACKFILE_HEADER, *PPACKFILE_HEADER;
+})
 
 /// @brief Pack file directory entry
-typedef struct PACKFILE_ENTRY
-{
+PURPL_MAKE_TAG(struct, PACKFILE_ENTRY, {
     XXH128_hash_t Hash;
     XXH128_hash_t CompressedHash;
     UINT16 ArchiveIndex;
@@ -59,20 +57,20 @@ typedef struct PACKFILE_ENTRY
     UINT64 CompressedSize;
     UINT16 PathLength;
     // on-disk: the path
-} PACKFILE_ENTRY, *PPACKFILE_ENTRY;
+})
 #pragma pack(pop)
 
 PURPL_MAKE_STRING_HASHMAP_ENTRY(PACKFILE_ENTRY_MAP, PACKFILE_ENTRY);
 
 /// @brief A representation of a pack file
-typedef struct PACKFILE
+PURPL_MAKE_TAG(struct, PACKFILE,
 {
     PCHAR Path;
     PACKFILE_HEADER Header;
     PPACKFILE_ENTRY_MAP Entries;
     UINT16 CurrentArchive;
     UINT64 CurrentOffset;
-} PACKFILE, *PPACKFILE;
+})
 
 /// @brief Create a pack file
 ///
