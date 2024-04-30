@@ -469,6 +469,7 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
         elseif is_plat("linux", "freebsd") then
             add_files(
                 path.join(support_root, "platform", "unix", "async.c"),
+                path.join(support_root, "platform", "unix", "input.c"),
                 path.join(support_root, "platform", "unix", "platform.c"),
                 path.join(support_root, "platform", "unix", "video.c")
             )
