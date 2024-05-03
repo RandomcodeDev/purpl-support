@@ -64,7 +64,6 @@ function do_settings(support_root)
     add_defines("_GNU_SOURCE")
 
     if get_config("toolchain") == "msvc" or get_config("toolchain") == "xbox360" then
-        add_cxflags("-Qspectre", "-EHsc", {force = true})
         -- all of these are either external or inconsequential
         add_cxflags(
             "-wd4820", -- padded
@@ -78,11 +77,8 @@ function do_settings(support_root)
             "-wd4005", -- macro redefinition
             "-wd4668", -- x is not defined as a preprocessor macro, replacing with 0 for #if
             "-wd4113", -- Spectre mitigation
-            "-wd5045",
             "-wd4191", -- casting function pointer (used for InitializeMainThread, it doesn't call the pointer)
-            "-wd5029", -- nonstandard extension: alignment attributes don't apply to functions
             "-wd4090", -- different const qualifiers (mainly from freeing things that are const)
-            "-wd5039", -- exception nonsense (external)
             "-wd4127", -- conditional expression is constant (external)
             "-wd4100", -- unreferenced formal parameter (external)
             "-wd4189", -- local variable is initialized but not referenced (external)
@@ -91,22 +87,33 @@ function do_settings(support_root)
             "-wd4201", -- nameless struct/union
         {force = true})
         add_cxxflags(
-            "-wd5204", -- virtual function something something
-            "-wd5027", -- move assignment operator was defined as deleted
-            "-wd5026",
             "-wd4626", -- assignment operator was defined as deleted
             "-wd4623", -- default constructor was defined as deleted
             "-wd4625", -- copy constructor was defined as deleted
             "-wd4355", -- this used in base member initializer list
             "-wd4267", -- conversion from size_t to _Ty (in C++ <utility>, not my problem)
-            "-wd5267", -- definition of implicit copy constructor is deprecated because it has a user-provided destructor
             "-wd4505", -- unreferenced function with internal linkage has been removed
             "-wd4800", -- implicit conversion to bool, possible information loss
-            "-wd5262", -- implicit fallthrough use [[fallthrough]]
             "-wd4388", -- signed/unsigned mismatch
-            "-wd5054", -- incompatible enums or'd together
         {force = true})
-    elseif get_config("toolchain") == "clang" then
+
+        if get_config("toolchain") == "msvc" then
+            add_cxflags("-Qspectre", "-EHsc", {force = true})
+            add_cxflags(
+                "-wd5039", -- exception nonsense (external)
+                "-wd5045", -- Spectre mitigation
+                "-wd5029", -- nonstandard extension: alignment attributes don't apply to functions
+                {force = true})
+            add_cxxflags(
+                "-wd5267", -- definition of implicit copy constructor is deprecated because it has a user-provided destructor
+                "-wd5204", -- virtual function something something
+                "-wd5027", -- move assignment operator was defined as deleted
+                "-wd5026",
+                "-wd5262", -- implicit fallthrough use [[fallthrough]]
+                "-wd5054", -- incompatible enums or'd together
+            {force = true})
+        end
+    elseif get_config("toolchain") == "clang" or get_config("toolchain") == "switch" or get_config("toolchain") == "llvm" then
         add_cxflags(
             "-Wno-gnu-line-marker",
             "-Wno-gnu-zero-variadic-macro-arguments",
@@ -449,7 +456,7 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
 
     target("platform")
         set_kind("static")
-        add_headerfiles(path.join(support_root, "platform", "*.h"))
+        add_headerfiles(path.join(support_root, "platform", "*.h"), path.join(support_root, "platform", "**.lua"))
         add_files(path.join(support_root, "platform", "*.c"))
 
         if is_plat("gdk", "gdkx", "xbox360", "windows") then

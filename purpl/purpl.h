@@ -41,12 +41,12 @@
 #include <xboxmath.h>
 #else
 #include <windows.h>
+#include <shlobj.h>
 #endif
 
 #ifdef __cplusplus
 #include <comdef.h>
 #endif
-#include <shlobj.h>
 #include <shellapi.h>
 #include <uxtheme.h>
 #include <windowsx.h>

@@ -32,7 +32,7 @@ toolchain("xbox360")
         for _, libdir in ipairs({
             path.join(xbox360root, "lib", "xbox")
         }) do
-            toolchain:add("ldflags", "-libdir:" .. libdir)
+            toolchain:add("libdirs", libdir)
         end
     end)
 toolchain_end()
@@ -43,23 +43,5 @@ end
 
 function xbox360_postbuild(target)
     if target:kind() == "binary" then
-        --local nacp = path.join(path.absolute(target:targetdir()), "control.nacp")
-        --local romfs = path.join(path.absolute(target:targetdir()), "romfs")
-        --os.mkdir(romfs)
-        --for _, pair in ipairs({
-        --    {path.join(path.absolute(target:targetdir()), "assets"), path.join(romfs, "assets")}
-        --}) do
-        --    local source = pair[1]
-        --    local dest = pair[2]
-        --    if os.isfile(source) then
-        --        print("copy " .. source .. " to " .. dest)
-        --        os.cp(source, dest)
-        --    else
-        --        if not os.exists(dest) then
-        --            print("link " .. source .. " to " .. dest)
-        --            os.ln(source, dest)
-        --        end
-        --    end
-        --end
     end
 end

@@ -208,11 +208,12 @@ def main():
             if file.endswith(".hlsl"):
                 name = os.path.splitext(file)[0]
                 for shader in [
-                    ("VertexMain", "vs_6_0"),
-                    ("PixelMain", "ps_6_0"),
+                    ("VertexMain", "vs_6_0", ["-fvk-invert-y"]),
+                    ("PixelMain", "ps_6_0", []),
                 ]:
                     entry = shader[0]
                     model = shader[1]
+                    vkflags = shader[2]
                     extension = model[0:2]
                     build_asset(
                         lambda src, dest: [
@@ -244,7 +245,7 @@ def main():
                             src,
                             "-Fo",
                             dest,
-                        ],
+                        ] + vkflags,
                         os.path.join(root, file),
                         os.path.join(
                             root.replace(assets_dir, output_dir),
