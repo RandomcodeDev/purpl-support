@@ -37,10 +37,12 @@ def main():
         path = os.path.join(build, name)
         for file in glob.glob(path):
             target = os.path.join(output, os.path.dirname(name))
-            if not os.path.isdir(target):
-                if os.path.exists(target):
+            if os.path.exists(target):
+                if os.path.isdir(file):
+                    shutil.rmtree(target)
+                else:
                     shutil.delete(target)
-                os.makedirs(target)
+            os.makedirs(target)
             print(f"{file} -> {target}")
             if os.path.isdir(file):
                 shutil.copytree(file, os.path.join(target, name))

@@ -420,9 +420,6 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
             add_files(path.join(deps_root, "zstd", "lib", "**", "*.S"))
         end
         remove_files(path.join(deps_root, "zstd", "lib", "legacy", "*.c"))
-        add_defines(
-            "_BitScanReverse(a, b) *(a) = ZSTD_countTrailingZeroes32_fallback((b))",
-            "_BitScanForward(a, b) *(a) = ZSTD_countLeadingZeroes32_fallback((b))")
         set_warnings("none")
         set_group("External")
         on_load(fix_target)
@@ -456,7 +453,7 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
 
     target("platform")
         set_kind("static")
-        add_headerfiles(path.join(support_root, "platform", "*.h"), path.join(support_root, "platform", "**.lua"))
+        add_headerfiles(path.join(support_root, "platform", "*.h"), path.join(support_root, "..", "..", "platform", "**.lua"), path.join(support_root, "platform", "**.lua"))
         add_files(path.join(support_root, "platform", "*.c"))
 
         if is_plat("gdk", "gdkx", "xbox360", "windows") then
