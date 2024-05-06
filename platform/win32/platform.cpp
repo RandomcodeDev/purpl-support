@@ -34,6 +34,8 @@ DWORD InitialConsoleInputMode;
 DWORD InitialConsoleOutputMode;
 DWORD InitialConsoleErrorMode;
 
+extern "C" CONST IMAGE_DOS_HEADER *__ImageBase;
+
 VOID PlatInitialize(VOID)
 {
     BOOL HaveConsole;
@@ -80,7 +82,7 @@ VOID PlatInitialize(VOID)
         DWORD Error = GetLastError();
         LogError("Failed to initialize DbgHelp: %d (0x%X)", Error, Error);
     }
-    if (!SymLoadModuleEx(GetCurrentProcess(), NULL, PURPL_EXECUTABLE_NAME ".exe", NULL, (UINT64)GetModuleHandleA(NULL),
+    if (!SymLoadModuleEx(GetCurrentProcess(), NULL, PURPL_EXECUTABLE_NAME ".exe", NULL, (UINT64)__ImageBase,
                          0, NULL, 0))
     {
         DWORD Error = GetLastError();

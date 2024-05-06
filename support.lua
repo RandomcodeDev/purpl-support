@@ -49,13 +49,13 @@ end
 function do_settings(support_root)
     set_warnings("everything")
 
-    if is_mode("debug") then
-        set_runtimes("MDd")
-    else
-        set_runtimes("MD")
-    end
-
     if not is_plat("xbox360") then
+        if is_mode("debug") then
+            set_runtimes("MDd")
+        else
+            set_runtimes("MD")
+        end
+
         set_languages("gnu11", "cxx23")
     end
     set_exceptions("cxx")
@@ -147,9 +147,11 @@ function do_settings(support_root)
             "-Wno-zero-as-null-pointer-constant",
         {force = true})
     elseif get_config("toolchain") == "switchhb" or get_config("toolchain") == "mingw" then
+        add_cflags(
+            "-Wno-pointer-to-int-cast",
+        {force = true})
         add_cxflags(
             "-Wno-unused-value",
-            "-Wno-pointer-to-int-cast",
             "-Wno-int-to-pointer-cast",
             "-Wno-frame-address",
             "-Wno-sign-conversion",
