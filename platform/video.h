@@ -65,3 +65,49 @@ extern PVOID PlatGetVulkanFunction(_In_ PVOID Instance, _In_z_ PCSTR Name);
 extern VkSurfaceKHR VidCreateVulkanSurface(_In_ VkInstance Instance, _In_ PVOID AllocationCallbacks,
                                            _In_opt_ PVOID WindowHandle);
 #endif
+
+/// @brief Assumed size of one pixel
+#define VIDEO_FRAMEBUFFER_PIXEL_SIZE 4
+
+/// @brief A framebuffer
+typedef struct VIDEO_FRAMEBUFFER
+{
+    PUINT32 Pixels;
+    UINT32 Width;
+    UINT32 Height;
+    PVOID Handle;
+} VIDEO_FRAMEBUFFER, *PVIDEO_FRAMEBUFFER;
+
+/// @brief Create a framebuffer
+///
+/// @return A framebuffer
+extern PVIDEO_FRAMEBUFFER VidCreateFramebuffer(VOID);
+
+/// @brief Display a framebuffer's contents, and update it if necessary
+///
+/// @param[in,out] Framebuffer The framebuffer to display/update
+extern VOID VidDisplayFramebuffer(_Inout_ PVIDEO_FRAMEBUFFER Framebuffer);
+
+/// @brief Destroy a framebuffer
+///
+/// @param[in] Framebuffer The framebuffer to destroy
+extern VOID VidDestroyFramebuffer(_In_ PVIDEO_FRAMEBUFFER Framebuffer);
+
+/// @brief Convert a pixel from 32-bit RGBA
+///
+/// @param[in] Pixel The color to convert
+///
+/// @return An equivalent value for the framebuffer
+extern UINT32 VidConvertPixel(_In_ UINT32 Pixel);
+
+#define VIDEO_PACK_COLOUR(Colour)                                                                                       \
+    ((UINT8)((Colour)[0] * 255) << 24 | (UINT8)((Colour)[1] * 255) << 16 | (UINT8)((Colour)[2] * 255) << 8 |           \
+     (UINT8)((Colour)[3] * 255))
+
+#define VIDEO_UNPACK_COLOUR(Colour, ColourRaw)                                                                                  \
+    {                                                                                                                  \
+        Colour[0] = (UINT8)((ColourRaw >> 24) & 0xFF) / 255.0f; \
+        Colour[1] = (UINT8)((ColourRaw >> 16) & 0xFF) / 255.0f; \
+        Colour[2] = (UINT8)((ColourRaw >> 8) & 0xFF) / 255.0f; \
+        Colour[3] = (UINT8)((ColourRaw >> 0) & 0xFF) / 255.0f; \
+    }

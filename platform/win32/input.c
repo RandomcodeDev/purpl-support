@@ -332,7 +332,7 @@ static VOID UpdateKeyboard(VOID)
         }
     }
 
-    // TODO: handle keybindings
+    // TODO: handle key bindings and switching between controller/keyboard
     InState.LeftAxis[1] = 0.0f;
     if (INPUT_GET_KEY(W))
     {
