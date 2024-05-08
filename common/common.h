@@ -71,7 +71,7 @@
     {                                                                                                                  \
         Type Swap_ = A;                                                                                                \
         A = B;                                                                                                         \
-        B = A;                                                                                                         \
+        B = Swap_;                                                                                                         \
     } while (0)
 
 /// @brief Characters a command line argument can start with
@@ -165,12 +165,14 @@ extern PCHAR CmnDuplicateString(_In_z_ PCSTR String, _In_ SIZE_T Count);
 /// @brief This routine displays an error message and terminates the program.
 ///
 /// @param[in] ShutdownFirst Whether to attempt a call to CmnShutdown
+/// @param[in] File The file where the error was
+/// @param[in] Line The line where the error was
 /// @param[in] Message The error message.
 /// @param[in] ...     The arguments to the error message.
-_Noreturn extern VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_z_ _Printf_format_string_ PCSTR Message, ...);
+_Noreturn extern VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_ PCSTR File, _In_ UINT64 Line, _In_z_ _Printf_format_string_ PCSTR Message, ...);
 
 /// @brief This routine displays an error message and terminates the program.
-#define CmnError(...) CmnErrorEx(TRUE, __VA_ARGS__)
+#define CmnError(...) CmnErrorEx(TRUE, __FILE__, __LINE__, __VA_ARGS__)
 
 /// @brief This routine is a modified version of ReactOS's CommandLineToArgvW
 ///        that is adjusted to convert ASCII instead of Unicode command lines

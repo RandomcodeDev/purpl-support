@@ -23,23 +23,17 @@
 #define TEXTURE_FORMAT_VERSION 2
 
 /// @brief Texture formats. Only TextureFormatRgba8 is used.
-typedef enum TEXTURE_FORMAT
-{
-    TextureFormatUndefined,
-    TextureFormatDepth,
-    TextureFormatRgba8,
-    TextureFormatRgb8,
-    TextureFormatCount
-} TEXTURE_FORMAT, *PTEXTURE_FORMAT;
+PURPL_MAKE_TAG(enum, TEXTURE_FORMAT,
+               {TextureFormatUndefined, TextureFormatDepth, TextureFormatRgba8, TextureFormatRgb8, TextureFormatCount})
 
 /// @brief A depth pixel
-typedef union DEPTH_PIXEL {
+PURPL_MAKE_TAG(union, DEPTH_PIXEL, {
     BYTE Bytes[4];
     FLOAT Value;
-} DEPTH_PIXEL, *PDEPTH_PIXEL;
+})
 
 /// @brief An RGBA pixel
-typedef union RGBA8_PIXEL {
+PURPL_MAKE_TAG(union, RGBA8_PIXEL, {
     BYTE Bytes[4];
     UINT32 Value;
     struct
@@ -49,7 +43,7 @@ typedef union RGBA8_PIXEL {
         BYTE Red;
         BYTE Alpha;
     };
-} RGBA8_PIXEL, *PRGBA8_PIXEL;
+})
 
 /// @brief An RGB pixel
 typedef union RGB8_PIXEL {
@@ -66,9 +60,10 @@ typedef union RGB8_PIXEL {
         BYTE Red;
     };
 } RGB8_PIXEL, *PRGB8_PIXEL;
+typedef CONST RGB8_PIXEL *PCRGB8_PIXEL;
 
 /// @brief A texture
-typedef struct TEXTURE
+PURPL_MAKE_TAG(struct, TEXTURE,
 {
     union {
         CHAR MagicBytes[4];
@@ -83,15 +78,14 @@ typedef struct TEXTURE
     // Following fields are in memory only
 
     BOOLEAN DataSeparate;
-    union
-    {
+    union {
         PDEPTH_PIXEL DepthPixels;
         PRGBA8_PIXEL Rgba8Pixels;
         PRGB8_PIXEL Rgb8Pixels;
         PVOID Pixels;
         UINT64 AlignmentDummy; // Ensures alignment remains the same
     };
-} TEXTURE, *PTEXTURE;
+})
 
 /// @brief Check a texture's validity
 ///

@@ -307,7 +307,8 @@ PCHAR CmnDuplicateString(_In_z_ PCSTR String, _In_ SIZE_T Count)
     return New;
 }
 
-_Noreturn VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_z_ _Printf_format_string_ PCSTR Message, ...)
+_Noreturn VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_ PCSTR File, _In_ UINT64 Line,
+                          _In_z_ _Printf_format_string_ PCSTR Message, ...)
 {
     va_list Arguments;
     PCSTR FormattedMessage;
@@ -333,7 +334,7 @@ _Noreturn VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_z_ _Printf_format_stri
     }
     BackTrace = PlatCaptureStackBackTrace(1, // Don't include CmnError in the trace
                                           MaxFrames);
-    Formatted = CmnFormatString("Fatal error: %s\nStack trace:\n%s", FormattedMessage, BackTrace);
+    Formatted = CmnFormatString("Fatal error at %s:%d: %s\nStack trace:\n%s", File, Line, FormattedMessage, BackTrace);
     LogFatal("%s", Formatted);
     PlatError(Formatted);
 }

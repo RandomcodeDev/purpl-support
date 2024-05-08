@@ -2,6 +2,9 @@
 ///
 /// @brief This file defines the mesh API.
 ///
+/// The mesh format does not use compression because files are typically kilobytes, not megabytes, and there is
+/// therefore no reason to compress them.
+///
 /// @copyright (c) 2024 Randomcode Developers
 
 #pragma once
@@ -23,17 +26,15 @@
 #define MESH_FORMAT_VERSION 5
 
 /// @brief Vertex
-typedef struct VERTEX
-{
+PURPL_MAKE_TAG(struct, VERTEX, {
     vec3 Position;
     vec4 Colour;
     vec2 TextureCoordinate;
     vec3 Normal;
-} VERTEX, *PVERTEX;
+})
 
 /// @brief A mesh
-typedef struct MESH
-{
+PURPL_MAKE_TAG(struct, MESH, {
     union {
         CHAR MagicBytes[4];
         UINT32 Magic;
@@ -51,7 +52,7 @@ typedef struct MESH
     BOOLEAN DataSeparate;
     PVERTEX Vertices;
     ivec3 *Indices;
-} MESH, *PMESH;
+})
 
 /// @brief Mesh file header size
 #define MESH_HEADER_SIZE offsetof(MESH, DataSeparate)
@@ -61,10 +62,8 @@ typedef struct MESH
 /// @param Mesh The mesh to check
 ///
 /// @return Whether the mesh can be used
-#define ValidateMesh(Mesh)                                                     \
-    ((Mesh) &&                                                                 \
-     memcmp((Mesh)->MagicBytes, MESH_MAGIC, MESH_MAGIC_LENGTH) == 0 &&         \
-     (Mesh)->Version == MESH_FORMAT_VERSION)
+#define ValidateMesh(Mesh)                                                                                             \
+    ((Mesh) && memcmp((Mesh)->MagicBytes, MESH_MAGIC, MESH_MAGIC_LENGTH) == 0 && (Mesh)->Version == MESH_FORMAT_VERSION)
 
 /// @brief Create a mesh
 ///
@@ -75,12 +74,8 @@ typedef struct MESH
 /// @param IndexCount The number of indices
 ///
 /// @return A mesh which can be freed with CmnFree.
-extern PMESH CreateMesh(_In_z_ PCSTR Material,
-                        _In_reads_(VertexCount * sizeof(VERTEX))
-                            PVERTEX Vertices,
-                        _In_ SIZE_T VertexCount,
-                        _In_reads_(IndexCount * sizeof(ivec3)) ivec3 *Indices,
-                        _In_ SIZE_T IndexCount);
+extern PMESH CreateMesh(_In_z_ PCSTR Material, _In_ PCVERTEX Vertices, _In_ SIZE_T VertexCount,
+                        _In_ CONST ivec3 *CONST Indices, _In_ SIZE_T IndexCount);
 
 /// @brief Load a mesh from a file
 ///
@@ -95,4 +90,4 @@ extern PMESH LoadMesh(_In_z_ PCSTR Path);
 /// @param Mesh The mesh to write
 ///
 /// @return Whether the mesh could be written
-extern BOOLEAN WriteMesh(_In_z_ PCSTR Path, _In_ PMESH Mesh);
+extern BOOLEAN WriteMesh(_In_z_ PCSTR Path, _In_ PCMESH Mesh);
