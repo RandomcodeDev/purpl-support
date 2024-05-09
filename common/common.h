@@ -71,11 +71,18 @@
     {                                                                                                                  \
         Type Swap_ = A;                                                                                                \
         A = B;                                                                                                         \
-        B = Swap_;                                                                                                         \
+        B = Swap_;                                                                                                     \
     } while (0)
 
 /// @brief Characters a command line argument can start with
 #define PURPL_ARGUMENT_PREFIXES "-/"
+
+/// @brief Append b to the end of a
+#define stbds_arrappend(a, b)                                                                                          \
+    {                                                                                                                  \
+        PVOID p = stbds_arraddnptr(a, stbds_arrlenu(b));                                                               \
+        memmove(p, b, stbds_arrlenu(b) * sizeof(*b));                                                                  \
+    }
 
 /// @brief Initialize the common library
 ///
@@ -169,7 +176,8 @@ extern PCHAR CmnDuplicateString(_In_z_ PCSTR String, _In_ SIZE_T Count);
 /// @param[in] Line The line where the error was
 /// @param[in] Message The error message.
 /// @param[in] ...     The arguments to the error message.
-_Noreturn extern VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_ PCSTR File, _In_ UINT64 Line, _In_z_ _Printf_format_string_ PCSTR Message, ...);
+_Noreturn extern VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_ PCSTR File, _In_ UINT64 Line,
+                                 _In_z_ _Printf_format_string_ PCSTR Message, ...);
 
 /// @brief This routine displays an error message and terminates the program.
 #define CmnError(...) CmnErrorEx(TRUE, __FILE__, __LINE__, __VA_ARGS__)

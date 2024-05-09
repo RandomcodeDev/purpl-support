@@ -249,6 +249,17 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
         add_defines("PURPL_MINGW")
     end
 
+    if is_arch("x86") then
+        add_defines("PURPL_X86")
+    elseif is_arch("x64") then
+        add_defines("PURPL_X86")
+        add_defines("PURPL_AMD64")
+    elseif is_arch("arm64") then
+        add_defines("PURPL_ARM64")
+    elseif is_arch("powerpc64") then
+        add_defines("PURPL_PPC64")
+    end
+
     if is_mode("debug") then
         add_defines("PURPL_DEBUG")
         add_defines('PURPL_BUILD_TYPE="Debug"')

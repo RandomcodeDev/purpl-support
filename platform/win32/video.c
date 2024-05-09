@@ -348,7 +348,9 @@ BOOLEAN VidUpdate(VOID)
     static BOOLEAN IsFirstUpdate = TRUE;
     if (IsFirstUpdate)
     {
-        PCHAR Title = CmnAppendString(WindowTitle, CmnFormatTempString(" using GPU %s", RdrGetGpuName()));
+        PCHAR Title = CmnAppendString(
+            WindowTitle,
+            CmnFormatTempString(" using %cPU %s", CONFIGVAR_GET_BOOLEAN("rdr_software") ? 'C' : 'G', RdrGetGpuName()));
         SetWindowTextA(Window, Title); // Window proc stores this into WindowTitle
         CmnFree(Title);
         IsFirstUpdate = FALSE;
@@ -412,7 +414,6 @@ BOOLEAN VidUpdate(VOID)
 
 VOID VidShutdown(VOID)
 {
-
 }
 #endif
 

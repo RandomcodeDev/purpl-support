@@ -95,3 +95,6 @@ extern PCHAR PlatFixPath(_In_z_ PCSTR Path);
 ///
 /// @return The size of the file (returns zero if it doesn't exist)
 extern UINT64 PlatGetFileSize(_In_z_ PCSTR Path);
+
+/// @brief Get a string representing the current CPU
+extern PCSTR PlatGetCpuName(VOID);
