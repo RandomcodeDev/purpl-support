@@ -315,6 +315,8 @@ _Noreturn VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_ PCSTR File, _In_ UINT
     PCSTR Formatted;
     PCSTR BackTrace;
 
+    BOOLEAN Verbose = CONFIGVAR_GET_BOOLEAN("verbose");
+
     if (ShutdownFirst)
     {
         CmnShutdown();
@@ -328,7 +330,7 @@ _Noreturn VOID CmnErrorEx(_In_ BOOLEAN ShutdownFirst, _In_ PCSTR File, _In_ UINT
 #else
     UINT32 MaxFrames = 3;
 #endif
-    if (CONFIGVAR_GET_BOOLEAN("verbose"))
+    if (Verbose)
     {
         MaxFrames = 0;
     }

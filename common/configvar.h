@@ -101,7 +101,7 @@ extern PCONFIGVAR CfgGetVariable(_In_z_ PCSTR Name);
 #define CONFIGVAR_GET_STRING_EX(Name, DefaultValue)                                                                    \
     (CfgGetVariable(Name) ? CfgGetVariable(Name)->Current.String.Value : (DefaultValue))
 
-#define CONFIGVAR_GET_BOOLEAN(Name) CONFIGVAR_GET_BOOLEAN_EX(Name, FALSE)
+#define CONFIGVAR_GET_BOOLEAN(Name) CONFIGVAR_GET_BOOLEAN_EX(Name, (BOOLEAN)FALSE)
 #define CONFIGVAR_GET_INT(Name) CONFIGVAR_GET_INT_EX(Name, 0)
 #define CONFIGVAR_GET_FLOAT(Name) CONFIGVAR_GET_FLOAT_EX(Name, 0.0)
 #define CONFIGVAR_GET_STRING(Name) CONFIGVAR_GET_STRING_EX(Name, NULL)

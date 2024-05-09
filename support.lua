@@ -251,7 +251,7 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
 
     if is_arch("x86") then
         add_defines("PURPL_X86")
-    elseif is_arch("x64") then
+    elseif is_arch("x64", "x86_64") then
         add_defines("PURPL_X86")
         add_defines("PURPL_AMD64")
     elseif is_arch("arm64") then

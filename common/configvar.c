@@ -57,7 +57,7 @@ VOID CfgDefineVariable(_In_z_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CO
         Flags[2] = 'I';
     }
 
-    strncpy(Variable->Name, Name, PURPL_ARRAYSIZE(Variable->Name));
+    strncpy(Variable->Name, Name, PURPL_ARRAYSIZE(Variable->Name) - 1);
     Variable->Type = Type;
     switch (Type)
     {
@@ -77,7 +77,7 @@ VOID CfgDefineVariable(_In_z_ PCSTR Name, _In_ CONST PVOID DefaultValue, _In_ CO
                 Variable->Default.Float);
         break;
     case ConfigVarTypeString:
-        strncpy(Variable->Default.String, DefaultValue, PURPL_ARRAYSIZE(Variable->Default.String));
+        strncpy(Variable->Default.String, DefaultValue, PURPL_ARRAYSIZE(Variable->Default.String) - 1);
         LogInfo("%s [%s] string variable \"%s\" defined with default value %s", SideString, Flags, Variable->Name,
                 Variable->Default.String);
         break;
@@ -122,7 +122,7 @@ VOID CfgSetVariable(_In_z_ PCSTR Name, _In_ PVOID Value)
         Variable->Current.Float = *(DOUBLE *)Value;
         break;
     case ConfigVarTypeString:
-        strncpy(Variable->Current.String, Value, PURPL_ARRAYSIZE(Variable->Default.String));
+        strncpy(Variable->Current.String, Value, PURPL_ARRAYSIZE(Variable->Default.String) - 1);
         break;
     default:
         break;

@@ -62,6 +62,10 @@
 #endif
 
 #ifdef PURPL_UNIX
+#ifdef PURPL_X86
+#include <cpuid.h>
+#endif
+
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
