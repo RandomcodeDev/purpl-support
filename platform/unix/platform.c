@@ -347,14 +347,14 @@ UINT64 PlatGetMilliseconds(VOID)
 {
     struct timespec Time = {0};
 
-    clock_gettime(CLOCK_MONOTONIC, &Time);
+    clock_gettime(CLOCK_REALTIME, &Time);
 
-    return Time.tv_sec * 1000 + Time.tv_nsec / 1000000;
+    return Time.tv_sec * 1000 + (Time.tv_nsec + 500000) / 1000000;
 }
 
 VOID PlatSleep(_In_ UINT64 Duration)
 {
-    sleep(Duration);
+    usleep((UINT32)(Duration * 1000));
 }
 
 BOOLEAN PlatCreateDirectory(_In_ PCSTR Path)

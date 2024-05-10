@@ -19,10 +19,10 @@ Abstract:
 #include "engine/render/render.h"
 #endif
 
+#include "GLFW/glfw3.h"
+
 #include "platform/platform.h"
 #include "platform/video.h"
-
-#include "GLFW/glfw3.h"
 
 static GLFWwindow *Window;
 
@@ -290,6 +290,11 @@ VidGetDpi(VOID)
     glfwGetWindowContentScale(Window, &XDpi, &YDpi);
 
     return XDpi;
+}
+
+PVOID VidGetObject(VOID)
+{
+    return Window;
 }
 
 #ifdef PURPL_VULKAN
