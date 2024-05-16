@@ -111,7 +111,7 @@ Return Value:
 
 --*/
 {
-    PVERTEX Vertices;
+    PMESH_VERTEX Vertices;
     ivec3 *Indices;
     PMESH OutMesh;
     SIZE_T i;
@@ -124,7 +124,7 @@ Return Value:
 
     Indices = NULL;
 
-    Vertices = CmnAlloc(Mesh->mNumVertices, sizeof(VERTEX));
+    Vertices = CmnAlloc(Mesh->mNumVertices, sizeof(MESH_VERTEX));
     if (!Vertices)
     {
         LogError("Failed to allocate %u vertices: %s", Mesh->mNumVertices, strerror(errno));

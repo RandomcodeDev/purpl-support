@@ -5,6 +5,7 @@
 #endif
 
 #include "platform/input.h"
+#include "platform/video.h"
 
 extern INT32 WindowWidth;
 extern INT32 WindowHeight;
