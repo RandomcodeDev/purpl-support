@@ -87,8 +87,6 @@
 
 #include <malloc.h>
 #include <unistd.h>
-
-#include "common/wintypes.h"
 #endif
 
 #ifdef PURPL_CONSOLE_HOMEBREW
@@ -107,6 +105,10 @@
 
 #ifdef PURPL_PSP
 #include <pspkernel.h>
+#endif
+
+#ifndef PURPL_WIN32
+#include "common/wintypes.h"
 #endif
 
 #define CGLM_CLIPSPACE_INCLUDE_ALL

@@ -26,7 +26,7 @@
 #define MESH_FORMAT_VERSION 5
 
 /// @brief Vertex
-PURPL_MAKE_TAG(struct, VERTEX, {
+PURPL_MAKE_TAG(struct, MESH_VERTEX, {
     vec3 Position;
     vec4 Colour;
     vec2 TextureCoordinate;
@@ -50,7 +50,7 @@ PURPL_MAKE_TAG(struct, MESH, {
     /// @brief Indicates that the vertices and indices are dynamically allocated
     /// with CmnAlloc
     BOOLEAN DataSeparate;
-    PVERTEX Vertices;
+    PMESH_VERTEX Vertices;
     ivec3 *Indices;
 })
 
@@ -74,7 +74,7 @@ PURPL_MAKE_TAG(struct, MESH, {
 /// @param IndexCount The number of indices
 ///
 /// @return A mesh which can be freed with CmnFree.
-extern PMESH CreateMesh(_In_z_ PCSTR Material, _In_ PCVERTEX Vertices, _In_ SIZE_T VertexCount,
+extern PMESH CreateMesh(_In_z_ PCSTR Material, _In_ PCMESH_VERTEX Vertices, _In_ SIZE_T VertexCount,
                         _In_ CONST ivec3 *CONST Indices, _In_ SIZE_T IndexCount);
 
 /// @brief Load a mesh from a file

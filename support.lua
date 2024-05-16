@@ -6,7 +6,7 @@ if not is_plat("switch") then
 end
 
 function fix_target(target)
-    if is_plat("gdk", "gdkx", "xbox360") and get_config("toolchain") ~= "mingw" then
+    if is_plat("gdk", "gdkx", "xbox360", "baremetal") and get_config("toolchain") ~= "mingw" then
         target:set("prefixname", "")
         if target:kind() == "binary" then
             target:set("extension", ".exe")
@@ -217,6 +217,8 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
     includes(path.join(support_root, "platform", "ps3", "ps3.lua"))
     includes(path.join(support_root, "platform", "win32", "xbox360.lua"))
 
+    includes(path.join(support_root, "platform", "baremetal", "baremetal.lua"))
+
     if is_plat("windows") then
         add_defines("PURPL_WIN32")
     elseif is_plat("gdk") then
@@ -336,6 +338,10 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
 
     if set_big_settings then
         do_settings(support_root)
+    end
+
+    if is_plat("baremetal") then
+        setup_baremetal(support_root)
     end
 
     target("cjson")
@@ -525,6 +531,10 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
                 path.join(support_root, "platform", "ps3", "platform.c"),
                 path.join(support_root, "platform", "ps3", "video.c")
             )
+        elseif is_plat("baremetal") then
+            add_headerfiles(path.join(support_root, "platform", "baremetal", "support", "*.h"))
+            add_files(path.join(support_root, "platform", "baremetal", "support", "*.c"))
+            add_deps("libc")
         end
 
         if use_mimalloc then

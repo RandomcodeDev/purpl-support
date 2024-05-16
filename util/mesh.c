@@ -6,7 +6,7 @@
 
 #include "mesh.h"
 
-PMESH CreateMesh(_In_z_ PCSTR Material, _In_ PCVERTEX Vertices, _In_ SIZE_T VertexCount,
+PMESH CreateMesh(_In_z_ PCSTR Material, _In_ PCMESH_VERTEX Vertices, _In_ SIZE_T VertexCount,
                  _In_ CONST ivec3 *CONST Indices, _In_ SIZE_T IndexCount)
 {
     PMESH Mesh;
@@ -59,7 +59,7 @@ PMESH LoadMesh(_In_z_ PCSTR Path)
     }
 
     memmove((PBYTE)Mesh + sizeof(MESH), (PBYTE)Mesh + MESH_HEADER_SIZE, Size - sizeof(MESH));
-    Mesh->Vertices = (PVERTEX)((PBYTE)Mesh + sizeof(MESH));
+    Mesh->Vertices = (PMESH_VERTEX)((PBYTE)Mesh + sizeof(MESH));
     Mesh->Indices = (ivec3 *)(Mesh->Vertices + Mesh->VertexCount);
     Mesh->DataSeparate = FALSE;
     return Mesh;
@@ -99,7 +99,7 @@ Return Value:
         return FALSE;
     }
 
-    if (!FsWriteFile(Path, Mesh->Vertices, Mesh->VertexCount * sizeof(VERTEX), TRUE))
+    if (!FsWriteFile(Path, Mesh->Vertices, Mesh->VertexCount * sizeof(MESH_VERTEX), TRUE))
     {
         LogError("Could not write vertex data to %s", Path);
         return FALSE;
