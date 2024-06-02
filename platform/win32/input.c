@@ -68,7 +68,7 @@ static INPUT_KEY KeyLookupTable[KEYBOARD_COUNT] = {
     InputKeyCount,        // filler 0x0F
     InputKeyCount,        // 0x10 SHIFT key
     InputKeyCount,        // 0x11 CTRL key
-    InputKeyCount,         // 0x12 ALT key
+    InputKeyCount,        // 0x12 ALT key
     InputKeyPauseBreak,   // 0x13 PAUSE key
     InputKeyCapsLock,     // 0x14 CAPS LOCK key
     InputKeyCount,        // 0x15 IME Kana mode
@@ -397,13 +397,13 @@ VOID InLockCursor(_In_ BOOLEAN Locked)
 
 static VOID LockCursor(VOID)
 {
-    RECT WindowRect = {0};
-    GetWindowRect(VidGetObject(), &WindowRect);
-    SetCursorPos(WindowRect.left + (WindowRect.right - WindowRect.left) / 2,
-                 WindowRect.top + (WindowRect.bottom - WindowRect.top) / 2);
-    ShowCursor(FALSE);
     RECT ClientRect = {0};
     GetClientRect(VidGetObject(), &ClientRect);
+    ClientToScreen(VidGetObject(), (LPPOINT)(&ClientRect.left));
+    ClientToScreen(VidGetObject(), (LPPOINT)(&ClientRect.right));
+    SetCursorPos(ClientRect.left + (ClientRect.right - ClientRect.left) / 2,
+                 ClientRect.top + (ClientRect.bottom - ClientRect.top) / 2);
+    ShowCursor(FALSE);
     ClipCursor(&ClientRect);
 }
 

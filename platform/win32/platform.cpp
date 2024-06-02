@@ -197,7 +197,7 @@ PCSTR PlatCaptureStackBackTrace(_In_ UINT32 FramesToSkip, _In_ UINT32 MaxFrames)
 
 PCSTR PlatGetDescription(VOID)
 {
-    static CHAR Buffer[64];
+    static CHAR Buffer[128];
 
     Buffer[PURPL_ARRAYSIZE(Buffer) - 1] = 0;
     if (strlen(Buffer))

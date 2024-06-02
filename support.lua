@@ -217,8 +217,6 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
     includes(path.join(support_root, "platform", "ps3", "ps3.lua"))
     includes(path.join(support_root, "platform", "win32", "xbox360.lua"))
 
-    includes(path.join(support_root, "platform", "baremetal", "baremetal.lua"))
-
     if is_plat("windows") then
         add_defines("PURPL_WIN32")
     elseif is_plat("gdk") then
@@ -365,6 +363,7 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
                 path.join(deps_root, "mimalloc", "src", "bitmap.c"),
                 path.join(deps_root, "mimalloc", "src", "heap.c"),
                 path.join(deps_root, "mimalloc", "src", "init.c"),
+                path.join(deps_root, "mimalloc", "src", "libc.c"),
                 path.join(deps_root, "mimalloc", "src", "options.c"),
                 path.join(deps_root, "mimalloc", "src", "os.c"),
                 path.join(deps_root, "mimalloc", "src", "page.c"),
@@ -374,14 +373,6 @@ function setup_support(support_root, deps_root, use_mimalloc, directx, vulkan, o
                 path.join(deps_root, "mimalloc", "src", "stats.c"),
                 path.join(deps_root, "mimalloc", "src", "prim", "prim.c")
             )
-
-            if is_plat("windows", "gdk", "gdkx") then
-                add_files(path.join(deps_root, "mimalloc", "src", "prim", "windows", "*.c"))
-            elseif is_plat("macos") then
-                add_files(path.join(deps_root, "mimalloc", "src", "prim", "osx", "*.c"))
-            else
-                add_files(path.join(deps_root, "mimalloc", "src", "prim", "unix", "*.c"))
-            end
 
             if is_mode("debug") then
                 add_defines("MI_DEBUG=3", "MI_SECURE=4")
